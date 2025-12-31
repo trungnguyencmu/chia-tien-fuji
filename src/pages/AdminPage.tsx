@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { fetchPayerNames, addPayerName, removePayerName } from '../utils/storage';
 import { deleteAllExpenses } from '../api/api';
 
-export function AdminPage() {
+function AdminPage() {
   const [payerNames, setPayerNames] = useState<string[]>([]);
   const [newName, setNewName] = useState('');
   const [deletePassword, setDeletePassword] = useState('');
@@ -274,3 +274,5 @@ export function AdminPage() {
     </div>
   );
 }
+
+export default AdminPage;

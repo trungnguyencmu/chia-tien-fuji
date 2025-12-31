@@ -6,7 +6,7 @@ import { ExpenseForm } from '../components/ExpenseForm';
 import { ExpenseList } from '../components/ExpenseList';
 import { Settlement } from '../components/Settlement';
 
-export function HomePage() {
+function HomePage() {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [payerNames, setPayerNames] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -91,3 +91,5 @@ export function HomePage() {
     </div>
   );
 }
+
+export default HomePage;

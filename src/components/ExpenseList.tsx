@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo, useCallback, memo } from 'react';
 import { Expense } from '../utils/calculation';
 import { deleteExpense } from '../api/api';
 
@@ -7,10 +7,10 @@ interface ExpenseListProps {
   onExpenseDeleted: () => void;
 }
 
-export function ExpenseList({ expenses, onExpenseDeleted }: ExpenseListProps) {
+export const ExpenseList = memo(function ExpenseList({ expenses, onExpenseDeleted }: ExpenseListProps) {
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  const handleDelete = async (expenseId: string, expenseTitle: string) => {
+  const handleDelete = useCallback(async (expenseId: string, expenseTitle: string) => {
     const password = window.prompt(
       `⚠️ Delete "${expenseTitle}"?\n\nEnter password to confirm:`
     );
@@ -27,7 +27,19 @@ export function ExpenseList({ expenses, onExpenseDeleted }: ExpenseListProps) {
     } finally {
       setDeletingId(null);
     }
-  };
+  }, [onExpenseDeleted]);
+
+  // Memoize sorted expenses
+  const sorted = useMemo(() => {
+    return [...expenses].sort((a, b) => {
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
+  }, [expenses]);
+
+  // Memoize total calculation
+  const totalAmount = useMemo(() => {
+    return expenses.reduce((sum, e) => sum + e.amount, 0);
+  }, [expenses]);
 
   if (expenses.length === 0) {
     return (
@@ -42,13 +54,6 @@ export function ExpenseList({ expenses, onExpenseDeleted }: ExpenseListProps) {
       </div>
     );
   }
-
-  // Sort by date (newest first)
-  const sorted = [...expenses].sort((a, b) => {
-    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-  });
-
-  const totalAmount = expenses.reduce((sum, e) => sum + e.amount, 0);
 
   return (
     <div className="card">
@@ -121,4 +126,4 @@ export function ExpenseList({ expenses, onExpenseDeleted }: ExpenseListProps) {
       </div>
     </div>
   );
-}
+});

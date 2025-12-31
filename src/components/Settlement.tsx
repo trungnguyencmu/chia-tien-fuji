@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { Expense, calculateBalances, calculateTransactions, formatTransaction } from '../utils/calculation';
 
 interface SettlementProps {
@@ -6,13 +7,14 @@ interface SettlementProps {
 }
 
 export function Settlement({ expenses, payerNames }: SettlementProps) {
+  // Memoize expensive calculations
+  const balances = useMemo(() => calculateBalances(expenses, payerNames), [expenses, payerNames]);
+  const transactions = useMemo(() => calculateTransactions(balances), [balances]);
+  const total = useMemo(() => expenses.reduce((sum, e) => sum + e.amount, 0), [expenses]);
+
   if (expenses.length === 0) {
     return null;
   }
-
-  const balances = calculateBalances(expenses, payerNames);
-  const transactions = calculateTransactions(balances);
-  const total = expenses.reduce((sum, e) => sum + e.amount, 0);
 
   return (
     <div className="card">
