@@ -1,6 +1,7 @@
 import { useState, useMemo, useCallback, memo } from 'react';
 import { Expense } from '../utils/calculation';
 import { deleteExpense } from '../api/api';
+import { getCurrentTripId } from '../utils/storage';
 
 interface ExpenseListProps {
   expenses: Expense[];
@@ -11,6 +12,12 @@ export const ExpenseList = memo(function ExpenseList({ expenses, onExpenseDelete
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const handleDelete = useCallback(async (expenseId: string, expenseTitle: string) => {
+    const tripId = getCurrentTripId();
+    if (!tripId) {
+      alert('No trip selected');
+      return;
+    }
+
     const password = window.prompt(
       `⚠️ Delete "${expenseTitle}"?\n\nEnter password to confirm:`
     );
@@ -20,7 +27,7 @@ export const ExpenseList = memo(function ExpenseList({ expenses, onExpenseDelete
     setDeletingId(expenseId);
 
     try {
-      await deleteExpense(expenseId, password);
+      await deleteExpense(tripId, expenseId, password);
       onExpenseDeleted();
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Failed to delete expense');

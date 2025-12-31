@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { fetchExpenses, createExpense, CreateExpenseRequest } from '../api/api';
 import { Expense } from '../utils/calculation';
-import { fetchPayerNames } from '../utils/storage';
+import { fetchPayerNames, getCurrentTripId } from '../utils/storage';
 import { ExpenseForm } from '../components/ExpenseForm';
 import { ExpenseList } from '../components/ExpenseList';
 import { Settlement } from '../components/Settlement';
@@ -11,22 +11,44 @@ function HomePage() {
   const [payerNames, setPayerNames] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentTripId, setCurrentTripId] = useState<string | null>(null);
 
-  // Fetch expenses and payer names on mount
+  // Check for current trip on mount
   useEffect(() => {
-    loadExpenses();
-    loadPayerNames();
+    const tripId = getCurrentTripId();
+    setCurrentTripId(tripId);
+
+    if (tripId) {
+      loadExpenses();
+      loadPayerNames();
+    } else {
+      setLoading(false);
+    }
 
     // Listen for refresh event from header
     const handleRefresh = () => {
-      loadExpenses();
-      loadPayerNames();
+      if (getCurrentTripId()) {
+        loadExpenses();
+        loadPayerNames();
+      }
+    };
+
+    // Listen for trip change event from header
+    const handleTripChange = () => {
+      const newTripId = getCurrentTripId();
+      setCurrentTripId(newTripId);
+      if (newTripId) {
+        loadExpenses();
+        loadPayerNames();
+      }
     };
 
     window.addEventListener('refreshExpenses', handleRefresh);
+    window.addEventListener('tripChanged', handleTripChange);
 
     return () => {
       window.removeEventListener('refreshExpenses', handleRefresh);
+      window.removeEventListener('tripChanged', handleTripChange);
     };
   }, []);
 
@@ -40,11 +62,18 @@ function HomePage() {
   };
 
   const loadExpenses = async () => {
+    const tripId = getCurrentTripId();
+    if (!tripId) {
+      setError('No trip selected');
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
     try {
-      const data = await fetchExpenses();
+      const data = await fetchExpenses(tripId);
       setExpenses(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load expenses');
@@ -54,9 +83,31 @@ function HomePage() {
   };
 
   const handleAddExpense = async (expense: CreateExpenseRequest) => {
-    const newExpense = await createExpense(expense);
+    const tripId = getCurrentTripId();
+    if (!tripId) {
+      throw new Error('No trip selected');
+    }
+
+    const newExpense = await createExpense(tripId, expense);
     setExpenses((prev) => [...prev, newExpense]);
   };
+
+  if (!currentTripId) {
+    return (
+      <div className="card" style={{ textAlign: 'center', padding: '3rem' }}>
+        <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>✈️</div>
+        <h2 style={{ fontSize: '1.5rem', fontWeight: '700', marginBottom: '1rem', color: 'var(--gray-900)' }}>
+          No Trip Selected
+        </h2>
+        <p style={{ color: 'var(--gray-600)', marginBottom: '2rem', fontSize: '1.1rem' }}>
+          Please create or select a trip in the Admin page to get started!
+        </p>
+        <a href="/admin" className="btn btn-primary" style={{ textDecoration: 'none' }}>
+          ⚙️ Go to Admin
+        </a>
+      </div>
+    );
+  }
 
   if (loading) {
     return (

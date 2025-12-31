@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { CreateExpenseRequest } from '../api/api';
-import { fetchPayerNames, getPayerNamesFromCache } from '../utils/storage';
+import { fetchPayerNames, getPayerNamesFromCache, getCurrentTripId } from '../utils/storage';
 
 interface ExpenseFormProps {
   onSubmit: (expense: CreateExpenseRequest) => Promise<void>;
@@ -20,10 +20,19 @@ export function ExpenseForm({ onSubmit }: ExpenseFormProps) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    loadPayerNames();
+    // Only load payer names if a trip is selected
+    const tripId = getCurrentTripId();
+    if (tripId) {
+      loadPayerNames();
+    }
   }, []);
 
   const loadPayerNames = async () => {
+    // Check if trip is selected
+    if (!getCurrentTripId()) {
+      return;
+    }
+
     // Load from cache immediately (with validation)
     const cachedNames = getPayerNamesFromCache().filter((name) => typeof name === 'string');
     setPayerNames(cachedNames);

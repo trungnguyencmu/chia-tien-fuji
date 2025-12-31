@@ -4,49 +4,87 @@ import {
   deletePayerNameFromBackend,
 } from '../api/api';
 
-const PAYER_NAMES_KEY = 'trip-expense-payer-names';
+const PAYER_NAMES_CACHE_KEY = 'payerNamesCache';
+const CURRENT_TRIP_KEY = 'currentTripId';
 
 /**
- * Get all saved payer names from localStorage (cached)
+ * Get current trip ID from localStorage
+ */
+export function getCurrentTripId(): string | null {
+  return localStorage.getItem(CURRENT_TRIP_KEY);
+}
+
+/**
+ * Set current trip ID in localStorage
+ */
+export function setCurrentTripId(tripId: string): void {
+  localStorage.setItem(CURRENT_TRIP_KEY, tripId);
+}
+
+/**
+ * Clear current trip ID
+ */
+export function clearCurrentTripId(): void {
+  localStorage.removeItem(CURRENT_TRIP_KEY);
+}
+
+/**
+ * Get payer names from cache (with trip ID)
  */
 export function getPayerNamesFromCache(): string[] {
+  const tripId = getCurrentTripId();
+  if (!tripId) return [];
+
   try {
-    const stored = localStorage.getItem(PAYER_NAMES_KEY);
-    if (!stored) return [];
-    return JSON.parse(stored);
+    const cached = localStorage.getItem(`${PAYER_NAMES_CACHE_KEY}_${tripId}`);
+    if (cached) {
+      const names = JSON.parse(cached);
+      return Array.isArray(names) ? names.filter((n) => typeof n === 'string') : [];
+    }
   } catch (error) {
-    console.error('Error reading payer names:', error);
-    return [];
+    console.error('Error reading payer names from cache:', error);
   }
+  return [];
 }
 
 /**
- * Save payer names to localStorage (cache)
+ * Save payer names to cache (with trip ID)
  */
 export function savePayerNamesToCache(names: string[]): void {
+  const tripId = getCurrentTripId();
+  if (!tripId) return;
+
   try {
-    localStorage.setItem(PAYER_NAMES_KEY, JSON.stringify(names));
+    const validNames = names.filter((name) => typeof name === 'string');
+    localStorage.setItem(`${PAYER_NAMES_CACHE_KEY}_${tripId}`, JSON.stringify(validNames));
   } catch (error) {
-    console.error('Error saving payer names:', error);
+    console.error('Error saving payer names to cache:', error);
   }
 }
 
 /**
- * Fetch payer names from backend and update cache
+ * Fetch payer names from backend (requires current trip)
  */
 export async function fetchPayerNames(): Promise<string[]> {
-  try {
-    const names = await fetchPayerNamesAPI();
+  const tripId = getCurrentTripId();
+  if (!tripId) {
+    console.warn('⚠️ No trip selected - cannot fetch payer names');
+    return [];
+  }
 
-    // Validate that we got an array of strings, not objects
+  try {
+    console.log('Fetching payer names for trip:', tripId);
+    const names = await fetchPayerNamesAPI(tripId);
+    console.log('Received payer names:', names);
+
+    // Validate that we got an array of strings
     const validNames = Array.isArray(names)
       ? names.filter((name) => typeof name === 'string')
       : [];
 
-    // If we got invalid data (objects instead of strings), fallback to cache
     if (validNames.length === 0 && names.length > 0) {
       console.error('Invalid payer names data received from backend');
-      console.error('Expected: array of strings, Got:', names);
+      console.error('Expected array of strings, got:', names);
       console.warn('⚠️ Please update your Google Apps Script with the new code!');
       return getPayerNamesFromCache();
     }
@@ -54,42 +92,41 @@ export async function fetchPayerNames(): Promise<string[]> {
     savePayerNamesToCache(validNames);
     return validNames;
   } catch (error) {
-    console.error('Error fetching payer names from backend:', error);
+    console.error('Failed to fetch payer names:', error);
     // Fallback to cache if backend fails
     return getPayerNamesFromCache();
   }
 }
 
 /**
- * Add a new payer name to backend and cache
+ * Add a payer name (requires current trip)
  */
 export async function addPayerName(name: string): Promise<string[]> {
-  const trimmedName = name.trim();
+  const tripId = getCurrentTripId();
+  if (!tripId) {
+    throw new Error('No trip selected');
+  }
 
+  const trimmedName = name.trim();
   if (!trimmedName) {
     throw new Error('Name cannot be empty');
   }
 
-  try {
-    const updatedNames = await addPayerNameToBackend(trimmedName);
-    savePayerNamesToCache(updatedNames);
-    return updatedNames;
-  } catch (error) {
-    console.error('Error adding payer name:', error);
-    throw error;
-  }
+  const updatedNames = await addPayerNameToBackend(tripId, trimmedName);
+  savePayerNamesToCache(updatedNames);
+  return updatedNames;
 }
 
 /**
- * Remove a payer name from backend and cache
+ * Remove a payer name (requires current trip)
  */
 export async function removePayerName(name: string): Promise<string[]> {
-  try {
-    const updatedNames = await deletePayerNameFromBackend(name);
-    savePayerNamesToCache(updatedNames);
-    return updatedNames;
-  } catch (error) {
-    console.error('Error removing payer name:', error);
-    throw error;
+  const tripId = getCurrentTripId();
+  if (!tripId) {
+    throw new Error('No trip selected');
   }
+
+  const updatedNames = await deletePayerNameFromBackend(tripId, name);
+  savePayerNamesToCache(updatedNames);
+  return updatedNames;
 }
