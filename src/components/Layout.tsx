@@ -19,11 +19,16 @@ export function Layout() {
   }, []);
 
   useEffect(() => {
-    // Auto-select first trip if none selected
+    // Auto-select latest (most recently created) trip if none selected
     if (!currentTripId && trips.length > 0) {
-      const firstTrip = trips[0];
-      setCurrentTripId(firstTrip.tripId);
-      setCurrentTripIdState(firstTrip.tripId);
+      // Sort by createdAt descending to get the latest trip
+      const sortedTrips = [...trips].sort((a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+      const latestTrip = sortedTrips[0];
+
+      setCurrentTripId(latestTrip.tripId);
+      setCurrentTripIdState(latestTrip.tripId);
       window.dispatchEvent(new CustomEvent('tripChanged'));
     }
 
