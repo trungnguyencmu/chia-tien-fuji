@@ -2,14 +2,15 @@ import { Expense, calculateBalances, calculateTransactions, formatTransaction } 
 
 interface SettlementProps {
   expenses: Expense[];
+  payerNames?: string[];
 }
 
-export function Settlement({ expenses }: SettlementProps) {
+export function Settlement({ expenses, payerNames }: SettlementProps) {
   if (expenses.length === 0) {
     return null;
   }
 
-  const balances = calculateBalances(expenses);
+  const balances = calculateBalances(expenses, payerNames);
   const transactions = calculateTransactions(balances);
   const total = expenses.reduce((sum, e) => sum + e.amount, 0);
 

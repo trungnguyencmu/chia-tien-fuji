@@ -1,10 +1,34 @@
+import { useState } from 'react';
 import { Expense } from '../utils/calculation';
+import { deleteExpense } from '../api/api';
 
 interface ExpenseListProps {
   expenses: Expense[];
+  onExpenseDeleted: () => void;
 }
 
-export function ExpenseList({ expenses }: ExpenseListProps) {
+export function ExpenseList({ expenses, onExpenseDeleted }: ExpenseListProps) {
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  const handleDelete = async (expenseId: string, expenseTitle: string) => {
+    const password = window.prompt(
+      `⚠️ Delete "${expenseTitle}"?\n\nEnter password to confirm:`
+    );
+
+    if (!password) return;
+
+    setDeletingId(expenseId);
+
+    try {
+      await deleteExpense(expenseId, password);
+      onExpenseDeleted();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to delete expense');
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
   if (expenses.length === 0) {
     return (
       <div className="card">
@@ -50,6 +74,7 @@ export function ExpenseList({ expenses }: ExpenseListProps) {
               <th>Payer</th>
               <th>Title</th>
               <th className="text-right">Amount (VND)</th>
+              <th style={{ width: '100px' }}>Action</th>
             </tr>
           </thead>
           <tbody>
@@ -62,6 +87,32 @@ export function ExpenseList({ expenses }: ExpenseListProps) {
                 <td>{expense.title}</td>
                 <td className="text-right" style={{ fontWeight: '600' }}>
                   {expense.amount.toLocaleString()}
+                </td>
+                <td>
+                  <button
+                    onClick={() => handleDelete(expense.id, expense.title)}
+                    disabled={deletingId === expense.id}
+                    style={{
+                      padding: '0.375rem 0.75rem',
+                      background: '#fee2e2',
+                      color: '#991b1b',
+                      borderRadius: '6px',
+                      border: 'none',
+                      fontWeight: '600',
+                      fontSize: '0.75rem',
+                      cursor: deletingId === expense.id ? 'not-allowed' : 'pointer',
+                      transition: 'all 0.2s',
+                      opacity: deletingId === expense.id ? 0.6 : 1,
+                    }}
+                    onMouseOver={(e) => {
+                      if (deletingId !== expense.id) e.currentTarget.style.background = '#fecaca';
+                    }}
+                    onMouseOut={(e) => {
+                      if (deletingId !== expense.id) e.currentTarget.style.background = '#fee2e2';
+                    }}
+                  >
+                    {deletingId === expense.id ? '⏳' : '🗑️'}
+                  </button>
                 </td>
               </tr>
             ))}

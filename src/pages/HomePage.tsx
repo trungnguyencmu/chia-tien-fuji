@@ -1,19 +1,43 @@
 import { useState, useEffect } from 'react';
 import { fetchExpenses, createExpense, CreateExpenseRequest } from '../api/api';
 import { Expense } from '../utils/calculation';
+import { fetchPayerNames } from '../utils/storage';
 import { ExpenseForm } from '../components/ExpenseForm';
 import { ExpenseList } from '../components/ExpenseList';
 import { Settlement } from '../components/Settlement';
 
 export function HomePage() {
   const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [payerNames, setPayerNames] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch expenses on mount
+  // Fetch expenses and payer names on mount
   useEffect(() => {
     loadExpenses();
+    loadPayerNames();
+
+    // Listen for refresh event from header
+    const handleRefresh = () => {
+      loadExpenses();
+      loadPayerNames();
+    };
+
+    window.addEventListener('refreshExpenses', handleRefresh);
+
+    return () => {
+      window.removeEventListener('refreshExpenses', handleRefresh);
+    };
   }, []);
+
+  const loadPayerNames = async () => {
+    try {
+      const names = await fetchPayerNames();
+      setPayerNames(names);
+    } catch (err) {
+      console.error('Failed to load payer names:', err);
+    }
+  };
 
   const loadExpenses = async () => {
     setLoading(true);
@@ -47,40 +71,6 @@ export function HomePage() {
 
   return (
     <div>
-      <header
-        style={{
-          textAlign: 'center',
-          marginBottom: '3rem',
-          background: 'white',
-          padding: '2rem',
-          borderRadius: '12px',
-          boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)',
-        }}
-      >
-        <h1
-          style={{
-            fontSize: '2.5rem',
-            fontWeight: '800',
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            marginBottom: '0.5rem',
-          }}
-        >
-          ✈️ Trip Expense Splitter
-        </h1>
-        <p style={{ color: '#6b7280', fontSize: '1rem' }}>
-          Track and split expenses with friends
-        </p>
-        <button
-          onClick={loadExpenses}
-          className="btn btn-secondary"
-          style={{ marginTop: '1rem' }}
-        >
-          🔄 Refresh Data
-        </button>
-      </header>
-
       {error && (
         <div className="alert alert-error">
           <span style={{ fontSize: '1.5rem' }}>⚠️</span>
@@ -95,9 +85,9 @@ export function HomePage() {
 
       <ExpenseForm onSubmit={handleAddExpense} />
 
-      <ExpenseList expenses={expenses} />
+      <ExpenseList expenses={expenses} onExpenseDeleted={loadExpenses} />
 
-      <Settlement expenses={expenses} />
+      <Settlement expenses={expenses} payerNames={payerNames} />
     </div>
   );
 }

@@ -100,32 +100,6 @@ export function AdminPage() {
 
   return (
     <div>
-      <header
-        style={{
-          textAlign: 'center',
-          marginBottom: '3rem',
-          background: 'white',
-          padding: '2rem',
-          borderRadius: '12px',
-          boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)',
-        }}
-      >
-        <h1
-          style={{
-            fontSize: '2.5rem',
-            fontWeight: '800',
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            marginBottom: '0.5rem',
-          }}
-        >
-          ⚙️ Admin Settings
-        </h1>
-        <p style={{ color: '#6b7280', fontSize: '1rem' }}>
-          Manage payer names for your trip
-        </p>
-      </header>
 
       {success && (
         <div

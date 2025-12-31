@@ -1,7 +1,7 @@
 import { Expense } from '../utils/calculation';
 
 // Replace with your deployed Apps Script Web App URL
-const API_URL = 'https://script.google.com/macros/s/AKfycbyWuXCfJrHyKkK2Eb44m3D-gz-VLsQcXwoezyiApigGCokIHs9wYFWMZaDYFB9XqQ4/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbxl9gnEYPdMHxgshYjTwjb7lj4ecgcCzgIA435qLLKQIqI8X9IK-fSYqDe8Z1pZVvgQ/exec';
 
 export interface ApiResponse<T> {
   success: boolean;
@@ -156,6 +156,28 @@ export async function deleteAllExpenses(password: string): Promise<void> {
     }
   } catch (error) {
     console.error('Error deleting expenses:', error);
+    throw error;
+  }
+}
+
+/**
+ * Delete a single expense (requires password 'ok')
+ */
+export async function deleteExpense(expenseId: string, password: string): Promise<void> {
+  try {
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      redirect: 'follow',
+      body: JSON.stringify({ action: 'deleteExpense', expenseId, password }),
+    });
+
+    const result: ApiResponse<void> = await response.json();
+
+    if (!result.success) {
+      throw new Error(result.error || 'Failed to delete expense');
+    }
+  } catch (error) {
+    console.error('Error deleting expense:', error);
     throw error;
   }
 }

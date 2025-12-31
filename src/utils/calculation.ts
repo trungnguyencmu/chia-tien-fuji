@@ -22,11 +22,13 @@ export interface Transaction {
 
 /**
  * Calculate settlement balances for all members
+ * If payerNames is provided, split equally among ALL payer names (not just those who paid)
+ * Otherwise, split only among members who have paid
  */
-export function calculateBalances(expenses: Expense[]): MemberBalance[] {
-  if (expenses.length === 0) return [];
+export function calculateBalances(expenses: Expense[], payerNames?: string[]): MemberBalance[] {
+  if (expenses.length === 0 && (!payerNames || payerNames.length === 0)) return [];
 
-  // Calculate total and gather unique members
+  // Calculate total and gather payment data
   const total = expenses.reduce((sum, expense) => sum + expense.amount, 0);
   const memberPayments = new Map<string, number>();
 
@@ -35,7 +37,18 @@ export function calculateBalances(expenses: Expense[]): MemberBalance[] {
     memberPayments.set(expense.payer, current + expense.amount);
   });
 
-  const members = Array.from(memberPayments.keys());
+  // Determine which members to include in calculation
+  let members: string[];
+  if (payerNames && payerNames.length > 0) {
+    // Use all payer names from admin, even if they haven't paid yet
+    members = payerNames;
+  } else {
+    // Fallback to only those who have paid
+    members = Array.from(memberPayments.keys());
+  }
+
+  if (members.length === 0) return [];
+
   const sharePerPerson = total / members.length;
 
   // Calculate balances for each member

@@ -14,6 +14,7 @@ export function ExpenseForm({ onSubmit }: ExpenseFormProps) {
   const [showCustomInput, setShowCustomInput] = useState(false);
   const [title, setTitle] = useState('');
   const [amount, setAmount] = useState('');
+  const [displayAmount, setDisplayAmount] = useState('');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -46,6 +47,24 @@ export function ExpenseForm({ onSubmit }: ExpenseFormProps) {
     } else {
       setShowCustomInput(false);
       setCustomPayer('');
+    }
+  };
+
+  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+
+    // Remove all non-digit characters
+    const numbers = value.replace(/\D/g, '');
+
+    // Store the raw number
+    setAmount(numbers);
+
+    // Format with commas for display
+    if (numbers) {
+      const formatted = Number(numbers).toLocaleString('en-US');
+      setDisplayAmount(formatted);
+    } else {
+      setDisplayAmount('');
     }
   };
 
@@ -82,6 +101,7 @@ export function ExpenseForm({ onSubmit }: ExpenseFormProps) {
       setShowCustomInput(false);
       setTitle('');
       setAmount('');
+      setDisplayAmount('');
       setDate(new Date().toISOString().split('T')[0]);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to add expense');
@@ -173,13 +193,13 @@ export function ExpenseForm({ onSubmit }: ExpenseFormProps) {
             </label>
             <input
               id="amount"
-              type="number"
+              type="text"
+              inputMode="numeric"
               className="form-input"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
+              value={displayAmount}
+              onChange={handleAmountChange}
               disabled={loading}
               placeholder="0"
-              step="1000"
             />
           </div>
 
