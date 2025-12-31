@@ -1,9 +1,5 @@
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 
-interface LayoutProps {
-  onRefresh?: () => void;
-}
-
 export function Layout() {
   const location = useLocation();
   const isHomePage = location.pathname === '/';
