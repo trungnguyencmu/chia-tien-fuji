@@ -19,6 +19,14 @@ export function Layout() {
   }, []);
 
   useEffect(() => {
+    // Auto-select first trip if none selected
+    if (!currentTripId && trips.length > 0) {
+      const firstTrip = trips[0];
+      setCurrentTripId(firstTrip.tripId);
+      setCurrentTripIdState(firstTrip.tripId);
+      window.dispatchEvent(new CustomEvent('tripChanged'));
+    }
+
     // Update current trip when trips or currentTripId changes
     if (currentTripId && trips.length > 0) {
       const trip = trips.find((t) => t.tripId === currentTripId);
