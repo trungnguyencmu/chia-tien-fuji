@@ -1,22 +1,22 @@
 import { useState, useEffect } from 'react';
+import { useOutletContext } from 'react-router-dom';
 import {
   fetchPayerNames,
   addPayerNameToBackend,
   deletePayerNameFromBackend,
   deleteAllExpenses,
-  fetchTrips,
   createTrip,
   deleteTrip,
-  Trip,
 } from '../api/api';
-import { getCurrentTripId, setCurrentTripId } from '../utils/storage';
+import { setCurrentTripId } from '../utils/storage';
+import { LayoutContext } from '../components/Layout';
 
 function AdminPage() {
+  const { trips, currentTripId: layoutTripId, reloadTrips } = useOutletContext<LayoutContext>();
+
   // Trip state
-  const [trips, setTrips] = useState<Trip[]>([]);
-  const [currentTripId, setCurrentTripIdState] = useState<string | null>(null);
+  const [currentTripId, setCurrentTripIdState] = useState<string | null>(layoutTripId);
   const [newTripName, setNewTripName] = useState('');
-  const [tripsLoading, setTripsLoading] = useState(false);
 
   // Payer names state
   const [payerNames, setPayerNames] = useState<string[]>([]);
@@ -30,27 +30,14 @@ function AdminPage() {
   const [deleteLoading, setDeleteLoading] = useState(false);
 
   useEffect(() => {
-    loadTrips();
-    const tripId = getCurrentTripId();
-    setCurrentTripIdState(tripId);
+    setCurrentTripIdState(layoutTripId);
+  }, [layoutTripId]);
 
-    if (tripId) {
-      loadPayerNames(tripId);
+  useEffect(() => {
+    if (currentTripId) {
+      loadPayerNames(currentTripId);
     }
-  }, []);
-
-  const loadTrips = async () => {
-    setTripsLoading(true);
-    try {
-      const data = await fetchTrips();
-      const activeTrips = data.filter((t) => t.isActive);
-      setTrips(activeTrips);
-    } catch {
-      setError('Failed to load trips from server');
-    } finally {
-      setTripsLoading(false);
-    }
-  };
+  }, [currentTripId]);
 
   const loadPayerNames = async (tripId: string) => {
     setLoading(true);
@@ -77,13 +64,15 @@ function AdminPage() {
     setLoading(true);
     try {
       const newTrip = await createTrip(newTripName);
-      setTrips((prev) => [...prev, newTrip]);
       setNewTripName('');
 
       // Auto-select the new trip
       setCurrentTripId(newTrip.tripId);
       setCurrentTripIdState(newTrip.tripId);
       setPayerNames([]);
+
+      // Reload trips in Layout so nav updates
+      await reloadTrips();
 
       setSuccess(`Created trip "${newTripName}" successfully!`);
       setTimeout(() => setSuccess(null), 3000);
@@ -97,7 +86,7 @@ function AdminPage() {
   const handleSelectTrip = (tripId: string) => {
     setCurrentTripId(tripId);
     setCurrentTripIdState(tripId);
-    loadPayerNames(tripId);
+    window.dispatchEvent(new CustomEvent('tripChanged'));
     setSuccess('Trip selected!');
     setTimeout(() => setSuccess(null), 2000);
   };
@@ -107,7 +96,6 @@ function AdminPage() {
       setLoading(true);
       try {
         await deleteTrip(tripId);
-        setTrips((prev) => prev.filter((t) => t.tripId !== tripId));
 
         // If deleted current trip, clear selection
         if (tripId === currentTripId) {
@@ -115,6 +103,9 @@ function AdminPage() {
           setCurrentTripIdState(null);
           setPayerNames([]);
         }
+
+        // Reload trips in Layout
+        await reloadTrips();
 
         setSuccess(`Deleted trip "${tripName}" successfully!`);
         setTimeout(() => setSuccess(null), 3000);
@@ -267,12 +258,7 @@ function AdminPage() {
           </div>
         </form>
 
-        {tripsLoading ? (
-          <div style={{ textAlign: 'center', padding: '2rem' }}>
-            <div style={{ fontSize: '2rem' }}>⏳</div>
-            <p>Loading trips...</p>
-          </div>
-        ) : trips.length === 0 ? (
+        {trips.length === 0 ? (
           <div className="empty-state">
             <div className="empty-state-icon">✈️</div>
             <p>No trips yet. Create your first trip above!</p>

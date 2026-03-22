@@ -1,8 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { getCurrentTripId, setCurrentTripId, clearCurrentTripId } from '../utils/storage';
 import { fetchTrips, Trip } from '../api/api';
 import { useAuth } from '../contexts/auth-context';
+
+export interface LayoutContext {
+  trips: Trip[];
+  currentTripId: string | null;
+  reloadTrips: () => Promise<void>;
+}
 
 export function Layout() {
   const location = useLocation();
@@ -60,7 +66,7 @@ export function Layout() {
     }
   }, [currentTripId, trips]);
 
-  const loadTrips = async () => {
+  const loadTrips = useCallback(async () => {
     try {
       const data = await fetchTrips();
       const activeTrips = data.filter((t) => t.isActive);
@@ -70,7 +76,7 @@ export function Layout() {
     } finally {
       setTripsLoaded(true);
     }
-  };
+  }, []);
 
   const handleTripChange = (tripId: string) => {
     setCurrentTripId(tripId);
@@ -258,7 +264,7 @@ export function Layout() {
       </nav>
 
       {tripsLoaded ? (
-        <Outlet />
+        <Outlet context={{ trips, currentTripId, reloadTrips: loadTrips } satisfies LayoutContext} />
       ) : (
         <div style={{ textAlign: 'center', padding: '3rem' }}>
           <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>⏳</div>
