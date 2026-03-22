@@ -16,15 +16,17 @@ export interface CreateExpenseRequest {
   date: string;
 }
 
-function getAccessToken(): string | null {
-  return localStorage.getItem('auth_access_token');
+function getAuthToken(): string | null {
+  // Use idToken because Cognito access tokens lack the `aud` claim
+  // that the backend JWT strategy validates
+  return localStorage.getItem('auth_id_token');
 }
 
 async function apiFetch<T>(
   path: string,
   options: RequestInit = {},
 ): Promise<T> {
-  const token = getAccessToken();
+  const token = getAuthToken();
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     ...(options.headers as Record<string, string>),
