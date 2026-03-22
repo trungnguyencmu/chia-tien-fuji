@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
-import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { Outlet, useNavigate } from 'react-router-dom';
 import { getCurrentTripId, setCurrentTripId, clearCurrentTripId } from '../utils/storage';
-import { fetchTrips, Trip } from '../api/api';
+import { fetchTrips, createTrip, deleteTrip, Trip } from '../api/api';
 import { useAuth } from '../contexts/auth-context';
 
 export interface LayoutContext {
@@ -11,10 +11,11 @@ export interface LayoutContext {
 }
 
 export function Layout() {
-  const location = useLocation();
   const navigate = useNavigate();
   const { userEmail, logout } = useAuth();
-  const isHomePage = location.pathname === '/';
+  const [newTripName, setNewTripName] = useState('');
+  const [showCreateTrip, setShowCreateTrip] = useState(false);
+  const [tripLoading, setTripLoading] = useState(false);
 
   const [trips, setTrips] = useState<Trip[]>([]);
   const [tripsLoaded, setTripsLoaded] = useState(false);
@@ -84,6 +85,46 @@ export function Layout() {
     window.dispatchEvent(new CustomEvent('tripChanged'));
   };
 
+  const handleCreateTrip = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newTripName.trim()) return;
+
+    setTripLoading(true);
+    try {
+      const newTrip = await createTrip(newTripName);
+      setNewTripName('');
+      setShowCreateTrip(false);
+      setCurrentTripId(newTrip.tripId);
+      setCurrentTripIdState(newTrip.tripId);
+      await loadTrips();
+      window.dispatchEvent(new CustomEvent('tripChanged'));
+    } catch (err) {
+      console.error('Failed to create trip:', err);
+    } finally {
+      setTripLoading(false);
+    }
+  };
+
+  const handleDeleteTrip = async (tripId: string, tripName: string) => {
+    if (!window.confirm(`Delete trip "${tripName}"? This cannot be undone.`)) return;
+
+    setTripLoading(true);
+    try {
+      await deleteTrip(tripId);
+      if (tripId === currentTripId) {
+        clearCurrentTripId();
+        setCurrentTripIdState(null);
+        setCurrentTrip(null);
+      }
+      await loadTrips();
+      window.dispatchEvent(new CustomEvent('tripChanged'));
+    } catch (err) {
+      console.error('Failed to delete trip:', err);
+    } finally {
+      setTripLoading(false);
+    }
+  };
+
   return (
     <div>
       <nav
@@ -97,80 +138,51 @@ export function Layout() {
           backdropFilter: 'blur(10px)',
         }}
       >
-        {/* Top row: Navigation tabs and refresh */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: currentTrip ? '1rem' : '0' }}>
-          <div style={{ display: 'flex', gap: '0.75rem' }}>
-            <NavLink
-              to="/"
-              style={({ isActive }) => ({
-                padding: '0.875rem 1.75rem',
-                borderRadius: '15px',
-                textDecoration: 'none',
-                fontWeight: '700',
-                fontSize: '0.95rem',
-                transition: 'all 0.3s ease',
-                background: isActive
-                  ? 'linear-gradient(135deg, #ff9ec1 0%, #ffc4e1 100%)'
-                  : 'rgba(255, 255, 255, 0.7)',
-                color: isActive ? 'white' : '#5a5770',
-                boxShadow: isActive ? '0 4px 12px rgb(255 158 193 / 0.3)' : 'none',
-                border: isActive ? 'none' : '2px solid rgba(255, 158, 193, 0.2)',
-              })}
-            >
-              🏠 Home
-            </NavLink>
-            <NavLink
-              to="/admin"
-              style={({ isActive }) => ({
-                padding: '0.875rem 1.75rem',
-                borderRadius: '15px',
-                textDecoration: 'none',
-                fontWeight: '700',
-                fontSize: '0.95rem',
-                transition: 'all 0.3s ease',
-                background: isActive
-                  ? 'linear-gradient(135deg, #c7b4f3 0%, #e4b5f7 100%)'
-                  : 'rgba(255, 255, 255, 0.7)',
-                color: isActive ? 'white' : '#5a5770',
-                boxShadow: isActive ? '0 4px 12px rgb(199 180 243 / 0.3)' : 'none',
-                border: isActive ? 'none' : '2px solid rgba(199, 180, 243, 0.2)',
-              })}
-            >
-              ⚙️ Admin
-            </NavLink>
+        {/* Top row: Title and actions */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: currentTrip || showCreateTrip ? '1rem' : '0' }}>
+          <div
+            style={{
+              padding: '0.875rem 1.75rem',
+              borderRadius: '15px',
+              fontWeight: '700',
+              fontSize: '0.95rem',
+              background: 'linear-gradient(135deg, #ff9ec1 0%, #ffc4e1 100%)',
+              color: 'white',
+              boxShadow: '0 4px 12px rgb(255 158 193 / 0.3)',
+            }}
+          >
+            💰 Share Money
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            {isHomePage && (
-              <button
-                onClick={() => window.dispatchEvent(new CustomEvent('refreshExpenses'))}
-                style={{
-                  padding: '0.875rem',
-                  minWidth: 'auto',
-                  borderRadius: '15px',
-                  background: 'linear-gradient(135deg, #b4e4ff 0%, #c7b4f3 100%)',
-                  color: 'white',
-                  border: 'none',
-                  cursor: 'pointer',
-                  fontSize: '1.25rem',
-                  transition: 'all 0.3s ease',
-                  boxShadow: '0 4px 12px rgb(180 228 255 / 0.3)',
-                }}
-                onMouseOver={(e) => {
-                  e.currentTarget.style.transform = 'scale(1.1) rotate(180deg)';
-                  e.currentTarget.style.boxShadow = '0 6px 20px rgb(180 228 255 / 0.5)';
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.transform = 'scale(1) rotate(0deg)';
-                  e.currentTarget.style.boxShadow = '0 4px 12px rgb(180 228 255 / 0.3)';
-                }}
-                title="Refresh Data"
-              >
-                🔄
-              </button>
-            )}
             <button
-              onClick={() => { logout(); navigate('/login'); }}
+              onClick={() => window.dispatchEvent(new CustomEvent('refreshExpenses'))}
+              style={{
+                padding: '0.875rem',
+                minWidth: 'auto',
+                borderRadius: '15px',
+                background: 'linear-gradient(135deg, #b4e4ff 0%, #c7b4f3 100%)',
+                color: 'white',
+                border: 'none',
+                cursor: 'pointer',
+                fontSize: '1.25rem',
+                transition: 'all 0.3s ease',
+                boxShadow: '0 4px 12px rgb(180 228 255 / 0.3)',
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.transform = 'scale(1.1) rotate(180deg)';
+                e.currentTarget.style.boxShadow = '0 6px 20px rgb(180 228 255 / 0.5)';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.transform = 'scale(1) rotate(0deg)';
+                e.currentTarget.style.boxShadow = '0 4px 12px rgb(180 228 255 / 0.3)';
+              }}
+              title="Refresh Data"
+            >
+              🔄
+            </button>
+            <button
+              onClick={() => { logout(); navigate('/'); }}
               style={{
                 padding: '0.625rem 1rem',
                 borderRadius: '15px',
@@ -195,13 +207,13 @@ export function Layout() {
           </div>
         </div>
 
-        {/* Bottom row: Current trip selector */}
+        {/* Trip selector row */}
         {currentTrip && (
           <div
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '1rem',
+              gap: '0.75rem',
               padding: '0.75rem 1rem',
               background: 'rgba(255, 158, 193, 0.1)',
               borderRadius: '12px',
@@ -224,7 +236,7 @@ export function Layout() {
                 className="form-input"
                 style={{
                   width: 'auto',
-                  minWidth: '200px',
+                  minWidth: '150px',
                   padding: '0.5rem 1rem',
                   fontSize: '0.875rem',
                   cursor: 'pointer',
@@ -238,9 +250,9 @@ export function Layout() {
               </select>
             )}
             <button
-              onClick={() => navigate('/admin')}
+              onClick={() => setShowCreateTrip(!showCreateTrip)}
               style={{
-                padding: '0.5rem 1rem',
+                padding: '0.5rem 0.75rem',
                 borderRadius: '8px',
                 background: 'rgba(199, 180, 243, 0.2)',
                 color: 'var(--gray-700)',
@@ -256,10 +268,86 @@ export function Layout() {
               onMouseOut={(e) => {
                 e.currentTarget.style.background = 'rgba(199, 180, 243, 0.2)';
               }}
+              title="New Trip"
             >
-              ⚙️ Manage
+              ➕
+            </button>
+            <button
+              onClick={() => handleDeleteTrip(currentTrip.tripId, currentTrip.tripName)}
+              disabled={tripLoading}
+              style={{
+                padding: '0.5rem 0.75rem',
+                borderRadius: '8px',
+                background: 'rgba(255, 179, 186, 0.2)',
+                color: '#991b1b',
+                border: '1px solid rgba(255, 179, 186, 0.3)',
+                fontSize: '0.875rem',
+                fontWeight: '600',
+                cursor: tripLoading ? 'not-allowed' : 'pointer',
+                transition: 'all 0.2s',
+                opacity: tripLoading ? 0.5 : 1,
+              }}
+              onMouseOver={(e) => {
+                if (!tripLoading) e.currentTarget.style.background = 'rgba(255, 179, 186, 0.4)';
+              }}
+              onMouseOut={(e) => {
+                if (!tripLoading) e.currentTarget.style.background = 'rgba(255, 179, 186, 0.2)';
+              }}
+              title="Delete current trip"
+            >
+              🗑️
             </button>
           </div>
+        )}
+
+        {/* Inline create trip form */}
+        {showCreateTrip && (
+          <form
+            onSubmit={handleCreateTrip}
+            style={{
+              display: 'flex',
+              gap: '0.75rem',
+              marginTop: currentTrip ? '0.75rem' : '0',
+              padding: '0.75rem 1rem',
+              background: 'rgba(199, 180, 243, 0.1)',
+              borderRadius: '12px',
+              border: '1px solid rgba(199, 180, 243, 0.3)',
+            }}
+          >
+            <input
+              type="text"
+              className="form-input"
+              value={newTripName}
+              onChange={(e) => setNewTripName(e.target.value)}
+              disabled={tripLoading}
+              placeholder="New trip name..."
+              style={{ flex: 1, padding: '0.5rem 1rem', fontSize: '0.875rem' }}
+              autoFocus
+            />
+            <button
+              type="submit"
+              className="btn btn-primary"
+              disabled={tripLoading || !newTripName.trim()}
+              style={{ padding: '0.5rem 1rem', fontSize: '0.875rem' }}
+            >
+              {tripLoading ? '⏳' : 'Create'}
+            </button>
+            <button
+              type="button"
+              onClick={() => { setShowCreateTrip(false); setNewTripName(''); }}
+              style={{
+                padding: '0.5rem 0.75rem',
+                borderRadius: '8px',
+                background: 'transparent',
+                border: '1px solid var(--gray-300)',
+                cursor: 'pointer',
+                fontSize: '0.875rem',
+                color: 'var(--gray-600)',
+              }}
+            >
+              ✕
+            </button>
+          </form>
         )}
       </nav>
 

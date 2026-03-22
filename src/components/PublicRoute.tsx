@@ -1,7 +1,11 @@
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/auth-context';
 
-export function ProtectedRoute({ children }: { children: React.ReactNode }) {
+/**
+ * Redirects authenticated users to the app dashboard.
+ * Shows children (landing, login, register) only for unauthenticated users.
+ */
+export function PublicRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) {
@@ -21,8 +25,8 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
     );
   }
 
-  if (!isAuthenticated) {
-    return <Navigate to="/" replace />;
+  if (isAuthenticated) {
+    return <Navigate to="/app" replace />;
   }
 
   return <>{children}</>;

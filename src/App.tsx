@@ -3,10 +3,11 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/auth-context';
 import { Layout } from './components/Layout';
 import { ProtectedRoute } from './components/ProtectedRoute';
+import { PublicRoute } from './components/PublicRoute';
 
 // Lazy load pages to reduce initial bundle size
+const LandingPage = lazy(() => import('./pages/landing/LandingPage'));
 const HomePage = lazy(() => import('./pages/HomePage'));
-const AdminPage = lazy(() => import('./pages/AdminPage'));
 const LoginPage = lazy(() => import('./pages/LoginPage'));
 const RegisterPage = lazy(() => import('./pages/RegisterPage'));
 
@@ -27,27 +28,41 @@ function App() {
     <BrowserRouter>
       <AuthProvider>
         <Routes>
-          {/* Public auth routes */}
+          {/* Public routes — redirect to /app if already logged in */}
+          <Route
+            path="/"
+            element={
+              <PublicRoute>
+                <Suspense fallback={<PageLoader />}>
+                  <LandingPage />
+                </Suspense>
+              </PublicRoute>
+            }
+          />
           <Route
             path="/login"
             element={
-              <Suspense fallback={<PageLoader />}>
-                <LoginPage />
-              </Suspense>
+              <PublicRoute>
+                <Suspense fallback={<PageLoader />}>
+                  <LoginPage />
+                </Suspense>
+              </PublicRoute>
             }
           />
           <Route
             path="/register"
             element={
-              <Suspense fallback={<PageLoader />}>
-                <RegisterPage />
-              </Suspense>
+              <PublicRoute>
+                <Suspense fallback={<PageLoader />}>
+                  <RegisterPage />
+                </Suspense>
+              </PublicRoute>
             }
           />
 
-          {/* Protected app routes */}
+          {/* Protected app routes — redirect to / if not logged in */}
           <Route
-            path="/"
+            path="/app"
             element={
               <ProtectedRoute>
                 <Layout />
@@ -59,14 +74,6 @@ function App() {
               element={
                 <Suspense fallback={<PageLoader />}>
                   <HomePage />
-                </Suspense>
-              }
-            />
-            <Route
-              path="admin"
-              element={
-                <Suspense fallback={<PageLoader />}>
-                  <AdminPage />
                 </Suspense>
               }
             />
