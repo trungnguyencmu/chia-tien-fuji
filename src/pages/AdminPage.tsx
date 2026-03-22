@@ -422,7 +422,7 @@ function AdminPage() {
               Delete All Expenses
             </label>
             <p style={{ color: '#991b1b', fontSize: '0.875rem', marginBottom: '1rem' }}>
-              This will permanently delete ALL expenses from Google Sheets. Type the password <strong>"ok"</strong> to confirm.
+              This will permanently delete ALL expenses in this trip. Type the password to confirm.
             </p>
             <div style={{ display: 'flex', gap: '1rem' }}>
               <input

@@ -1,7 +1,6 @@
 import { Expense } from '../utils/calculation';
 
-// Replace with your deployed Apps Script Web App URL
-const API_URL = 'https://script.google.com/macros/s/AKfycbwwbJjyPVhfOwNgCZRpOlyt-BbtxQrc4-P81xSqqPZTbrXWHRS08n_917dz4wTVaFDi/exec';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 export interface Trip {
   tripId: string;
@@ -17,233 +16,144 @@ export interface CreateExpenseRequest {
   date: string;
 }
 
-/**
- * Fetch all trips
- */
+function getAccessToken(): string | null {
+  return localStorage.getItem('auth_access_token');
+}
+
+async function apiFetch<T>(
+  path: string,
+  options: RequestInit = {},
+): Promise<T> {
+  const token = getAccessToken();
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    ...(options.headers as Record<string, string>),
+  };
+
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    ...options,
+    headers,
+  });
+
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new Error(data.message || `Request failed (${response.status})`);
+  }
+
+  // Handle empty responses (DELETE endpoints)
+  const text = await response.text();
+  if (!text) return undefined as T;
+  return JSON.parse(text);
+}
+
+// --- Trips ---
+
 export async function fetchTrips(): Promise<Trip[]> {
-  try {
-    const response = await fetch(`${API_URL}?action=getTrips`, {
-      method: 'GET',
-      redirect: 'follow',
-    });
-
-    const data = await response.json();
-
-    if (data.error) {
-      throw new Error(data.error);
-    }
-
-    return data || [];
-  } catch (error) {
-    console.error('Error fetching trips:', error);
-    throw error;
-  }
+  return apiFetch<Trip[]>('/trips');
 }
 
-/**
- * Create a new trip
- */
 export async function createTrip(tripName: string): Promise<Trip> {
-  try {
-    const response = await fetch(API_URL, {
-      method: 'POST',
-      redirect: 'follow',
-      body: JSON.stringify({ action: 'createTrip', tripName }),
-    });
-
-    const data = await response.json();
-
-    if (data.error) {
-      throw new Error(data.error);
-    }
-
-    return data;
-  } catch (error) {
-    console.error('Error creating trip:', error);
-    throw error;
-  }
+  return apiFetch<Trip>('/trips', {
+    method: 'POST',
+    body: JSON.stringify({ tripName }),
+  });
 }
 
-/**
- * Delete a trip (soft delete)
- */
 export async function deleteTrip(tripId: string): Promise<void> {
-  try {
-    const response = await fetch(API_URL, {
-      method: 'POST',
-      redirect: 'follow',
-      body: JSON.stringify({ action: 'deleteTrip', tripId }),
-    });
-
-    const data = await response.json();
-
-    if (data.error) {
-      throw new Error(data.error);
-    }
-  } catch (error) {
-    console.error('Error deleting trip:', error);
-    throw error;
-  }
+  return apiFetch<void>(`/trips/${tripId}`, { method: 'DELETE' });
 }
 
-/**
- * Fetch all expenses for a specific trip
- */
+// --- Expenses ---
+
+interface ExpenseResponse {
+  tripId: string;
+  expenseId: string;
+  payer: string;
+  title: string;
+  amount: number;
+  date: string;
+  createdAt: string;
+}
+
+function mapExpense(e: ExpenseResponse): Expense {
+  return {
+    id: e.expenseId,
+    payer: e.payer,
+    title: e.title,
+    amount: e.amount,
+    date: e.date,
+    createdAt: e.createdAt,
+  };
+}
+
 export async function fetchExpenses(tripId: string): Promise<Expense[]> {
-  try {
-    const response = await fetch(`${API_URL}?action=getExpenses&tripId=${tripId}`, {
-      method: 'GET',
-      redirect: 'follow',
-    });
-
-    const data = await response.json();
-
-    if (data.error) {
-      throw new Error(data.error);
-    }
-
-    return data || [];
-  } catch (error) {
-    console.error('Error fetching expenses:', error);
-    throw error;
-  }
+  const data = await apiFetch<ExpenseResponse[]>(
+    `/trips/${tripId}/expenses`,
+  );
+  return data.map(mapExpense);
 }
 
-/**
- * Create a new expense in a specific trip
- */
-export async function createExpense(tripId: string, expense: CreateExpenseRequest): Promise<Expense> {
-  try {
-    const response = await fetch(API_URL, {
+export async function createExpense(
+  tripId: string,
+  expense: CreateExpenseRequest,
+): Promise<Expense> {
+  const data = await apiFetch<ExpenseResponse>(
+    `/trips/${tripId}/expenses`,
+    {
       method: 'POST',
-      redirect: 'follow',
-      body: JSON.stringify({ action: 'addExpense', tripId, ...expense }),
-    });
-
-    const data = await response.json();
-
-    if (data.error) {
-      throw new Error(data.error);
-    }
-
-    return data;
-  } catch (error) {
-    console.error('Error creating expense:', error);
-    throw error;
-  }
+      body: JSON.stringify(expense),
+    },
+  );
+  return mapExpense(data);
 }
 
-/**
- * Fetch all payer names for a specific trip
- */
+export async function deleteExpense(
+  tripId: string,
+  expenseId: string,
+  password: string,
+): Promise<void> {
+  return apiFetch<void>(`/trips/${tripId}/expenses/${expenseId}`, {
+    method: 'DELETE',
+    headers: { 'x-admin-password': password },
+  });
+}
+
+export async function deleteAllExpenses(
+  tripId: string,
+  password: string,
+): Promise<void> {
+  return apiFetch<void>(`/trips/${tripId}/expenses`, {
+    method: 'DELETE',
+    headers: { 'x-admin-password': password },
+  });
+}
+
+// --- Participants ---
+
 export async function fetchPayerNames(tripId: string): Promise<string[]> {
-  try {
-    const response = await fetch(`${API_URL}?action=getPayerNames&tripId=${tripId}`, {
-      method: 'GET',
-      redirect: 'follow',
-    });
-
-    const data = await response.json();
-
-    if (data.error) {
-      throw new Error(data.error);
-    }
-
-    return data || [];
-  } catch (error) {
-    console.error('Error fetching payer names:', error);
-    throw error;
-  }
+  return apiFetch<string[]>(`/trips/${tripId}/participants/names`);
 }
 
-/**
- * Add a new payer name to a specific trip
- */
-export async function addPayerNameToBackend(tripId: string, name: string): Promise<string[]> {
-  try {
-    const response = await fetch(API_URL, {
-      method: 'POST',
-      redirect: 'follow',
-      body: JSON.stringify({ action: 'addPayerName', tripId, name }),
-    });
-
-    const data = await response.json();
-
-    if (data.error) {
-      throw new Error(data.error);
-    }
-
-    return data || [];
-  } catch (error) {
-    console.error('Error adding payer name:', error);
-    throw error;
-  }
+export async function addPayerNameToBackend(
+  tripId: string,
+  name: string,
+): Promise<void> {
+  return apiFetch<void>(`/trips/${tripId}/participants`, {
+    method: 'POST',
+    body: JSON.stringify({ participantName: name }),
+  });
 }
 
-/**
- * Delete a payer name from a specific trip
- */
-export async function deletePayerNameFromBackend(tripId: string, name: string): Promise<string[]> {
-  try {
-    const response = await fetch(API_URL, {
-      method: 'POST',
-      redirect: 'follow',
-      body: JSON.stringify({ action: 'removePayerName', tripId, name }),
-    });
-
-    const data = await response.json();
-
-    if (data.error) {
-      throw new Error(data.error);
-    }
-
-    return data || [];
-  } catch (error) {
-    console.error('Error deleting payer name:', error);
-    throw error;
-  }
-}
-
-/**
- * Delete all expenses in a trip (requires password 'ok')
- */
-export async function deleteAllExpenses(tripId: string, password: string): Promise<void> {
-  try {
-    const response = await fetch(API_URL, {
-      method: 'POST',
-      redirect: 'follow',
-      body: JSON.stringify({ action: 'deleteAllExpenses', tripId, password }),
-    });
-
-    const data = await response.json();
-
-    if (data.error) {
-      throw new Error(data.error);
-    }
-  } catch (error) {
-    console.error('Error deleting expenses:', error);
-    throw error;
-  }
-}
-
-/**
- * Delete a single expense (requires password 'ok')
- */
-export async function deleteExpense(tripId: string, expenseId: string, password: string): Promise<void> {
-  try {
-    const response = await fetch(API_URL, {
-      method: 'POST',
-      redirect: 'follow',
-      body: JSON.stringify({ action: 'deleteExpense', tripId, expenseId, password }),
-    });
-
-    const data = await response.json();
-
-    if (data.error) {
-      throw new Error(data.error);
-    }
-  } catch (error) {
-    console.error('Error deleting expense:', error);
-    throw error;
-  }
+export async function deletePayerNameFromBackend(
+  tripId: string,
+  name: string,
+): Promise<void> {
+  return apiFetch<void>(
+    `/trips/${tripId}/participants/${encodeURIComponent(name)}`,
+    { method: 'DELETE' },
+  );
 }

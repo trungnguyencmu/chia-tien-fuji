@@ -67,33 +67,17 @@ export function savePayerNamesToCache(names: string[]): void {
  */
 export async function fetchPayerNames(): Promise<string[]> {
   const tripId = getCurrentTripId();
-  if (!tripId) {
-    console.warn('⚠️ No trip selected - cannot fetch payer names');
-    return [];
-  }
+  if (!tripId) return [];
 
   try {
-    console.log('Fetching payer names for trip:', tripId);
     const names = await fetchPayerNamesAPI(tripId);
-    console.log('Received payer names:', names);
-
-    // Validate that we got an array of strings
     const validNames = Array.isArray(names)
       ? names.filter((name) => typeof name === 'string')
       : [];
-
-    if (validNames.length === 0 && names.length > 0) {
-      console.error('Invalid payer names data received from backend');
-      console.error('Expected array of strings, got:', names);
-      console.warn('⚠️ Please update your Google Apps Script with the new code!');
-      return getPayerNamesFromCache();
-    }
-
     savePayerNamesToCache(validNames);
     return validNames;
   } catch (error) {
     console.error('Failed to fetch payer names:', error);
-    // Fallback to cache if backend fails
     return getPayerNamesFromCache();
   }
 }
@@ -112,9 +96,9 @@ export async function addPayerName(name: string): Promise<string[]> {
     throw new Error('Name cannot be empty');
   }
 
-  const updatedNames = await addPayerNameToBackend(tripId, trimmedName);
-  savePayerNamesToCache(updatedNames);
-  return updatedNames;
+  await addPayerNameToBackend(tripId, trimmedName);
+  // Re-fetch updated list since API returns void
+  return fetchPayerNames();
 }
 
 /**
@@ -126,7 +110,7 @@ export async function removePayerName(name: string): Promise<string[]> {
     throw new Error('No trip selected');
   }
 
-  const updatedNames = await deletePayerNameFromBackend(tripId, name);
-  savePayerNamesToCache(updatedNames);
-  return updatedNames;
+  await deletePayerNameFromBackend(tripId, name);
+  // Re-fetch updated list since API returns void
+  return fetchPayerNames();
 }
