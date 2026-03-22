@@ -16,14 +16,24 @@ export function Layout() {
 
   useEffect(() => {
     loadTrips();
-    const tripId = getCurrentTripId();
-    setCurrentTripIdState(tripId);
   }, []);
 
   useEffect(() => {
-    // Auto-select latest (most recently created) trip if none selected
-    if (!currentTripId && trips.length > 0) {
-      // Sort by createdAt descending to get the latest trip
+    if (trips.length === 0) {
+      setCurrentTrip(null);
+      return;
+    }
+
+    // Validate stored trip ID exists in fetched trips
+    const storedId = getCurrentTripId();
+    const storedTripExists = storedId && trips.some((t) => t.tripId === storedId);
+
+    if (storedTripExists) {
+      // Stored trip is valid
+      setCurrentTripIdState(storedId);
+      setCurrentTrip(trips.find((t) => t.tripId === storedId) || null);
+    } else {
+      // Stored trip is stale or none selected — auto-select latest
       const sortedTrips = [...trips].sort((a, b) =>
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       );
@@ -31,15 +41,16 @@ export function Layout() {
 
       setCurrentTripId(latestTrip.tripId);
       setCurrentTripIdState(latestTrip.tripId);
+      setCurrentTrip(latestTrip);
       window.dispatchEvent(new CustomEvent('tripChanged'));
     }
+  }, [trips]);
 
-    // Update current trip when trips or currentTripId changes
+  useEffect(() => {
+    // Update current trip object when selection changes
     if (currentTripId && trips.length > 0) {
       const trip = trips.find((t) => t.tripId === currentTripId);
       setCurrentTrip(trip || null);
-    } else {
-      setCurrentTrip(null);
     }
   }, [currentTripId, trips]);
 
