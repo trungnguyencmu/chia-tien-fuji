@@ -2,10 +2,12 @@ import { useState, useEffect } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { getCurrentTripId, setCurrentTripId } from '../utils/storage';
 import { fetchTrips, Trip } from '../api/api';
+import { useAuth } from '../contexts/auth-context';
 
 export function Layout() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { userEmail, logout } = useAuth();
   const isHomePage = location.pathname === '/';
 
   const [trips, setTrips] = useState<Trip[]>([]);
@@ -113,34 +115,59 @@ export function Layout() {
             </NavLink>
           </div>
 
-          {isHomePage && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            {isHomePage && (
+              <button
+                onClick={() => window.dispatchEvent(new CustomEvent('refreshExpenses'))}
+                style={{
+                  padding: '0.875rem',
+                  minWidth: 'auto',
+                  borderRadius: '15px',
+                  background: 'linear-gradient(135deg, #b4e4ff 0%, #c7b4f3 100%)',
+                  color: 'white',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontSize: '1.25rem',
+                  transition: 'all 0.3s ease',
+                  boxShadow: '0 4px 12px rgb(180 228 255 / 0.3)',
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.transform = 'scale(1.1) rotate(180deg)';
+                  e.currentTarget.style.boxShadow = '0 6px 20px rgb(180 228 255 / 0.5)';
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.transform = 'scale(1) rotate(0deg)';
+                  e.currentTarget.style.boxShadow = '0 4px 12px rgb(180 228 255 / 0.3)';
+                }}
+                title="Refresh Data"
+              >
+                🔄
+              </button>
+            )}
             <button
-              onClick={() => window.dispatchEvent(new CustomEvent('refreshExpenses'))}
+              onClick={() => { logout(); navigate('/login'); }}
               style={{
-                padding: '0.875rem',
-                minWidth: 'auto',
+                padding: '0.625rem 1rem',
                 borderRadius: '15px',
-                background: 'linear-gradient(135deg, #b4e4ff 0%, #c7b4f3 100%)',
-                color: 'white',
-                border: 'none',
+                background: 'rgba(255, 179, 186, 0.3)',
+                color: 'var(--gray-700)',
+                border: '1px solid rgba(255, 179, 186, 0.4)',
                 cursor: 'pointer',
-                fontSize: '1.25rem',
-                transition: 'all 0.3s ease',
-                boxShadow: '0 4px 12px rgb(180 228 255 / 0.3)',
+                fontSize: '0.8rem',
+                fontWeight: '600',
+                transition: 'all 0.2s ease',
               }}
               onMouseOver={(e) => {
-                e.currentTarget.style.transform = 'scale(1.1) rotate(180deg)';
-                e.currentTarget.style.boxShadow = '0 6px 20px rgb(180 228 255 / 0.5)';
+                e.currentTarget.style.background = 'rgba(255, 179, 186, 0.5)';
               }}
               onMouseOut={(e) => {
-                e.currentTarget.style.transform = 'scale(1) rotate(0deg)';
-                e.currentTarget.style.boxShadow = '0 4px 12px rgb(180 228 255 / 0.3)';
+                e.currentTarget.style.background = 'rgba(255, 179, 186, 0.3)';
               }}
-              title="Refresh Data"
+              title={userEmail || 'Sign out'}
             >
-              🔄
+              Sign Out
             </button>
-          )}
+          </div>
         </div>
 
         {/* Bottom row: Current trip selector */}

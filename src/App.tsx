@@ -1,10 +1,14 @@
 import { lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './contexts/auth-context';
 import { Layout } from './components/Layout';
+import { ProtectedRoute } from './components/ProtectedRoute';
 
 // Lazy load pages to reduce initial bundle size
 const HomePage = lazy(() => import('./pages/HomePage'));
 const AdminPage = lazy(() => import('./pages/AdminPage'));
+const LoginPage = lazy(() => import('./pages/LoginPage'));
+const RegisterPage = lazy(() => import('./pages/RegisterPage'));
 
 // Loading fallback component
 function PageLoader() {
@@ -21,26 +25,57 @@ function PageLoader() {
 function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Layout />}>
+      <AuthProvider>
+        <Routes>
+          {/* Public auth routes */}
           <Route
-            index
+            path="/login"
             element={
               <Suspense fallback={<PageLoader />}>
-                <HomePage />
+                <LoginPage />
               </Suspense>
             }
           />
           <Route
-            path="admin"
+            path="/register"
             element={
               <Suspense fallback={<PageLoader />}>
-                <AdminPage />
+                <RegisterPage />
               </Suspense>
             }
           />
-        </Route>
-      </Routes>
+
+          {/* Protected app routes */}
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <Layout />
+              </ProtectedRoute>
+            }
+          >
+            <Route
+              index
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <HomePage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="admin"
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <AdminPage />
+                </Suspense>
+              }
+            />
+          </Route>
+
+          {/* Catch all */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </AuthProvider>
     </BrowserRouter>
   );
 }
