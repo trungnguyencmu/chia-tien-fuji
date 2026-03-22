@@ -1,6 +1,15 @@
 import { useState, useEffect } from 'react';
-import { fetchPayerNames, addPayerName, removePayerName, getCurrentTripId, setCurrentTripId } from '../utils/storage';
-import { deleteAllExpenses, fetchTrips, createTrip, deleteTrip, Trip } from '../api/api';
+import {
+  fetchPayerNames,
+  addPayerNameToBackend,
+  deletePayerNameFromBackend,
+  deleteAllExpenses,
+  fetchTrips,
+  createTrip,
+  deleteTrip,
+  Trip,
+} from '../api/api';
+import { getCurrentTripId, setCurrentTripId } from '../utils/storage';
 
 function AdminPage() {
   // Trip state
@@ -26,7 +35,7 @@ function AdminPage() {
     setCurrentTripIdState(tripId);
 
     if (tripId) {
-      loadPayerNames();
+      loadPayerNames(tripId);
     }
   }, []);
 
@@ -34,13 +43,24 @@ function AdminPage() {
     setTripsLoading(true);
     try {
       const data = await fetchTrips();
-      // Only show active trips
       const activeTrips = data.filter((t) => t.isActive);
       setTrips(activeTrips);
-    } catch (err) {
+    } catch {
       setError('Failed to load trips from server');
     } finally {
       setTripsLoading(false);
+    }
+  };
+
+  const loadPayerNames = async (tripId: string) => {
+    setLoading(true);
+    try {
+      const names = await fetchPayerNames(tripId);
+      setPayerNames(names);
+    } catch {
+      setError('Failed to load participants from server');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -63,6 +83,7 @@ function AdminPage() {
       // Auto-select the new trip
       setCurrentTripId(newTrip.tripId);
       setCurrentTripIdState(newTrip.tripId);
+      setPayerNames([]);
 
       setSuccess(`Created trip "${newTripName}" successfully!`);
       setTimeout(() => setSuccess(null), 3000);
@@ -76,7 +97,7 @@ function AdminPage() {
   const handleSelectTrip = (tripId: string) => {
     setCurrentTripId(tripId);
     setCurrentTripIdState(tripId);
-    loadPayerNames();
+    loadPayerNames(tripId);
     setSuccess('Trip selected!');
     setTimeout(() => setSuccess(null), 2000);
   };
@@ -105,52 +126,50 @@ function AdminPage() {
     }
   };
 
-  const loadPayerNames = async () => {
-    setLoading(true);
-    try {
-      const names = await fetchPayerNames();
-      setPayerNames(names);
-    } catch (err) {
-      setError('Failed to load payer names from server');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleAddName = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setSuccess(null);
 
-    if (!newName.trim()) {
+    if (!currentTripId) {
+      setError('No trip selected');
+      return;
+    }
+
+    const trimmedName = newName.trim();
+    if (!trimmedName) {
       setError('Name cannot be empty');
       return;
     }
 
     setLoading(true);
     try {
-      const updatedNames = await addPayerName(newName);
-      setPayerNames(updatedNames);
+      await addPayerNameToBackend(currentTripId, trimmedName);
+      const names = await fetchPayerNames(currentTripId);
+      setPayerNames(names);
       setNewName('');
-      setSuccess(`Added "${newName}" successfully!`);
+      setSuccess(`Added "${trimmedName}" successfully!`);
       setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to add name');
+      setError(err instanceof Error ? err.message : 'Failed to add participant');
     } finally {
       setLoading(false);
     }
   };
 
   const handleRemoveName = async (name: string) => {
+    if (!currentTripId) return;
+
     if (window.confirm(`Are you sure you want to remove "${name}"?`)) {
       setLoading(true);
       try {
-        const updatedNames = await removePayerName(name);
-        setPayerNames(updatedNames);
+        await deletePayerNameFromBackend(currentTripId, name);
+        const names = await fetchPayerNames(currentTripId);
+        setPayerNames(names);
         setSuccess(`Removed "${name}" successfully!`);
         setTimeout(() => setSuccess(null), 3000);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to remove name');
+        setError(err instanceof Error ? err.message : 'Failed to remove participant');
       } finally {
         setLoading(false);
       }
@@ -327,7 +346,7 @@ function AdminPage() {
         <>
           <div className="card">
             <h2 style={{ marginBottom: '1.5rem', fontSize: '1.5rem', fontWeight: '700' }}>
-              👥 Add Payer Name
+              👥 Add Participant
             </h2>
             <form onSubmit={handleAddName}>
               <div className="form-group">
@@ -346,7 +365,7 @@ function AdminPage() {
                     style={{ flex: 1 }}
                   />
                   <button type="submit" className="btn btn-primary" disabled={loading}>
-                    {loading ? '⏳ Adding...' : '➕ Add Name'}
+                    {loading ? '⏳ Adding...' : '➕ Add'}
                   </button>
                 </div>
               </div>
@@ -355,13 +374,13 @@ function AdminPage() {
 
           <div className="card">
         <h2 style={{ marginBottom: '1.5rem', fontSize: '1.5rem', fontWeight: '700' }}>
-          📋 Payer Names ({payerNames.length})
+          📋 Participants ({payerNames.length})
         </h2>
 
         {payerNames.length === 0 ? (
           <div className="empty-state">
             <div className="empty-state-icon">👤</div>
-            <p>No payer names yet. Add some above!</p>
+            <p>No participants yet. Add some above!</p>
           </div>
         ) : (
           <div style={{ display: 'grid', gap: '0.75rem' }}>
@@ -469,10 +488,10 @@ function AdminPage() {
             <p style={{ color: '#78350f', lineHeight: '1.6' }}>
               <strong>How to use:</strong><br />
               1. Create a trip above (e.g., "Fuji Trip 2025")<br />
-              2. Add all trip members as payer names<br />
+              2. Add all trip members as participants<br />
               3. Go to Home page to add expenses<br />
               <br />
-              Each trip has its own expenses and payer names. Switch between trips by clicking them above!
+              Each trip has its own expenses and participants. Switch between trips by clicking them above!
             </p>
           </div>
         </div>

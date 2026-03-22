@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { CreateExpenseRequest } from '../api/api';
-import { fetchPayerNames, getPayerNamesFromCache, getCurrentTripId } from '../utils/storage';
+import { CreateExpenseRequest, fetchPayerNames } from '../api/api';
+import { getCurrentTripId } from '../utils/storage';
 
 interface ExpenseFormProps {
   onSubmit: (expense: CreateExpenseRequest) => Promise<void>;
@@ -20,32 +20,18 @@ export function ExpenseForm({ onSubmit }: ExpenseFormProps) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Only load payer names if a trip is selected
     const tripId = getCurrentTripId();
     if (tripId) {
-      loadPayerNames();
+      loadPayerNames(tripId);
     }
   }, []);
 
-  const loadPayerNames = async () => {
-    // Check if trip is selected
-    if (!getCurrentTripId()) {
-      return;
-    }
-
-    // Load from cache immediately (with validation)
-    const cachedNames = getPayerNamesFromCache().filter((name) => typeof name === 'string');
-    setPayerNames(cachedNames);
-
-    // Then fetch from backend to ensure sync
+  const loadPayerNames = async (tripId: string) => {
     try {
-      const names = await fetchPayerNames();
-      // Ensure we only set valid string names
-      const validNames = names.filter((name) => typeof name === 'string');
-      setPayerNames(validNames);
+      const names = await fetchPayerNames(tripId);
+      setPayerNames(names);
     } catch (err) {
       console.error('Failed to fetch payer names:', err);
-      // Keep using cached names if fetch fails
     }
   };
 

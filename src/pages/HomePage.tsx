@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { fetchExpenses, createExpense, CreateExpenseRequest } from '../api/api';
+import { fetchExpenses, createExpense, fetchPayerNames, CreateExpenseRequest } from '../api/api';
 import { Expense } from '../utils/calculation';
-import { fetchPayerNames, getCurrentTripId } from '../utils/storage';
+import { getCurrentTripId } from '../utils/storage';
 import { ExpenseForm } from '../components/ExpenseForm';
 import { ExpenseList } from '../components/ExpenseList';
 import { Settlement } from '../components/Settlement';
@@ -19,28 +19,22 @@ function HomePage() {
     setCurrentTripId(tripId);
 
     if (tripId) {
-      loadExpenses();
-      loadPayerNames();
+      loadData(tripId);
     } else {
       setLoading(false);
     }
 
     // Listen for refresh event from header
     const handleRefresh = () => {
-      if (getCurrentTripId()) {
-        loadExpenses();
-        loadPayerNames();
-      }
+      const id = getCurrentTripId();
+      if (id) loadData(id);
     };
 
     // Listen for trip change event from header
     const handleTripChange = () => {
       const newTripId = getCurrentTripId();
       setCurrentTripId(newTripId);
-      if (newTripId) {
-        loadExpenses();
-        loadPayerNames();
-      }
+      if (newTripId) loadData(newTripId);
     };
 
     window.addEventListener('refreshExpenses', handleRefresh);
@@ -52,31 +46,19 @@ function HomePage() {
     };
   }, []);
 
-  const loadPayerNames = async () => {
-    try {
-      const names = await fetchPayerNames();
-      setPayerNames(names);
-    } catch (err) {
-      console.error('Failed to load payer names:', err);
-    }
-  };
-
-  const loadExpenses = async () => {
-    const tripId = getCurrentTripId();
-    if (!tripId) {
-      setError('No trip selected');
-      setLoading(false);
-      return;
-    }
-
+  const loadData = async (tripId: string) => {
     setLoading(true);
     setError(null);
 
     try {
-      const data = await fetchExpenses(tripId);
-      setExpenses(data);
+      const [expensesData, namesData] = await Promise.all([
+        fetchExpenses(tripId),
+        fetchPayerNames(tripId),
+      ]);
+      setExpenses(expensesData);
+      setPayerNames(namesData);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load expenses');
+      setError(err instanceof Error ? err.message : 'Failed to load data');
     } finally {
       setLoading(false);
     }
@@ -128,7 +110,7 @@ function HomePage() {
           <div style={{ flex: 1 }}>
             <strong>Error:</strong> {error}
           </div>
-          <button onClick={loadExpenses} className="btn btn-primary">
+          <button onClick={() => loadData(currentTripId)} className="btn btn-primary">
             Retry
           </button>
         </div>
@@ -136,7 +118,7 @@ function HomePage() {
 
       <ExpenseForm onSubmit={handleAddExpense} />
 
-      <ExpenseList expenses={expenses} onExpenseDeleted={loadExpenses} />
+      <ExpenseList expenses={expenses} onExpenseDeleted={() => loadData(currentTripId)} />
 
       <Settlement expenses={expenses} payerNames={payerNames} />
     </div>
