@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { getCurrentTripId, setCurrentTripId } from '../utils/storage';
+import { getCurrentTripId, setCurrentTripId, clearCurrentTripId } from '../utils/storage';
 import { fetchTrips, Trip } from '../api/api';
 import { useAuth } from '../contexts/auth-context';
 
@@ -11,6 +11,7 @@ export function Layout() {
   const isHomePage = location.pathname === '/';
 
   const [trips, setTrips] = useState<Trip[]>([]);
+  const [tripsLoaded, setTripsLoaded] = useState(false);
   const [currentTripId, setCurrentTripIdState] = useState<string | null>(null);
   const [currentTrip, setCurrentTrip] = useState<Trip | null>(null);
 
@@ -20,7 +21,10 @@ export function Layout() {
 
   useEffect(() => {
     if (trips.length === 0) {
+      clearCurrentTripId();
+      setCurrentTripIdState(null);
       setCurrentTrip(null);
+      window.dispatchEvent(new CustomEvent('tripChanged'));
       return;
     }
 
@@ -33,7 +37,9 @@ export function Layout() {
       setCurrentTripIdState(storedId);
       setCurrentTrip(trips.find((t) => t.tripId === storedId) || null);
     } else {
-      // Stored trip is stale or none selected — auto-select latest
+      // Stored trip is stale or none selected — clear stale and auto-select latest
+      clearCurrentTripId();
+
       const sortedTrips = [...trips].sort((a, b) =>
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       );
@@ -61,6 +67,8 @@ export function Layout() {
       setTrips(activeTrips);
     } catch (err) {
       console.error('Failed to load trips:', err);
+    } finally {
+      setTripsLoaded(true);
     }
   };
 
@@ -249,7 +257,16 @@ export function Layout() {
         )}
       </nav>
 
-      <Outlet />
+      {tripsLoaded ? (
+        <Outlet />
+      ) : (
+        <div style={{ textAlign: 'center', padding: '3rem' }}>
+          <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>⏳</div>
+          <div style={{ color: 'white', fontSize: '1.25rem', fontWeight: '600' }}>
+            Loading...
+          </div>
+        </div>
+      )}
     </div>
   );
 }

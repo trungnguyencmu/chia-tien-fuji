@@ -13,7 +13,6 @@ function HomePage() {
   const [error, setError] = useState<string | null>(null);
   const [currentTripId, setCurrentTripId] = useState<string | null>(null);
 
-  // Check for current trip on mount
   useEffect(() => {
     const tripId = getCurrentTripId();
     setCurrentTripId(tripId);
@@ -24,17 +23,21 @@ function HomePage() {
       setLoading(false);
     }
 
-    // Listen for refresh event from header
     const handleRefresh = () => {
       const id = getCurrentTripId();
       if (id) loadData(id);
     };
 
-    // Listen for trip change event from header
     const handleTripChange = () => {
       const newTripId = getCurrentTripId();
       setCurrentTripId(newTripId);
-      if (newTripId) loadData(newTripId);
+      if (newTripId) {
+        loadData(newTripId);
+      } else {
+        setExpenses([]);
+        setPayerNames([]);
+        setLoading(false);
+      }
     };
 
     window.addEventListener('refreshExpenses', handleRefresh);
