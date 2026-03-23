@@ -114,7 +114,7 @@ export type TranslationKey =
   | 'enterCodeSentTo'
   | 'registrationFailed'
   | 'nameOptional'
-  | 'min8Chars'
+  | 'min6Chars'
   | 'creatingAccount'
   | 'verificationCode'
   | 'enter6DigitCode'

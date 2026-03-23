@@ -125,7 +125,7 @@ export const en: Translations = {
   enterCodeSentTo: 'Enter the code sent to {email}',
   registrationFailed: 'Registration failed. Please try again.',
   nameOptional: 'Name (optional)',
-  min8Chars: 'Min 8 chars, uppercase, lowercase, number',
+  min6Chars: 'Minimum 6 characters',
   creatingAccount: 'Creating account...',
   verificationCode: 'Verification Code',
   enter6DigitCode: 'Enter 6-digit code',

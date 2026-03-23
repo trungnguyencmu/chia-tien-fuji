@@ -151,9 +151,9 @@ export default function RegisterPage() {
                   className="form-input"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder={t('min8Chars')}
+                  placeholder={t('min6Chars')}
                   required
-                  minLength={8}
+                  minLength={6}
                   autoComplete="new-password"
                 />
                 <button

@@ -125,7 +125,7 @@ export const vi: Translations = {
   enterCodeSentTo: 'Nhập mã đã gửi đến {email}',
   registrationFailed: 'Đăng ký thất bại. Vui lòng thử lại.',
   nameOptional: 'Tên (tùy chọn)',
-  min8Chars: 'Tối thiểu 8 ký tự, chữ hoa, chữ thường, số',
+  min6Chars: 'Tối thiểu 6 ký tự',
   creatingAccount: 'Đang tạo tài khoản...',
   verificationCode: 'Mã Xác Minh',
   enter6DigitCode: 'Nhập mã 6 chữ số',
