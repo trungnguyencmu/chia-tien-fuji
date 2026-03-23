@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Trip, TripMember, fetchTripMembers, addTripMember, removeTripMember, regenerateInviteCode, updateMyDisplayName } from '../api/api';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { Trip, TripMember, UserSearchResult, fetchTripMembers, addTripMember, removeTripMember, regenerateInviteCode, updateMyDisplayName, searchUsers } from '../api/api';
 import { useAuth } from '../contexts/auth-context';
 import { useLanguage } from '../i18n';
 
@@ -16,8 +16,14 @@ export function TripMembers({ trip, onMembersChanged }: TripMembersProps) {
   const [error, setError] = useState<string | null>(null);
 
   const [newEmail, setNewEmail] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<UserSearchResult[]>([]);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [searching, setSearching] = useState(false);
   const [adding, setAdding] = useState(false);
   const [addError, setAddError] = useState<string | null>(null);
+  const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const [regenerating, setRegenerating] = useState(false);
 
@@ -45,6 +51,54 @@ export function TripMembers({ trip, onMembersChanged }: TripMembersProps) {
     }
   };
 
+  // Debounced user search
+  const handleSearchChange = useCallback((value: string) => {
+    setSearchQuery(value);
+    setNewEmail(value);
+    setAddError(null);
+
+    if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+
+    if (value.trim().length < 2) {
+      setSearchResults([]);
+      setShowDropdown(false);
+      return;
+    }
+
+    searchTimeoutRef.current = setTimeout(async () => {
+      setSearching(true);
+      try {
+        const results = await searchUsers(value.trim());
+        // Filter out existing members
+        const memberEmails = new Set(members.map((m) => m.email));
+        setSearchResults(results.filter((r) => !memberEmails.has(r.email)));
+        setShowDropdown(true);
+      } catch {
+        setSearchResults([]);
+      } finally {
+        setSearching(false);
+      }
+    }, 300);
+  }, [members]);
+
+  const handleSelectUser = (user: UserSearchResult) => {
+    setNewEmail(user.email);
+    setSearchQuery(`${user.displayName} (${user.email})`);
+    setShowDropdown(false);
+    setSearchResults([]);
+  };
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   const handleAddMember = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newEmail.trim()) return;
@@ -54,6 +108,9 @@ export function TripMembers({ trip, onMembersChanged }: TripMembersProps) {
     try {
       await addTripMember(trip.tripId, newEmail.trim());
       setNewEmail('');
+      setSearchQuery('');
+      setSearchResults([]);
+      setShowDropdown(false);
       await loadMembers();
       onMembersChanged();
     } catch (err) {
@@ -212,15 +269,61 @@ export function TripMembers({ trip, onMembersChanged }: TripMembersProps) {
       {isOwner && (
         <form onSubmit={handleAddMember} style={{ marginBottom: '1.5rem' }}>
           <div style={{ display: 'flex', gap: '0.75rem' }}>
-            <input
-              type="email"
-              className="form-input"
-              value={newEmail}
-              onChange={(e) => setNewEmail(e.target.value)}
-              disabled={adding}
-              placeholder={t('enterEmailToInvite')}
-              style={{ flex: 1 }}
-            />
+            <div ref={dropdownRef} style={{ flex: 1, position: 'relative' }}>
+              <input
+                type="text"
+                className="form-input"
+                value={searchQuery}
+                onChange={(e) => handleSearchChange(e.target.value)}
+                onFocus={() => searchResults.length > 0 && setShowDropdown(true)}
+                disabled={adding}
+                placeholder={t('searchByNameOrEmail')}
+                style={{ width: '100%' }}
+                autoComplete="off"
+              />
+              {searching && (
+                <div style={{
+                  position: 'absolute',
+                  right: '0.75rem',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  fontSize: '0.85rem',
+                }}>
+                  ⏳
+                </div>
+              )}
+              {showDropdown && searchResults.length > 0 && (
+                <div className="search-dropdown">
+                  {searchResults.map((user) => (
+                    <button
+                      key={user.userId}
+                      type="button"
+                      className="search-dropdown-item"
+                      onClick={() => handleSelectUser(user)}
+                    >
+                      <div className="search-dropdown-avatar">
+                        {user.displayName.charAt(0).toUpperCase()}
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontWeight: '600', fontSize: '0.875rem', color: 'var(--gray-900)' }}>
+                          {user.displayName}
+                        </div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--gray-500)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {user.email}
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+              {showDropdown && !searching && searchResults.length === 0 && searchQuery.trim().length >= 2 && (
+                <div className="search-dropdown">
+                  <div style={{ padding: '0.75rem 1rem', color: 'var(--gray-500)', fontSize: '0.85rem', textAlign: 'center' }}>
+                    {t('noUsersFound')}
+                  </div>
+                </div>
+              )}
+            </div>
             <button type="submit" className="btn btn-primary" disabled={adding || !newEmail.trim()}>
               {adding ? '⏳' : '➕'} {t('invite')}
             </button>

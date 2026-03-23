@@ -79,6 +79,8 @@ export type TranslationKey =
   | 'copied'
   | 'regenerate'
   | 'enterEmailToInvite'
+  | 'searchByNameOrEmail'
+  | 'noUsersFound'
   | 'invite'
   | 'name'
   | 'email'

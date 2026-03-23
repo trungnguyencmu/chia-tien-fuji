@@ -88,6 +88,8 @@ export const vi: Translations = {
   copied: 'Đã sao chép!',
   regenerate: 'Tạo lại',
   enterEmailToInvite: 'Nhập email để mời',
+  searchByNameOrEmail: 'Tìm theo tên hoặc email...',
+  noUsersFound: 'Không tìm thấy người dùng',
   invite: 'Mời',
   name: 'Tên',
   email: 'Email',

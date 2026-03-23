@@ -123,6 +123,18 @@ export async function updateMyDisplayName(displayName: string): Promise<void> {
   });
 }
 
+// --- User Search ---
+
+export interface UserSearchResult {
+  userId: string;
+  email: string;
+  displayName: string;
+}
+
+export async function searchUsers(query: string): Promise<UserSearchResult[]> {
+  return apiFetch<UserSearchResult[]>(`/users/search?query=${encodeURIComponent(query)}`);
+}
+
 // --- Expenses ---
 
 interface ExpenseResponse {

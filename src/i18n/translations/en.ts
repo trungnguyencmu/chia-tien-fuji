@@ -88,6 +88,8 @@ export const en: Translations = {
   copied: 'Copied!',
   regenerate: 'Regenerate',
   enterEmailToInvite: 'Enter email to invite',
+  searchByNameOrEmail: 'Search by name or email...',
+  noUsersFound: 'No users found',
   invite: 'Invite',
   name: 'Name',
   email: 'Email',
