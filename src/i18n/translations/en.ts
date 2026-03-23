@@ -163,6 +163,19 @@ export const en: Translations = {
   addExpenseGuest: 'Add Expense',
   addingExpense: 'Adding...',
 
+  // Photos
+  photosTab: 'Photos',
+  tripPhotos: 'Trip Photos',
+  uploadPhoto: 'Upload Photo',
+  uploading: 'Uploading...',
+  noPhotosYet: 'No photos yet',
+  addFirstPhoto: 'Capture your trip memories! Tap to upload the first photo.',
+  deletePhoto: 'Delete photo',
+  deletePhotoConfirm: 'Are you sure you want to delete this photo?',
+  uploadedBy: 'by',
+  tapToUpload: 'Tap to upload',
+  dragOrTap: 'Tap or drag photos here',
+
   // GuestSettlement
   addExpensesToSeeWhoOwes: 'Add expenses to see who owes whom',
   everyoneIsSettledGuest: 'Everyone is settled!',

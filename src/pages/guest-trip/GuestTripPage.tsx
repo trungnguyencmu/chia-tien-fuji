@@ -6,11 +6,13 @@ import { Expense } from '../../utils/calculation';
 import {
   TripMember,
   GuestSettlement as GuestSettlementData,
+  GuestTripImage,
   GuestAuthError,
   fetchGuestTrip,
   fetchGuestMembers,
   fetchGuestExpenses,
   fetchGuestSettlement,
+  fetchGuestImages,
   createGuestExpense,
   CreateGuestExpenseRequest,
 } from '../../api/guest-api';
@@ -18,9 +20,10 @@ import { GuestExpenseForm } from './guest-expense-form';
 import { GuestExpenseList } from './guest-expense-list';
 import { GuestSettlement } from './guest-settlement';
 import { GuestMemberList } from './guest-member-list';
+import { GuestPhotos } from './guest-photos';
 import { useLanguage } from '../../i18n';
 
-type Tab = 'expenses' | 'settlement' | 'members';
+type Tab = 'expenses' | 'settlement' | 'photos' | 'members';
 
 export default function GuestTripPage() {
   const { tripId } = useParams<{ tripId: string }>();
@@ -33,6 +36,7 @@ export default function GuestTripPage() {
   const [members, setMembers] = useState<TripMember[]>([]);
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [settlement, setSettlement] = useState<GuestSettlementData | null>(null);
+  const [images, setImages] = useState<GuestTripImage[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -54,18 +58,20 @@ export default function GuestTripPage() {
     setError(null);
 
     try {
-      const [tripData, membersData, expensesData, settlementData] =
+      const [tripData, membersData, expensesData, settlementData, imagesData] =
         await Promise.all([
           fetchGuestTrip(tripId),
           fetchGuestMembers(tripId),
           fetchGuestExpenses(tripId),
           fetchGuestSettlement(tripId),
+          fetchGuestImages(tripId),
         ]);
 
       setTrip(tripData);
       setMembers(membersData);
       setExpenses(expensesData);
       setSettlement(settlementData);
+      setImages(imagesData);
     } catch (err) {
       if (!handleAuthError(err)) {
         setError(err instanceof Error ? err.message : 'Failed to load trip data');
@@ -89,6 +95,16 @@ export default function GuestTripPage() {
     ]);
     setExpenses(expensesData);
     setSettlement(settlementData);
+  };
+
+  const handleReloadImages = async () => {
+    if (!tripId) return;
+    try {
+      const imagesData = await fetchGuestImages(tripId);
+      setImages(imagesData);
+    } catch (err) {
+      console.error('Failed to reload images:', err);
+    }
   };
 
   const handleLeave = () => {
@@ -163,6 +179,7 @@ export default function GuestTripPage() {
         {([
           { key: 'expenses', label: '💸 ' + t('expensesTab') },
           { key: 'settlement', label: '💰 ' + t('settlementTab') },
+          { key: 'photos', label: '📸 ' + t('photosTab') },
           { key: 'members', label: '👥 ' + t('members') },
         ] as const).map(({ key, label }) => (
           <button
@@ -199,6 +216,10 @@ export default function GuestTripPage() {
 
       {activeTab === 'settlement' && (
         <GuestSettlement settlement={settlement} />
+      )}
+
+      {activeTab === 'photos' && tripId && (
+        <GuestPhotos tripId={tripId} images={images} onImagesChanged={handleReloadImages} />
       )}
 
       {activeTab === 'members' && <GuestMemberList members={members} />}

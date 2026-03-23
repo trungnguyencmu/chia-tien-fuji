@@ -174,3 +174,54 @@ export async function fetchGuestSettlement(
 ): Promise<GuestSettlement> {
   return guestApiFetch<GuestSettlement>(`/trips/${tripId}/settlement`);
 }
+
+// --- Images ---
+
+export interface GuestTripImage {
+  imageId: string;
+  tripId: string;
+  uploadedBy: string;
+  uploaderDisplayName: string;
+  fileName: string;
+  contentType: string;
+  size: number;
+  url: string;
+  caption?: string;
+  createdAt: string;
+}
+
+interface GuestUploadUrlResponse {
+  uploadUrl: string;
+  imageId: string;
+  s3Key: string;
+}
+
+export async function getGuestImageUploadUrl(
+  tripId: string,
+  fileName: string,
+  contentType: string,
+  size: number,
+): Promise<GuestUploadUrlResponse> {
+  return guestApiFetch<GuestUploadUrlResponse>(`/trips/${tripId}/images/upload-url`, {
+    method: 'POST',
+    body: JSON.stringify({ fileName, contentType, size }),
+  });
+}
+
+export async function saveGuestImage(
+  tripId: string,
+  data: { imageId: string; fileName: string; size: number; contentType: string; caption?: string },
+): Promise<GuestTripImage> {
+  return guestApiFetch<GuestTripImage>(`/trips/${tripId}/images`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function fetchGuestImages(tripId: string): Promise<GuestTripImage[]> {
+  return guestApiFetch<GuestTripImage[]>(`/trips/${tripId}/images`);
+}
+
+export async function deleteGuestImage(tripId: string, imageId: string): Promise<void> {
+  return guestApiFetch<void>(`/trips/${tripId}/images/${imageId}`, { method: 'DELETE' });
+}

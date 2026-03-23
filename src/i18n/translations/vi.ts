@@ -163,6 +163,19 @@ export const vi: Translations = {
   addExpenseGuest: 'Thêm Chi Tiêu',
   addingExpense: 'Đang thêm...',
 
+  // Photos
+  photosTab: 'Ảnh',
+  tripPhotos: 'Ảnh Chuyến Đi',
+  uploadPhoto: 'Tải ảnh lên',
+  uploading: 'Đang tải...',
+  noPhotosYet: 'Chưa có ảnh nào',
+  addFirstPhoto: 'Lưu giữ kỷ niệm chuyến đi! Nhấn để tải ảnh đầu tiên.',
+  deletePhoto: 'Xóa ảnh',
+  deletePhotoConfirm: 'Bạn có chắc muốn xóa ảnh này không?',
+  uploadedBy: 'bởi',
+  tapToUpload: 'Nhấn để tải lên',
+  dragOrTap: 'Nhấn hoặc kéo ảnh vào đây',
+
   // GuestSettlement
   addExpensesToSeeWhoOwes: 'Thêm chi tiêu để xem ai nợ ai',
   everyoneIsSettledGuest: 'Mọi người đã thanh toán xong!',

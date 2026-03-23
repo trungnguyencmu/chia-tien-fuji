@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { getCurrentTripId, setCurrentTripId, clearCurrentTripId } from '../utils/storage';
-import { fetchTrips, fetchCurrentTrip, fetchExpenses, fetchTripMembers, createTrip, deleteTrip, Trip, TripMember } from '../api/api';
+import { fetchTrips, fetchCurrentTrip, fetchExpenses, fetchTripMembers, fetchImages, createTrip, deleteTrip, Trip, TripMember, TripImage } from '../api/api';
 import { Expense } from '../utils/calculation';
 import { useAuth } from '../contexts/auth-context';
 import { useLanguage } from '../i18n';
@@ -12,10 +12,12 @@ export interface LayoutContext {
   currentTripId: string | null;
   expenses: Expense[];
   memberNames: string[];
+  images: TripImage[];
   loading: boolean;
   error: string | null;
   reloadData: () => Promise<void>;
   reloadTrips: () => Promise<void>;
+  reloadImages: () => Promise<void>;
 }
 
 export function Layout() {
@@ -34,6 +36,7 @@ export function Layout() {
   // Trip data
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [memberNames, setMemberNames] = useState<string[]>([]);
+  const [images, setImages] = useState<TripImage[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -43,16 +46,29 @@ export function Layout() {
     setLoading(true);
     setError(null);
     try {
-      const [expensesData, membersData] = await Promise.all([
+      const [expensesData, membersData, imagesData] = await Promise.all([
         fetchExpenses(currentTripId),
         fetchTripMembers(currentTripId),
+        fetchImages(currentTripId),
       ]);
       setExpenses(expensesData);
       setMemberNames(membersData.map((m: TripMember) => m.displayName));
+      setImages(imagesData);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load data');
     } finally {
       setLoading(false);
+    }
+  }, [currentTripId]);
+
+  // Reload only images
+  const reloadImages = useCallback(async () => {
+    if (!currentTripId) return;
+    try {
+      const imagesData = await fetchImages(currentTripId);
+      setImages(imagesData);
+    } catch (err) {
+      console.error('Failed to load images:', err);
     }
   }, [currentTripId]);
 
@@ -118,16 +134,18 @@ export function Layout() {
       setError(null);
 
       try {
-        const [fullTrip, expensesData, membersData] = await Promise.all([
+        const [fullTrip, expensesData, membersData, imagesData] = await Promise.all([
           fetchCurrentTrip(currentTripId),
           fetchExpenses(currentTripId),
           fetchTripMembers(currentTripId),
+          fetchImages(currentTripId),
         ]);
 
         if (!cancelled) {
           setCurrentTrip(fullTrip);
           setExpenses(expensesData);
           setMemberNames(membersData.map((m: TripMember) => m.displayName));
+          setImages(imagesData);
         }
       } catch (err) {
         if (!cancelled) {
@@ -458,7 +476,7 @@ export function Layout() {
       </nav>
 
       {tripsLoaded ? (
-        <Outlet context={{ trips, currentTrip, currentTripId, expenses, memberNames, loading, error, reloadData, reloadTrips } satisfies LayoutContext} />
+        <Outlet context={{ trips, currentTrip, currentTripId, expenses, memberNames, images, loading, error, reloadData, reloadTrips, reloadImages } satisfies LayoutContext} />
       ) : (
         <div style={{ textAlign: 'center', padding: '3rem' }}>
           <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>⏳</div>

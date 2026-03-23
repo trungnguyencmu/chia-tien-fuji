@@ -177,3 +177,54 @@ export async function deleteAllExpenses(
   });
 }
 
+// --- Images ---
+
+export interface TripImage {
+  imageId: string;
+  tripId: string;
+  uploadedBy: string;
+  uploaderDisplayName: string;
+  fileName: string;
+  contentType: string;
+  size: number;
+  url: string;
+  caption?: string;
+  createdAt: string;
+}
+
+interface UploadUrlResponse {
+  uploadUrl: string;
+  imageId: string;
+  s3Key: string;
+}
+
+export async function getImageUploadUrl(
+  tripId: string,
+  fileName: string,
+  contentType: string,
+  size: number,
+): Promise<UploadUrlResponse> {
+  return apiFetch<UploadUrlResponse>(`/trips/${tripId}/images/upload-url`, {
+    method: 'POST',
+    body: JSON.stringify({ fileName, contentType, size }),
+  });
+}
+
+export async function saveImage(
+  tripId: string,
+  data: { imageId: string; fileName: string; size: number; contentType: string; caption?: string },
+): Promise<TripImage> {
+  return apiFetch<TripImage>(`/trips/${tripId}/images`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function fetchImages(tripId: string): Promise<TripImage[]> {
+  return apiFetch<TripImage[]>(`/trips/${tripId}/images`);
+}
+
+export async function deleteImage(tripId: string, imageId: string): Promise<void> {
+  return apiFetch<void>(`/trips/${tripId}/images/${imageId}`, { method: 'DELETE' });
+}
+

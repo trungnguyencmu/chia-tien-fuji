@@ -148,6 +148,18 @@ export type TranslationKey =
   | 'failedToAdd'
   | 'addExpenseGuest'
   | 'addingExpense'
+  // Photos
+  | 'photosTab'
+  | 'tripPhotos'
+  | 'uploadPhoto'
+  | 'uploading'
+  | 'noPhotosYet'
+  | 'addFirstPhoto'
+  | 'deletePhoto'
+  | 'deletePhotoConfirm'
+  | 'uploadedBy'
+  | 'tapToUpload'
+  | 'dragOrTap'
   // GuestSettlement
   | 'addExpensesToSeeWhoOwes'
   | 'everyoneIsSettledGuest'

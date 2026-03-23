@@ -7,10 +7,11 @@ import { ExpenseForm } from '../components/ExpenseForm';
 import { ExpenseList } from '../components/ExpenseList';
 import { Settlement } from '../components/Settlement';
 import { TripMembers } from '../components/TripMembers';
+import { TripPhotos } from '../components/TripPhotos';
 import { useLanguage } from '../i18n';
 
 function HomePage() {
-  const { trips, currentTrip, currentTripId, expenses, memberNames, loading, error, reloadData, reloadTrips } = useOutletContext<LayoutContext>();
+  const { trips, currentTrip, currentTripId, expenses, memberNames, images, loading, error, reloadData, reloadTrips, reloadImages } = useOutletContext<LayoutContext>();
   const { t } = useLanguage();
 
   // Create trip state
@@ -139,6 +140,10 @@ function HomePage() {
       <ExpenseList expenses={expenses} members={memberNames} onExpenseDeleted={reloadData} />
 
       <Settlement expenses={expenses} payerNames={memberNames} />
+
+      {currentTripId && (
+        <TripPhotos tripId={currentTripId} images={images} onImagesChanged={reloadImages} />
+      )}
 
       {currentTrip && (
         <TripMembers trip={currentTrip} onMembersChanged={reloadData} />
