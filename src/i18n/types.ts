@@ -38,6 +38,7 @@ export type TranslationKey =
   | 'amountPlaceholder'
   | 'enterAmount'
   | 'selectCategory'
+  | 'currency'
   // ExpenseList
   | 'expenses'
   | 'noExpensesYet'

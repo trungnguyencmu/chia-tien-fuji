@@ -84,7 +84,7 @@ export function ExpenseForm({ members, onSubmit }: ExpenseFormProps) {
           placeholder={t('enterAmount')}
           autoFocus
         />
-        <div className="expense-form-amount-currency">VND</div>
+        <div className="expense-form-amount-currency">{t('currency')}</div>
       </div>
 
       {/* 2. Category — Smart Chips */}

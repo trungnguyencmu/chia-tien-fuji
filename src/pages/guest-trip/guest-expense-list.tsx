@@ -1,5 +1,6 @@
 import { useMemo, memo } from 'react';
 import { Expense } from '../../utils/calculation';
+import { useLanguage } from '../../i18n';
 
 interface GuestExpenseListProps {
   expenses: Expense[];
@@ -8,6 +9,7 @@ interface GuestExpenseListProps {
 export const GuestExpenseList = memo(function GuestExpenseList({
   expenses,
 }: GuestExpenseListProps) {
+  const { t } = useLanguage();
   const sorted = useMemo(
     () =>
       [...expenses].sort(
@@ -56,7 +58,7 @@ export const GuestExpenseList = memo(function GuestExpenseList({
 
       <div className="stat-card" style={{ marginBottom: '1.5rem' }}>
         <div className="stat-label">Total Expenses</div>
-        <div className="stat-value">{totalAmount.toLocaleString()} VND</div>
+        <div className="stat-value">{totalAmount.toLocaleString()} {t('currency')}</div>
       </div>
 
       <div className="table-container">
@@ -66,7 +68,7 @@ export const GuestExpenseList = memo(function GuestExpenseList({
               <th>Date</th>
               <th>Payer</th>
               <th>Title</th>
-              <th className="text-right">Amount (VND)</th>
+              <th className="text-right">{t('amount')} ({t('currency')})</th>
             </tr>
           </thead>
           <tbody>

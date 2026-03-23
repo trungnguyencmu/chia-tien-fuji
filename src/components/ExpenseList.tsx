@@ -105,7 +105,7 @@ export const ExpenseList = memo(function ExpenseList({ expenses, members, onExpe
             📋 {t('expenses')}
           </h2>
           <p style={{ fontSize: '0.875rem', color: 'var(--gray-600)', margin: '0.25rem 0 0' }}>
-            {expenses.length} {expenses.length === 1 ? t('items').slice(0, -1) : t('items')} • {t('totalExpenses')} {totalAmount.toLocaleString()} VND
+            {expenses.length} {expenses.length === 1 ? t('items').slice(0, -1) : t('items')} • {t('totalExpenses')} {totalAmount.toLocaleString()} {t('currency')}
           </p>
         </div>
       </div>

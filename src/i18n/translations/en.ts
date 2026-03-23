@@ -44,6 +44,7 @@ export const en: Translations = {
   amountPlaceholder: '0',
   enterAmount: 'Enter amount',
   selectCategory: 'What for?',
+  currency: '$',
 
   // ExpenseList
   expenses: 'Expenses',

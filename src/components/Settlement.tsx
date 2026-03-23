@@ -31,13 +31,13 @@ export function Settlement({ expenses, payerNames }: SettlementProps) {
         <div className="stat-card" style={{ borderLeftColor: '#4f46e5' }}>
           <div className="stat-label">{t('totalSpent')}</div>
           <div className="stat-value" style={{ fontSize: '1.25rem' }}>
-            {total.toLocaleString()} VND
+            {total.toLocaleString()} {t('currency')}
           </div>
         </div>
         <div className="stat-card" style={{ borderLeftColor: '#10b981' }}>
           <div className="stat-label">{t('yourShare')}</div>
           <div className="stat-value" style={{ fontSize: '1.25rem' }}>
-            {sharePerPerson.toLocaleString()} VND
+            {sharePerPerson.toLocaleString()} {t('currency')}
           </div>
         </div>
       </div>
@@ -66,7 +66,7 @@ export function Settlement({ expenses, payerNames }: SettlementProps) {
                   <div className="settlement-to">{t('owes')} {transaction.to}</div>
                 </div>
                 <div className="settlement-amount">
-                  {transaction.amount.toLocaleString()} VND
+                  {transaction.amount.toLocaleString()} {t('currency')}
                 </div>
               </div>
             ))}
@@ -103,7 +103,7 @@ export function Settlement({ expenses, payerNames }: SettlementProps) {
                   <div style={{ flex: 1 }}>
                     <div style={{ fontWeight: 600, fontSize: '0.95rem' }}>{balance.member}</div>
                     <div style={{ fontSize: '0.75rem', color: 'var(--gray-600)' }}>
-                      {t('paid')} {Math.round(balance.totalPaid).toLocaleString()} VND
+                      {t('paid')} {Math.round(balance.totalPaid).toLocaleString()} {t('currency')}
                     </div>
                   </div>
                   <div style={{ textAlign: 'right' }}>
@@ -111,11 +111,11 @@ export function Settlement({ expenses, payerNames }: SettlementProps) {
                       <span className="badge badge-neutral">{t('settled')}</span>
                     ) : isPositive ? (
                       <span className="badge badge-success">
-                        +{Math.round(balance.balance).toLocaleString()} VND
+                        +{Math.round(balance.balance).toLocaleString()} {t('currency')}
                       </span>
                     ) : (
                       <span className="badge badge-danger">
-                        {Math.round(balance.balance).toLocaleString()} VND
+                        {Math.round(balance.balance).toLocaleString()} {t('currency')}
                       </span>
                     )}
                   </div>

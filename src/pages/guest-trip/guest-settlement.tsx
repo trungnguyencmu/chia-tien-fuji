@@ -37,7 +37,7 @@ export function GuestSettlement({ settlement }: GuestSettlementProps) {
         <div className="grid grid-2" style={{ gap: '1rem' }}>
           <div className="stat-card" style={{ borderLeftColor: '#4f46e5' }}>
             <div className="stat-label">{t('totalExpenses')}</div>
-            <div className="stat-value">{totalExpenses.toLocaleString()} VND</div>
+            <div className="stat-value">{totalExpenses.toLocaleString()} {t('currency')}</div>
           </div>
           <div className="stat-card" style={{ borderLeftColor: '#10b981' }}>
             <div className="stat-label">{t('members')}</div>
@@ -46,7 +46,7 @@ export function GuestSettlement({ settlement }: GuestSettlementProps) {
           <div className="stat-card" style={{ borderLeftColor: '#f59e0b', gridColumn: 'span 2' }}>
             <div className="stat-label">{t('sharePerPerson')}</div>
             <div className="stat-value">
-              {Math.round(sharePerPerson).toLocaleString()} VND
+              {Math.round(sharePerPerson).toLocaleString()} {t('currency')}
             </div>
           </div>
         </div>
@@ -114,7 +114,7 @@ export function GuestSettlement({ settlement }: GuestSettlementProps) {
           <ul className="transaction-list">
             {transactions.map((tx, i) => (
               <li key={i} className="transaction-item">
-                💸 {tx.from} {t('owes')} {tx.to} {Math.round(tx.amount).toLocaleString()} VND
+                💸 {tx.from} {t('owes')} {tx.to} {Math.round(tx.amount).toLocaleString()} {t('currency')}
               </li>
             ))}
           </ul>

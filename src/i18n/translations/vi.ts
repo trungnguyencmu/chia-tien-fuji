@@ -44,6 +44,7 @@ export const vi: Translations = {
   amountPlaceholder: '0',
   enterAmount: 'Nhập số tiền',
   selectCategory: 'Chi cho gì?',
+  currency: 'VND',
 
   // ExpenseList
   expenses: 'Chi Tiêu',
