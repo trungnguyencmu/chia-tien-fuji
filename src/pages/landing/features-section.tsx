@@ -8,7 +8,7 @@ const features = [
     title: 'Easy Expense Tracking',
     description:
       'Add expenses in seconds. Just tap, type the amount, and select who paid. Done.',
-    color: '#ff9ec1',
+    color: '#74b9ff',
   },
   {
     icon: '🤝',

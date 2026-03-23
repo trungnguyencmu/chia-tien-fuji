@@ -6,7 +6,7 @@ const testimonials = [
     name: 'Sarah K.',
     role: 'Backpacker',
     avatar: 'S',
-    color: '#ff9ec1',
+    color: '#74b9ff',
     stars: 5,
     text: 'This saved our trip from money drama! We had 6 people on a 2-week trip and settling up took literally 5 minutes.',
   },

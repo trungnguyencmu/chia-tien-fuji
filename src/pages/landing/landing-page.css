@@ -327,7 +327,7 @@ body:has(.landing-page) #root {
   justify-content: center;
   width: 24px;
   height: 24px;
-  background: linear-gradient(135deg, #ff9ec1, #c7b4f3);
+  background: linear-gradient(135deg, #74b9ff, #c7b4f3);
   border-radius: 50%;
   font-size: 0.6rem;
   color: white;
@@ -386,7 +386,7 @@ body:has(.landing-page) #root {
   position: absolute;
   inset: -2px;
   border-radius: 38px;
-  background: linear-gradient(135deg, #ff9ec1, #c7b4f3, #b4d4ff);
+  background: linear-gradient(135deg, #74b9ff, #c7b4f3, #b4d4ff);
   z-index: -1;
   opacity: 0.6;
 }
@@ -409,7 +409,7 @@ body:has(.landing-page) #root {
 }
 
 .hero-app-header {
-  background: linear-gradient(135deg, #ff9ec1 0%, #c7b4f3 100%);
+  background: linear-gradient(135deg, #74b9ff 0%, #c7b4f3 100%);
   padding: 2rem 1.5rem 1.25rem;
   color: white;
   text-align: center;
@@ -788,7 +788,7 @@ body:has(.landing-page) #root {
 }
 
 .preview-add-btn {
-  background: linear-gradient(135deg, #ff9ec1, #c7b4f3);
+  background: linear-gradient(135deg, #74b9ff, #c7b4f3);
   color: white;
   border: none;
   padding: 0.6rem 1.25rem;

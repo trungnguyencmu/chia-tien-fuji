@@ -90,7 +90,7 @@ export function HeroSection() {
           transition={{ duration: 0.6, delay: 0.5 }}
         >
           <div className="hero-avatars">
-            <div className="hero-avatar" style={{ background: '#ff9ec1' }}>
+            <div className="hero-avatar" style={{ background: '#74b9ff' }}>
               M
             </div>
             <div className="hero-avatar" style={{ background: '#c7b4f3' }}>
