@@ -10,7 +10,8 @@ import { GuestRoute } from './components/GuestRoute';
 
 // Lazy load pages to reduce initial bundle size
 const LandingPage = lazy(() => import('./pages/landing/LandingPage'));
-const HomePage = lazy(() => import('./pages/HomePage'));
+const TripsPage = lazy(() => import('./pages/TripsPage'));
+const TripDetailPage = lazy(() => import('./pages/TripDetailPage'));
 const LoginPage = lazy(() => import('./pages/LoginPage'));
 const RegisterPage = lazy(() => import('./pages/RegisterPage'));
 const JoinPage = lazy(() => import('./pages/JoinPage'));
@@ -100,7 +101,15 @@ function App() {
                 index
                 element={
                   <Suspense fallback={<PageLoader />}>
-                    <HomePage />
+                    <TripsPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="trips/:tripId"
+                element={
+                  <Suspense fallback={<PageLoader />}>
+                    <TripDetailPage />
                   </Suspense>
                 }
               />

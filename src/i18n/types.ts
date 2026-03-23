@@ -148,6 +148,17 @@ export type TranslationKey =
   | 'failedToAdd'
   | 'addExpenseGuest'
   | 'addingExpense'
+  // Trip List
+  | 'yourTrips'
+  | 'createNewTrip'
+  | 'noTripsYet'
+  | 'backToTrips'
+  | 'tripMembers'
+  | 'createdOn'
+  | 'addCoverPhoto'
+  | 'changeCoverPhoto'
+  | 'removeCoverPhoto'
+  | 'uploadingCover'
   // Photos
   | 'photosTab'
   | 'tripPhotos'

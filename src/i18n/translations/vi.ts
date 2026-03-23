@@ -163,6 +163,18 @@ export const vi: Translations = {
   addExpenseGuest: 'Thêm Chi Tiêu',
   addingExpense: 'Đang thêm...',
 
+  // Trip List
+  yourTrips: 'Chuyến Đi Của Bạn',
+  createNewTrip: 'Tạo Chuyến Đi Mới',
+  noTripsYet: 'Chưa có chuyến đi nào',
+  backToTrips: 'Quay lại danh sách',
+  tripMembers: '{count} thành viên',
+  createdOn: 'Tạo ngày {date}',
+  addCoverPhoto: 'Thêm ảnh bìa',
+  changeCoverPhoto: 'Đổi ảnh bìa',
+  removeCoverPhoto: 'Xóa ảnh bìa',
+  uploadingCover: 'Đang tải ảnh bìa...',
+
   // Photos
   photosTab: 'Ảnh',
   tripPhotos: 'Ảnh Chuyến Đi',

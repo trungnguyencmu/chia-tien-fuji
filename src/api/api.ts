@@ -9,6 +9,8 @@ export interface Trip {
   createdAt: string;
   isActive: boolean;
   inviteCode?: string;
+  imageS3Key?: string;
+  imageUrl?: string;
 }
 
 export interface TripMember {
@@ -69,10 +71,19 @@ export async function fetchTrips(): Promise<Trip[]> {
   return apiFetch<Trip[]>('/trips');
 }
 
-export async function createTrip(tripName: string): Promise<Trip> {
+export async function createTrip(tripName: string, imageS3Key?: string): Promise<Trip> {
+  const body: Record<string, string> = { tripName };
+  if (imageS3Key) body.imageS3Key = imageS3Key;
   return apiFetch<Trip>('/trips', {
     method: 'POST',
-    body: JSON.stringify({ tripName }),
+    body: JSON.stringify(body),
+  });
+}
+
+export async function updateTrip(tripId: string, data: { tripName?: string; imageS3Key?: string }): Promise<Trip> {
+  return apiFetch<Trip>(`/trips/${tripId}`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
   });
 }
 

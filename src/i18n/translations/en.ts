@@ -163,6 +163,18 @@ export const en: Translations = {
   addExpenseGuest: 'Add Expense',
   addingExpense: 'Adding...',
 
+  // Trip List
+  yourTrips: 'Your Trips',
+  createNewTrip: 'Create New Trip',
+  noTripsYet: 'No trips yet',
+  backToTrips: 'Back to trips',
+  tripMembers: '{count} members',
+  createdOn: 'Created {date}',
+  addCoverPhoto: 'Add cover photo',
+  changeCoverPhoto: 'Change cover photo',
+  removeCoverPhoto: 'Remove cover',
+  uploadingCover: 'Uploading cover...',
+
   // Photos
   photosTab: 'Photos',
   tripPhotos: 'Trip Photos',
