@@ -125,6 +125,7 @@ interface GuestExpenseResponse {
 function mapExpense(e: GuestExpenseResponse): Expense {
   return {
     id: e.expenseId,
+    tripId: e.tripId,
     payer: e.payer,
     title: e.title,
     amount: e.amount,

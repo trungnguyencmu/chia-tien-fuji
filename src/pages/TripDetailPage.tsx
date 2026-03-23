@@ -284,7 +284,7 @@ export default function TripDetailPage() {
 
       <ExpenseForm members={memberNames} onSubmit={handleAddExpense} />
 
-      <ExpenseList expenses={expenses} members={memberNames} onExpenseDeleted={loadData} />
+      <ExpenseList tripId={tripId!} expenses={expenses} members={memberNames} onExpenseDeleted={loadData} />
 
       <Settlement expenses={expenses} payerNames={memberNames} />
 

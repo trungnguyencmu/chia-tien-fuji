@@ -150,6 +150,7 @@ interface ExpenseResponse {
 function mapExpense(e: ExpenseResponse): Expense {
   return {
     id: e.expenseId,
+    tripId: e.tripId,
     payer: e.payer,
     title: e.title,
     amount: e.amount,
@@ -182,11 +183,9 @@ export async function createExpense(
 export async function deleteExpense(
   tripId: string,
   expenseId: string,
-  password: string,
 ): Promise<void> {
   return apiFetch<void>(`/trips/${tripId}/expenses/${expenseId}`, {
     method: 'DELETE',
-    headers: { 'x-admin-password': password },
   });
 }
 

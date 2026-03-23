@@ -1,5 +1,6 @@
 export interface Expense {
   id: string;
+  tripId: string;
   payer: string;
   title: string;
   amount: number;

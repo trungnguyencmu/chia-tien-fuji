@@ -3,10 +3,10 @@ import { Expense } from '../utils/calculation';
 import { Avatar } from './ui/Avatar';
 import { getEmojiForTitle } from './ui/CategoryTag';
 import { deleteExpense } from '../api/api';
-import { getCurrentTripId } from '../utils/storage';
 import { useLanguage } from '../i18n';
 
 interface ExpenseListProps {
+  tripId: string;
   expenses: Expense[];
   members: string[];
   onExpenseDeleted: () => void;
@@ -49,34 +49,34 @@ function groupByDate(expenses: Expense[]): Map<string, Expense[]> {
   return groups;
 }
 
-export const ExpenseList = memo(function ExpenseList({ expenses, members, onExpenseDeleted }: ExpenseListProps) {
+export const ExpenseList = memo(function ExpenseList({ tripId, expenses, members, onExpenseDeleted }: ExpenseListProps) {
   const { t } = useLanguage();
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  const handleDelete = useCallback(async (expenseId: string, expenseTitle: string) => {
-    const tripId = getCurrentTripId();
-    if (!tripId) {
-      alert('No trip selected'); // TODO: translate
+  const handleDelete = useCallback(async (expenseId: string, expenseTripId: string, expenseTitle: string) => {
+    // Safety check: ensure expense belongs to this trip
+    if (expenseTripId !== tripId) {
+      alert(`Cannot delete expense: it belongs to a different trip (${expenseTripId})`);
       return;
     }
 
-    const password = window.prompt(
-      `Delete "${expenseTitle}"?\n\nEnter password to confirm:`
+    const confirm = window.prompt(
+      `Type "delete" to confirm removing "${expenseTitle}":`
     );
 
-    if (!password) return;
+    if (!confirm || confirm.toLowerCase() !== 'delete') return;
 
     setDeletingId(expenseId);
 
     try {
-      await deleteExpense(tripId, expenseId, password);
+      await deleteExpense(tripId, expenseId);
       onExpenseDeleted();
     } catch (err) {
       alert(err instanceof Error ? err.message : t('deleteExpense') + ' failed');
     } finally {
       setDeletingId(null);
     }
-  }, [onExpenseDeleted]);
+  }, [tripId, onExpenseDeleted]);
 
   const totalAmount = useMemo(() => {
     return expenses.reduce((sum, e) => sum + e.amount, 0);
@@ -136,7 +136,7 @@ export const ExpenseList = memo(function ExpenseList({ expenses, members, onExpe
                 <div style={{ textAlign: 'right' }}>
                   <div className="expense-amount">{expense.amount.toLocaleString()}</div>
                   <button
-                    onClick={() => handleDelete(expense.id, expense.title)}
+                    onClick={() => handleDelete(expense.id, expense.tripId, expense.title)}
                     disabled={deletingId === expense.id}
                     style={{
                       background: 'none',
