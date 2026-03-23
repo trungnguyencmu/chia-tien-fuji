@@ -1,12 +1,19 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { getCurrentTripId, setCurrentTripId, clearCurrentTripId } from '../utils/storage';
-import { fetchTrips, createTrip, deleteTrip, Trip } from '../api/api';
+import { fetchTrips, fetchCurrentTrip, fetchExpenses, fetchTripMembers, createTrip, deleteTrip, Trip, TripMember } from '../api/api';
+import { Expense } from '../utils/calculation';
 import { useAuth } from '../contexts/auth-context';
 
 export interface LayoutContext {
   trips: Trip[];
+  currentTrip: Trip | null;
   currentTripId: string | null;
+  expenses: Expense[];
+  memberNames: string[];
+  loading: boolean;
+  error: string | null;
+  reloadData: () => Promise<void>;
   reloadTrips: () => Promise<void>;
 }
 
@@ -22,52 +29,33 @@ export function Layout() {
   const [currentTripId, setCurrentTripIdState] = useState<string | null>(null);
   const [currentTrip, setCurrentTrip] = useState<Trip | null>(null);
 
-  useEffect(() => {
-    loadTrips();
-  }, []);
+  // Trip data
+  const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [memberNames, setMemberNames] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (trips.length === 0) {
-      clearCurrentTripId();
-      setCurrentTripIdState(null);
-      setCurrentTrip(null);
-      window.dispatchEvent(new CustomEvent('tripChanged'));
-      return;
+  // Reload all trip data (for external callers)
+  const reloadData = useCallback(async () => {
+    if (!currentTripId) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const [expensesData, membersData] = await Promise.all([
+        fetchExpenses(currentTripId),
+        fetchTripMembers(currentTripId),
+      ]);
+      setExpenses(expensesData);
+      setMemberNames(membersData.map((m: TripMember) => m.displayName));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load data');
+    } finally {
+      setLoading(false);
     }
+  }, [currentTripId]);
 
-    // Validate stored trip ID exists in fetched trips
-    const storedId = getCurrentTripId();
-    const storedTripExists = storedId && trips.some((t) => t.tripId === storedId);
-
-    if (storedTripExists) {
-      // Stored trip is valid
-      setCurrentTripIdState(storedId);
-      setCurrentTrip(trips.find((t) => t.tripId === storedId) || null);
-    } else {
-      // Stored trip is stale or none selected — clear stale and auto-select latest
-      clearCurrentTripId();
-
-      const sortedTrips = [...trips].sort((a, b) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      );
-      const latestTrip = sortedTrips[0];
-
-      setCurrentTripId(latestTrip.tripId);
-      setCurrentTripIdState(latestTrip.tripId);
-      setCurrentTrip(latestTrip);
-      window.dispatchEvent(new CustomEvent('tripChanged'));
-    }
-  }, [trips]);
-
-  useEffect(() => {
-    // Update current trip object when selection changes
-    if (currentTripId && trips.length > 0) {
-      const trip = trips.find((t) => t.tripId === currentTripId);
-      setCurrentTrip(trip || null);
-    }
-  }, [currentTripId, trips]);
-
-  const loadTrips = useCallback(async () => {
+  // Reload trips list
+  const reloadTrips = useCallback(async () => {
     try {
       const data = await fetchTrips();
       const activeTrips = data.filter((t) => t.isActive);
@@ -79,10 +67,105 @@ export function Layout() {
     }
   }, []);
 
+  // Load trips on mount
+  useEffect(() => {
+    reloadTrips();
+  }, [reloadTrips]);
+
+  // Handle trips loaded - set current trip and load its data
+  useEffect(() => {
+    if (!tripsLoaded) return;
+
+    if (trips.length === 0) {
+      clearCurrentTripId();
+      setCurrentTripIdState(null);
+      setCurrentTrip(null);
+      setExpenses([]);
+      setMemberNames([]);
+      return;
+    }
+
+    // Validate stored trip ID exists in fetched trips
+    const storedId = getCurrentTripId();
+    const storedTripExists = storedId && trips.some((t) => t.tripId === storedId);
+
+    if (storedTripExists) {
+      setCurrentTripIdState(storedId);
+    } else {
+      // Stored trip is stale or none selected — clear stale and auto-select latest
+      clearCurrentTripId();
+
+      const sortedTrips = [...trips].sort((a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+      const latestTrip = sortedTrips[0];
+
+      setCurrentTripId(latestTrip.tripId);
+      setCurrentTripIdState(latestTrip.tripId);
+    }
+  }, [trips, tripsLoaded]);
+
+  // When currentTripId changes, fetch full trip details and data ONCE
+  useEffect(() => {
+    if (!currentTripId) return;
+
+    let cancelled = false;
+
+    const initTrip = async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const [fullTrip, expensesData, membersData] = await Promise.all([
+          fetchCurrentTrip(currentTripId),
+          fetchExpenses(currentTripId),
+          fetchTripMembers(currentTripId),
+        ]);
+
+        if (!cancelled) {
+          setCurrentTrip(fullTrip);
+          setExpenses(expensesData);
+          setMemberNames(membersData.map((m: TripMember) => m.displayName));
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setError(err instanceof Error ? err.message : 'Failed to load data');
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    };
+
+    initTrip();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [currentTripId]);
+
+  // Listen for refresh events
+  useEffect(() => {
+    const handleRefresh = () => {
+      reloadData();
+    };
+
+    const handleTripUpdated = (e: CustomEvent<Trip>) => {
+      setCurrentTrip(e.detail);
+    };
+
+    window.addEventListener('refreshExpenses', handleRefresh);
+    window.addEventListener('tripUpdated', handleTripUpdated as EventListener);
+    return () => {
+      window.removeEventListener('refreshExpenses', handleRefresh);
+      window.removeEventListener('tripUpdated', handleTripUpdated as EventListener);
+    };
+  }, [reloadData]);
+
   const handleTripChange = (tripId: string) => {
     setCurrentTripId(tripId);
     setCurrentTripIdState(tripId);
-    window.dispatchEvent(new CustomEvent('tripChanged'));
   };
 
   const handleCreateTrip = async (e: React.FormEvent) => {
@@ -96,8 +179,7 @@ export function Layout() {
       setShowCreateTrip(false);
       setCurrentTripId(newTrip.tripId);
       setCurrentTripIdState(newTrip.tripId);
-      await loadTrips();
-      window.dispatchEvent(new CustomEvent('tripChanged'));
+      await reloadTrips();
     } catch (err) {
       console.error('Failed to create trip:', err);
     } finally {
@@ -116,8 +198,7 @@ export function Layout() {
         setCurrentTripIdState(null);
         setCurrentTrip(null);
       }
-      await loadTrips();
-      window.dispatchEvent(new CustomEvent('tripChanged'));
+      await reloadTrips();
     } catch (err) {
       console.error('Failed to delete trip:', err);
     } finally {
@@ -352,7 +433,7 @@ export function Layout() {
       </nav>
 
       {tripsLoaded ? (
-        <Outlet context={{ trips, currentTripId, reloadTrips: loadTrips } satisfies LayoutContext} />
+        <Outlet context={{ trips, currentTrip, currentTripId, expenses, memberNames, loading, error, reloadData, reloadTrips } satisfies LayoutContext} />
       ) : (
         <div style={{ textAlign: 'center', padding: '3rem' }}>
           <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>⏳</div>

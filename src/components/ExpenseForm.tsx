@@ -1,48 +1,18 @@
-import { useState, useEffect } from 'react';
-import { CreateExpenseRequest, fetchPayerNames } from '../api/api';
-import { getCurrentTripId } from '../utils/storage';
+import { useState } from 'react';
+import { CreateExpenseRequest } from '../api/api';
 
 interface ExpenseFormProps {
   onSubmit: (expense: CreateExpenseRequest) => Promise<void>;
 }
 
 export function ExpenseForm({ onSubmit }: ExpenseFormProps) {
-  const [payerNames, setPayerNames] = useState<string[]>([]);
   const [payer, setPayer] = useState('');
-  const [customPayer, setCustomPayer] = useState('');
-  const [showCustomInput, setShowCustomInput] = useState(false);
   const [title, setTitle] = useState('');
   const [amount, setAmount] = useState('');
   const [displayAmount, setDisplayAmount] = useState('');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const tripId = getCurrentTripId();
-    if (tripId) {
-      loadPayerNames(tripId);
-    }
-  }, []);
-
-  const loadPayerNames = async (tripId: string) => {
-    try {
-      const names = await fetchPayerNames(tripId);
-      setPayerNames(names);
-    } catch (err) {
-      console.error('Failed to fetch payer names:', err);
-    }
-  };
-
-  const handlePayerChange = (value: string) => {
-    setPayer(value);
-    if (value === 'custom') {
-      setShowCustomInput(true);
-    } else {
-      setShowCustomInput(false);
-      setCustomPayer('');
-    }
-  };
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -66,9 +36,7 @@ export function ExpenseForm({ onSubmit }: ExpenseFormProps) {
     e.preventDefault();
     setError(null);
 
-    const finalPayer = payer === 'custom' ? customPayer : payer;
-
-    if (!finalPayer || !title || !amount || !date) {
+    if (!payer || !title || !amount || !date) {
       setError('All fields are required');
       return;
     }
@@ -83,7 +51,7 @@ export function ExpenseForm({ onSubmit }: ExpenseFormProps) {
 
     try {
       await onSubmit({
-        payer: finalPayer,
+        payer,
         title,
         amount: amountNum,
         date,
@@ -91,8 +59,6 @@ export function ExpenseForm({ onSubmit }: ExpenseFormProps) {
 
       // Reset form
       setPayer('');
-      setCustomPayer('');
-      setShowCustomInput(false);
       setTitle('');
       setAmount('');
       setDisplayAmount('');
@@ -116,47 +82,15 @@ export function ExpenseForm({ onSubmit }: ExpenseFormProps) {
             <label className="form-label" htmlFor="payer">
               Payer Name
             </label>
-            {payerNames.length > 0 ? (
-              <>
-                <select
-                  id="payer"
-                  className="form-input"
-                  value={payer}
-                  onChange={(e) => handlePayerChange(e.target.value)}
-                  disabled={loading}
-                  style={{ cursor: 'pointer' }}
-                >
-                  <option value="">Select a payer...</option>
-                  {payerNames.map((name) => (
-                    <option key={name} value={name}>
-                      {name}
-                    </option>
-                  ))}
-                  <option value="custom">➕ Other (enter name)</option>
-                </select>
-                {showCustomInput && (
-                  <input
-                    type="text"
-                    className="form-input"
-                    value={customPayer}
-                    onChange={(e) => setCustomPayer(e.target.value)}
-                    disabled={loading}
-                    placeholder="Enter custom name"
-                    style={{ marginTop: '0.5rem' }}
-                  />
-                )}
-              </>
-            ) : (
-              <input
-                id="payer"
-                type="text"
-                className="form-input"
-                value={payer}
-                onChange={(e) => setPayer(e.target.value)}
-                disabled={loading}
-                placeholder="Enter payer name"
-              />
-            )}
+            <input
+              id="payer"
+              type="text"
+              className="form-input"
+              value={payer}
+              onChange={(e) => setPayer(e.target.value)}
+              disabled={loading}
+              placeholder="Enter payer name"
+            />
           </div>
 
           <div className="form-group">

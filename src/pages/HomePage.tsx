@@ -1,21 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
-import { fetchExpenses, createExpense, fetchPayerNames, createTrip, deleteAllExpenses, CreateExpenseRequest } from '../api/api';
-import { Expense } from '../utils/calculation';
+import { createExpense, deleteAllExpenses, createTrip, CreateExpenseRequest } from '../api/api';
 import { setCurrentTripId } from '../utils/storage';
 import { LayoutContext } from '../components/Layout';
 import { ExpenseForm } from '../components/ExpenseForm';
 import { ExpenseList } from '../components/ExpenseList';
 import { Settlement } from '../components/Settlement';
-import { Participants } from '../components/Participants';
+import { TripMembers } from '../components/TripMembers';
 
 function HomePage() {
-  const { trips, currentTripId, reloadTrips } = useOutletContext<LayoutContext>();
-
-  const [expenses, setExpenses] = useState<Expense[]>([]);
-  const [payerNames, setPayerNames] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { trips, currentTrip, currentTripId, expenses, memberNames, loading, error, reloadData, reloadTrips } = useOutletContext<LayoutContext>();
 
   // Create trip state
   const [newTripName, setNewTripName] = useState('');
@@ -25,45 +19,11 @@ function HomePage() {
   const [deletePassword, setDeletePassword] = useState('');
   const [deleteLoading, setDeleteLoading] = useState(false);
 
-  useEffect(() => {
-    if (currentTripId) {
-      loadData(currentTripId);
-    } else {
-      setExpenses([]);
-      setPayerNames([]);
-      setLoading(false);
-    }
-
-    const handleRefresh = () => {
-      if (currentTripId) loadData(currentTripId);
-    };
-
-    window.addEventListener('refreshExpenses', handleRefresh);
-    return () => window.removeEventListener('refreshExpenses', handleRefresh);
-  }, [currentTripId]);
-
-  const loadData = async (tripId: string) => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const [expensesData, namesData] = await Promise.all([
-        fetchExpenses(tripId),
-        fetchPayerNames(tripId),
-      ]);
-      setExpenses(expensesData);
-      setPayerNames(namesData);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load data');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleAddExpense = async (expense: CreateExpenseRequest) => {
     if (!currentTripId) throw new Error('No trip selected');
-    const newExpense = await createExpense(currentTripId, expense);
-    setExpenses((prev) => [...prev, newExpense]);
+    await createExpense(currentTripId, expense);
+    // Reload to get accurate data
+    await reloadData();
   };
 
   const handleCreateTrip = async (e: React.FormEvent) => {
@@ -76,9 +36,8 @@ function HomePage() {
       setNewTripName('');
       setCurrentTripId(newTrip.tripId);
       await reloadTrips();
-      window.dispatchEvent(new CustomEvent('tripChanged'));
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create trip');
+      console.error('Failed to create trip:', err);
     } finally {
       setCreating(false);
     }
@@ -94,9 +53,9 @@ function HomePage() {
     try {
       await deleteAllExpenses(currentTripId, deletePassword);
       setDeletePassword('');
-      setExpenses([]);
+      await reloadData();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete expenses');
+      console.error('Failed to delete expenses:', err);
     } finally {
       setDeleteLoading(false);
     }
@@ -128,17 +87,12 @@ function HomePage() {
               {creating ? '⏳' : '➕ Create'}
             </button>
           </div>
-          {error && (
-            <div className="alert alert-error" style={{ marginTop: '1rem' }}>
-              ⚠️ {error}
-            </div>
-          )}
         </form>
       </div>
     );
   }
 
-  // No trip selected (shouldn't happen with auto-select, but safety)
+  // No trip selected
   if (!currentTripId) {
     return (
       <div className="card" style={{ textAlign: 'center', padding: '3rem' }}>
@@ -172,7 +126,7 @@ function HomePage() {
           <div style={{ flex: 1 }}>
             <strong>Error:</strong> {error}
           </div>
-          <button onClick={() => loadData(currentTripId)} className="btn btn-primary">
+          <button onClick={() => reloadData()} className="btn btn-primary">
             Retry
           </button>
         </div>
@@ -180,15 +134,13 @@ function HomePage() {
 
       <ExpenseForm onSubmit={handleAddExpense} />
 
-      <ExpenseList expenses={expenses} onExpenseDeleted={() => loadData(currentTripId)} />
+      <ExpenseList expenses={expenses} onExpenseDeleted={reloadData} />
 
-      <Settlement expenses={expenses} payerNames={payerNames} />
+      <Settlement expenses={expenses} payerNames={memberNames} />
 
-      <Participants
-        tripId={currentTripId}
-        payerNames={payerNames}
-        onParticipantsChanged={(names) => setPayerNames(names)}
-      />
+      {currentTrip && (
+        <TripMembers trip={currentTrip} onMembersChanged={reloadData} />
+      )}
 
       {/* Danger Zone */}
       <div className="card" style={{ background: '#fef2f2', border: '2px solid #fca5a5' }}>

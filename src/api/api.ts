@@ -4,9 +4,20 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 export interface Trip {
   tripId: string;
+  userId: string;
   tripName: string;
   createdAt: string;
   isActive: boolean;
+  inviteCode?: string;
+}
+
+export interface TripMember {
+  tripId: string;
+  userId: string;
+  displayName: string;
+  email: string;
+  role: 'owner' | 'member';
+  joinedAt: string;
 }
 
 export interface CreateExpenseRequest {
@@ -67,6 +78,38 @@ export async function createTrip(tripName: string): Promise<Trip> {
 
 export async function deleteTrip(tripId: string): Promise<void> {
   return apiFetch<void>(`/trips/${tripId}`, { method: 'DELETE' });
+}
+
+export async function fetchCurrentTrip(tripId: string): Promise<Trip> {
+  return apiFetch<Trip>(`/trips/${tripId}`);
+}
+
+export async function regenerateInviteCode(tripId: string): Promise<Trip> {
+  return apiFetch<Trip>(`/trips/${tripId}/regenerate-invite-code`, { method: 'POST' });
+}
+
+// --- Members ---
+
+export async function fetchTripMembers(tripId: string): Promise<TripMember[]> {
+  return apiFetch<TripMember[]>(`/trips/${tripId}/members`);
+}
+
+export async function addTripMember(tripId: string, email: string): Promise<TripMember> {
+  return apiFetch<TripMember>(`/trips/${tripId}/members`, {
+    method: 'POST',
+    body: JSON.stringify({ email }),
+  });
+}
+
+export async function removeTripMember(tripId: string, userId: string): Promise<void> {
+  return apiFetch<void>(`/trips/${tripId}/members/${userId}`, { method: 'DELETE' });
+}
+
+export async function updateMyDisplayName(displayName: string): Promise<void> {
+  return apiFetch<void>('/members/me', {
+    method: 'PATCH',
+    body: JSON.stringify({ displayName }),
+  });
 }
 
 // --- Expenses ---
@@ -134,28 +177,3 @@ export async function deleteAllExpenses(
   });
 }
 
-// --- Participants ---
-
-export async function fetchPayerNames(tripId: string): Promise<string[]> {
-  return apiFetch<string[]>(`/trips/${tripId}/participants/names`);
-}
-
-export async function addPayerNameToBackend(
-  tripId: string,
-  name: string,
-): Promise<void> {
-  return apiFetch<void>(`/trips/${tripId}/participants`, {
-    method: 'POST',
-    body: JSON.stringify({ participantName: name }),
-  });
-}
-
-export async function deletePayerNameFromBackend(
-  tripId: string,
-  name: string,
-): Promise<void> {
-  return apiFetch<void>(
-    `/trips/${tripId}/participants/${encodeURIComponent(name)}`,
-    { method: 'DELETE' },
-  );
-}
