@@ -82,7 +82,7 @@ function HomePage() {
               value={newTripName}
               onChange={(e) => setNewTripName(e.target.value)}
               disabled={creating}
-              placeholder="e.g., Fuji Trip 2025"
+              placeholder="e.g., Enjoy Trip 2026"
               style={{ flex: 1 }}
             />
             <button type="submit" className="btn btn-primary" disabled={creating || !newTripName.trim()}>
