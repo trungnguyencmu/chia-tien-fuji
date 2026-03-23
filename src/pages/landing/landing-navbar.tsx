@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useLanguage } from '../../i18n';
 
 export function LandingNavbar() {
+  const { language, setLanguage } = useLanguage();
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
@@ -20,6 +22,22 @@ export function LandingNavbar() {
         </div>
 
         <div className="landing-nav-actions">
+          <button
+            onClick={() => setLanguage(language === 'en' ? 'vi' : 'en')}
+            style={{
+              padding: '0.5rem 0.75rem',
+              borderRadius: '8px',
+              background: 'rgba(116, 185, 255, 0.2)',
+              border: '1px solid rgba(116, 185, 255, 0.3)',
+              cursor: 'pointer',
+              fontSize: '0.8rem',
+              fontWeight: 600,
+              color: 'var(--gray-700)',
+              marginRight: '0.5rem',
+            }}
+          >
+            {language === 'en' ? '🇺🇸 EN' : '🇻🇳 VI'}
+          </button>
           <Link to="/login" className="landing-nav-signin">
             Sign In
           </Link>
@@ -57,6 +75,22 @@ export function LandingNavbar() {
               Reviews
             </a>
             <div className="landing-mobile-actions">
+              <button
+                onClick={() => setLanguage(language === 'en' ? 'vi' : 'en')}
+                style={{
+                  padding: '0.5rem 0.75rem',
+                  borderRadius: '8px',
+                  background: 'rgba(116, 185, 255, 0.2)',
+                  border: '1px solid rgba(116, 185, 255, 0.3)',
+                  cursor: 'pointer',
+                  fontSize: '0.8rem',
+                  fontWeight: 600,
+                  color: 'var(--gray-700)',
+                  marginRight: '0.5rem',
+                }}
+              >
+                {language === 'en' ? '🇺🇸 EN' : '🇻🇳 VI'}
+              </button>
               <Link to="/login">Sign In</Link>
               <Link to="/register" className="btn btn-primary">
                 Get Started
