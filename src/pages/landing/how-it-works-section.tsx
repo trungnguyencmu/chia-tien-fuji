@@ -1,31 +1,30 @@
 import { motion, useInView } from 'framer-motion';
 import { useRef } from 'react';
+import { useLanguage } from '../../i18n';
 
 const steps = [
   {
     number: '01',
     icon: '🗺️',
-    title: 'Create a Trip',
-    description:
-      'Name your trip and invite your travel buddies. Set up in under 30 seconds.',
+    titleKey: 'landingStep1Title',
+    descriptionKey: 'landingStep1Desc',
   },
   {
     number: '02',
     icon: '➕',
-    title: 'Add Expenses',
-    description:
-      'Log every expense as it happens — food, hotel, transport, activities. Quick and easy.',
+    titleKey: 'landingStep2Title',
+    descriptionKey: 'landingStep2Desc',
   },
   {
     number: '03',
     icon: '✅',
-    title: 'See Who Owes What',
-    description:
-      'The app calculates the perfect split. Everyone knows exactly what they owe. No confusion.',
+    titleKey: 'landingStep3Title',
+    descriptionKey: 'landingStep3Desc',
   },
 ];
 
 export function HowItWorksSection() {
+  const { t } = useLanguage();
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: '-80px' });
 
@@ -41,10 +40,10 @@ export function HowItWorksSection() {
         animate={isInView ? { opacity: 1, y: 0 } : {}}
         transition={{ duration: 0.5 }}
       >
-        <span className="section-badge">How It Works</span>
-        <h2 className="section-title">Three steps to stress-free splitting</h2>
+        <span className="section-badge">{t('landingHowItWorks')}</span>
+        <h2 className="section-title">{t('landingHowItWorksTitle')}</h2>
         <p className="section-subtitle">
-          From trip creation to settlement — it's that simple.
+          {t('landingHowItWorksSubtitle')}
         </p>
       </motion.div>
 
@@ -59,8 +58,8 @@ export function HowItWorksSection() {
           >
             <div className="step-number">{step.number}</div>
             <div className="step-icon">{step.icon}</div>
-            <h3 className="step-title">{step.title}</h3>
-            <p className="step-description">{step.description}</p>
+            <h3 className="step-title">{t(step.titleKey as any)}</h3>
+            <p className="step-description">{t(step.descriptionKey as any)}</p>
             {i < steps.length - 1 && <div className="step-connector" />}
           </motion.div>
         ))}

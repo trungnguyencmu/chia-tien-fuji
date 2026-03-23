@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '../../i18n';
 
 export function LandingNavbar() {
-  const { language, setLanguage } = useLanguage();
+  const { language, setLanguage, t } = useLanguage();
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
@@ -16,9 +16,9 @@ export function LandingNavbar() {
         </Link>
 
         <div className="landing-nav-links">
-          <a href="#features">Features</a>
-          <a href="#how-it-works">How It Works</a>
-          <a href="#testimonials">Reviews</a>
+          <a href="#features">{t('landingFeatures')}</a>
+          <a href="#how-it-works">{t('landingHowItWorks')}</a>
+          <a href="#testimonials">{t('landingReviews')}</a>
         </div>
 
         <div className="landing-nav-actions">
@@ -39,10 +39,10 @@ export function LandingNavbar() {
             {language === 'en' ? '🇺🇸 EN' : '🇻🇳 VI'}
           </button>
           <Link to="/login" className="landing-nav-signin">
-            Sign In
+            {t('landingSignIn')}
           </Link>
           <Link to="/register" className="btn btn-primary landing-nav-cta">
-            Get Started
+            {t('landingGetStarted')}
           </Link>
         </div>
 
@@ -66,13 +66,13 @@ export function LandingNavbar() {
             transition={{ duration: 0.25 }}
           >
             <a href="#features" onClick={() => setMenuOpen(false)}>
-              Features
+              {t('landingFeatures')}
             </a>
             <a href="#how-it-works" onClick={() => setMenuOpen(false)}>
-              How It Works
+              {t('landingHowItWorks')}
             </a>
             <a href="#testimonials" onClick={() => setMenuOpen(false)}>
-              Reviews
+              {t('landingReviews')}
             </a>
             <div className="landing-mobile-actions">
               <button
@@ -91,9 +91,9 @@ export function LandingNavbar() {
               >
                 {language === 'en' ? '🇺🇸 EN' : '🇻🇳 VI'}
               </button>
-              <Link to="/login">Sign In</Link>
+              <Link to="/login">{t('landingSignIn')}</Link>
               <Link to="/register" className="btn btn-primary">
-                Get Started
+                {t('landingGetStarted')}
               </Link>
             </div>
           </motion.div>

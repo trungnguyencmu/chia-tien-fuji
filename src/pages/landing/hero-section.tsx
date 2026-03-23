@@ -1,7 +1,10 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useLanguage } from '../../i18n';
 
 export function HeroSection() {
+  const { t } = useLanguage();
+
   return (
     <section className="hero-section">
       {/* Floating decorative elements */}
@@ -44,7 +47,7 @@ export function HeroSection() {
           transition={{ duration: 0.5 }}
         >
           <span className="hero-badge-dot" />
-          No more awkward money talks
+          {t('landingHeroBadge')}
         </motion.div>
 
         <motion.h1
@@ -53,8 +56,8 @@ export function HeroSection() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.1 }}
         >
-          Split Travel Expenses{' '}
-          <span className="hero-title-accent">Effortlessly</span>
+          {t('landingHeroTitle')}{' '}
+          <span className="hero-title-accent">{t('landingHeroTitleAccent')}</span>
         </motion.h1>
 
         <motion.p
@@ -63,8 +66,7 @@ export function HeroSection() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
         >
-          No more awkward calculations. Track, split, and settle instantly with
-          friends. Focus on making memories, not counting pennies.
+          {t('landingHeroSubtitle')}
         </motion.p>
 
         <motion.div
@@ -74,12 +76,12 @@ export function HeroSection() {
           transition={{ duration: 0.6, delay: 0.3 }}
         >
           <Link to="/register" className="btn btn-primary hero-btn-primary">
-            Start Free
+            {t('landingHeroStartFree')}
             <span className="hero-btn-arrow">→</span>
           </Link>
           <a href="#app-preview" className="btn hero-btn-secondary">
             <span className="hero-btn-play">▶</span>
-            View Demo
+            {t('landingHeroViewDemo')}
           </a>
         </motion.div>
 
@@ -104,7 +106,7 @@ export function HeroSection() {
             </div>
           </div>
           <span className="hero-users-text">
-            Trusted by <strong>2,000+</strong> travelers
+            {t('landingHeroTrusted')} <strong>2,000+</strong> {t('landingHeroTravelers')}
           </span>
         </motion.div>
       </div>
@@ -120,32 +122,32 @@ export function HeroSection() {
           <div className="hero-phone-notch" />
           <div className="hero-phone-screen">
             <div className="hero-app-header">
-              <div className="hero-app-title">🏖️ Nha Trang Trip</div>
+              <div className="hero-app-title">🏖️ {t('landingAppTripName')}</div>
               <div className="hero-app-amount">$1,240.00</div>
-              <div className="hero-app-label">Total expenses</div>
+              <div className="hero-app-label">{t('landingAppTotalExpenses')}</div>
             </div>
             <div className="hero-app-list">
               <div className="hero-app-item">
                 <span className="hero-app-item-icon">🍜</span>
                 <div className="hero-app-item-info">
-                  <div className="hero-app-item-name">Dinner at Seafood</div>
-                  <div className="hero-app-item-by">Paid by Mai</div>
+                  <div className="hero-app-item-name">{t('landingAppSeafoodDinner')}</div>
+                  <div className="hero-app-item-by">{t('landingAppPaidByPattern')} Mai</div>
                 </div>
                 <div className="hero-app-item-amount">$85.00</div>
               </div>
               <div className="hero-app-item">
                 <span className="hero-app-item-icon">🏨</span>
                 <div className="hero-app-item-info">
-                  <div className="hero-app-item-name">Hotel (3 nights)</div>
-                  <div className="hero-app-item-by">Paid by An</div>
+                  <div className="hero-app-item-name">{t('landingAppHotel')}</div>
+                  <div className="hero-app-item-by">{t('landingAppPaidByPattern')} An</div>
                 </div>
                 <div className="hero-app-item-amount">$450.00</div>
               </div>
               <div className="hero-app-item">
                 <span className="hero-app-item-icon">🚕</span>
                 <div className="hero-app-item-info">
-                  <div className="hero-app-item-name">Airport Transfer</div>
-                  <div className="hero-app-item-by">Paid by Khanh</div>
+                  <div className="hero-app-item-name">{t('landingAppAirportTransfer')}</div>
+                  <div className="hero-app-item-by">{t('landingAppPaidByPattern')} Khanh</div>
                 </div>
                 <div className="hero-app-item-amount">$32.00</div>
               </div>

@@ -1,39 +1,37 @@
 import { motion } from 'framer-motion';
 import { useInView } from 'framer-motion';
 import { useRef } from 'react';
+import { useLanguage } from '../../i18n';
 
 const features = [
   {
     icon: '💸',
-    title: 'Easy Expense Tracking',
-    description:
-      'Add expenses in seconds. Just tap, type the amount, and select who paid. Done.',
+    titleKey: 'landingFeature1Title',
+    descriptionKey: 'landingFeature1Desc',
     color: '#74b9ff',
   },
   {
     icon: '🤝',
-    title: 'Fair Split, No Headache',
-    description:
-      'Automatic calculations ensure everyone pays their fair share. No arguments, no drama.',
+    titleKey: 'landingFeature2Title',
+    descriptionKey: 'landingFeature2Desc',
     color: '#c7b4f3',
   },
   {
     icon: '📱',
-    title: 'Real-time Sync',
-    description:
-      'Everyone sees expenses as they happen. No more "did you add that?" messages.',
+    titleKey: 'landingFeature3Title',
+    descriptionKey: 'landingFeature3Desc',
     color: '#b4d4ff',
   },
   {
     icon: '📊',
-    title: 'Clear Summary',
-    description:
-      'See exactly who owes whom at a glance. Settle up with one simple view.',
+    titleKey: 'landingFeature4Title',
+    descriptionKey: 'landingFeature4Desc',
     color: '#a8e6cf',
   },
 ];
 
 export function FeaturesSection() {
+  const { t } = useLanguage();
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: '-80px' });
 
@@ -45,17 +43,17 @@ export function FeaturesSection() {
         animate={isInView ? { opacity: 1, y: 0 } : {}}
         transition={{ duration: 0.5 }}
       >
-        <span className="section-badge">Features</span>
-        <h2 className="section-title">Everything you need to split fairly</h2>
+        <span className="section-badge">{t('landingFeatures')}</span>
+        <h2 className="section-title">{t('landingFeaturesTitle')}</h2>
         <p className="section-subtitle">
-          Built for real group trips. No accounting degree required.
+          {t('landingFeaturesSubtitle')}
         </p>
       </motion.div>
 
       <div className="features-grid">
         {features.map((feature, i) => (
           <motion.div
-            key={feature.title}
+            key={feature.titleKey}
             className="feature-card"
             initial={{ opacity: 0, y: 30 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
@@ -67,8 +65,8 @@ export function FeaturesSection() {
             >
               {feature.icon}
             </div>
-            <h3 className="feature-title">{feature.title}</h3>
-            <p className="feature-description">{feature.description}</p>
+            <h3 className="feature-title">{t(feature.titleKey as any)}</h3>
+            <p className="feature-description">{t(feature.descriptionKey as any)}</p>
           </motion.div>
         ))}
       </div>

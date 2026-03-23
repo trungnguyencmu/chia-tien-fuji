@@ -1,8 +1,10 @@
 import { Link } from 'react-router-dom';
 import { motion, useInView } from 'framer-motion';
 import { useRef } from 'react';
+import { useLanguage } from '../../i18n';
 
 export function CtaSection() {
+  const { t } = useLanguage();
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: '-80px' });
 
@@ -15,13 +17,12 @@ export function CtaSection() {
         transition={{ duration: 0.6 }}
       >
         <div className="cta-glow" />
-        <h2 className="cta-title">Ready to travel without money stress?</h2>
+        <h2 className="cta-title">{t('landingCtaTitle')}</h2>
         <p className="cta-subtitle">
-          Join thousands of travelers who split expenses the easy way. Free
-          forever, no credit card required.
+          {t('landingCtaSubtitle')}
         </p>
         <Link to="/register" className="btn btn-primary cta-btn">
-          Get Started Now
+          {t('landingCtaBtn')}
           <span className="hero-btn-arrow">→</span>
         </Link>
       </motion.div>

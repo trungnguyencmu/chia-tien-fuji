@@ -1,5 +1,6 @@
 import { motion, useInView } from 'framer-motion';
 import { useRef } from 'react';
+import { useLanguage } from '../../i18n';
 
 const testimonials = [
   {
@@ -8,7 +9,7 @@ const testimonials = [
     avatar: 'S',
     color: '#74b9ff',
     stars: 5,
-    text: 'This saved our trip from money drama! We had 6 people on a 2-week trip and settling up took literally 5 minutes.',
+    textKey: 'landingTestimonial1Text',
   },
   {
     name: 'James L.',
@@ -16,7 +17,7 @@ const testimonials = [
     avatar: 'J',
     color: '#c7b4f3',
     stars: 5,
-    text: "Finally, an app that's actually simple. No sign-up hassle, no complicated features. Just add expenses and go.",
+    textKey: 'landingTestimonial2Text',
   },
   {
     name: 'Mai P.',
@@ -24,11 +25,12 @@ const testimonials = [
     avatar: 'M',
     color: '#b4d4ff',
     stars: 5,
-    text: "I organize trips for 10+ friends every year. Share Money is the only app that doesn't make me want to pull my hair out.",
+    textKey: 'landingTestimonial3Text',
   },
 ];
 
 export function TestimonialsSection() {
+  const { t } = useLanguage();
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: '-80px' });
 
@@ -44,36 +46,36 @@ export function TestimonialsSection() {
         animate={isInView ? { opacity: 1, y: 0 } : {}}
         transition={{ duration: 0.5 }}
       >
-        <span className="section-badge">Testimonials</span>
-        <h2 className="section-title">Loved by travelers worldwide</h2>
+        <span className="section-badge">{t('landingTestimonials')}</span>
+        <h2 className="section-title">{t('landingTestimonialsTitle')}</h2>
         <p className="section-subtitle">
-          Don't just take our word for it. Here's what our users say.
+          {t('landingTestimonialsSubtitle')}
         </p>
       </motion.div>
 
       <div className="testimonials-grid">
-        {testimonials.map((t, i) => (
+        {testimonials.map((tm, i) => (
           <motion.div
-            key={t.name}
+            key={tm.name}
             className="testimonial-card"
             initial={{ opacity: 0, y: 30 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.5, delay: 0.1 * (i + 1) }}
           >
             <div className="testimonial-stars">
-              {'★'.repeat(t.stars)}
+              {'★'.repeat(tm.stars)}
             </div>
-            <p className="testimonial-text">"{t.text}"</p>
+            <p className="testimonial-text">"{t(tm.textKey as any)}"</p>
             <div className="testimonial-author">
               <div
                 className="testimonial-avatar"
-                style={{ background: t.color }}
+                style={{ background: tm.color }}
               >
-                {t.avatar}
+                {tm.avatar}
               </div>
               <div>
-                <div className="testimonial-name">{t.name}</div>
-                <div className="testimonial-role">{t.role}</div>
+                <div className="testimonial-name">{tm.name}</div>
+                <div className="testimonial-role">{tm.role}</div>
               </div>
             </div>
           </motion.div>
