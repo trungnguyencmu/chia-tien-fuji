@@ -36,6 +36,8 @@ export type TranslationKey =
   | 'addExpense'
   | 'failedToAddExpense'
   | 'amountPlaceholder'
+  | 'enterAmount'
+  | 'selectCategory'
   // ExpenseList
   | 'expenses'
   | 'noExpensesYet'

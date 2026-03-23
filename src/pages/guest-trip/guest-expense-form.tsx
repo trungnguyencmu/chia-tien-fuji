@@ -1,5 +1,8 @@
 import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { TripMember, CreateGuestExpenseRequest } from '../../api/guest-api';
+import { Avatar } from '../../components/ui/Avatar';
+import { CategoryChipSelector, CATEGORIES, type Category } from '../../components/ui/CategoryTag';
 import { useLanguage } from '../../i18n';
 
 interface GuestExpenseFormProps {
@@ -10,10 +13,10 @@ interface GuestExpenseFormProps {
 export function GuestExpenseForm({ members, onSubmit }: GuestExpenseFormProps) {
   const { t } = useLanguage();
   const [payer, setPayer] = useState('');
-  const [title, setTitle] = useState('');
   const [amount, setAmount] = useState('');
   const [displayAmount, setDisplayAmount] = useState('');
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+  const [category, setCategory] = useState<Category>(CATEGORIES[0]);
+  const [title, setTitle] = useState(CATEGORIES[0].label);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -23,11 +26,18 @@ export function GuestExpenseForm({ members, onSubmit }: GuestExpenseFormProps) {
     setDisplayAmount(numbers ? Number(numbers).toLocaleString('en-US') : '');
   };
 
+  const handleCategorySelect = (cat: Category) => {
+    setCategory(cat);
+    if (!title || title === category.label) {
+      setTitle(cat.label);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
-    if (!payer || !title || !amount || !date) {
+    if (!payer || !amount || !title.trim()) {
       setError(t('allFieldsRequired'));
       return;
     }
@@ -39,14 +49,19 @@ export function GuestExpenseForm({ members, onSubmit }: GuestExpenseFormProps) {
     }
 
     setLoading(true);
-
     try {
-      await onSubmit({ payer, title, amount: amountNum, date });
+      await onSubmit({
+        payer,
+        title: title.trim(),
+        amount: amountNum,
+        date: new Date().toISOString().split('T')[0],
+      });
+
       setPayer('');
-      setTitle('');
       setAmount('');
       setDisplayAmount('');
-      setDate(new Date().toISOString().split('T')[0]);
+      setCategory(CATEGORIES[0]);
+      setTitle(CATEGORIES[0].label);
     } catch (err) {
       setError(err instanceof Error ? err.message : t('failedToAdd'));
     } finally {
@@ -56,89 +71,100 @@ export function GuestExpenseForm({ members, onSubmit }: GuestExpenseFormProps) {
 
   return (
     <div className="card">
-      <h2 style={{ marginBottom: '1.5rem', fontSize: '1.5rem', fontWeight: '700' }}>
+      <h2 style={{ marginBottom: '1.25rem', fontSize: '1.35rem', fontWeight: '700', textAlign: 'center' }}>
         💸 {t('addNewExpense')}
       </h2>
 
       <form onSubmit={handleSubmit}>
-        <div className="grid grid-2">
-          <div className="form-group">
-            <label className="form-label" htmlFor="guest-payer">
-              {t('payerName')}
-            </label>
-            <select
-              id="guest-payer"
-              className="form-input"
-              value={payer}
-              onChange={(e) => setPayer(e.target.value)}
-              disabled={loading}
-              style={{ cursor: 'pointer' }}
-            >
-              <option value="">{t('selectPayer')}</option>
-              {members.map((m) => (
-                <option key={m.userId} value={m.displayName}>
-                  {m.displayName}
-                </option>
-              ))}
-            </select>
-          </div>
+        {/* 1. Amount — Hero Element */}
+        <div className="expense-form-amount-wrapper">
+          <div className="expense-form-amount-label">💸 {t('howMuch')}</div>
+          <input
+            type="text"
+            inputMode="numeric"
+            className="expense-form-amount-input"
+            value={displayAmount}
+            onChange={handleAmountChange}
+            disabled={loading}
+            placeholder={t('enterAmount')}
+            autoFocus
+          />
+          <div className="expense-form-amount-currency">VND</div>
+        </div>
 
-          <div className="form-group">
-            <label className="form-label" htmlFor="guest-title">
-              {t('title')}
-            </label>
-            <input
-              id="guest-title"
-              type="text"
-              className="form-input"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              disabled={loading}
-              placeholder="e.g., Dinner, Hotel"
-              maxLength={200}
-            />
-          </div>
+        {/* 2. Category — Smart Chips */}
+        <div style={{ marginBottom: '1.5rem' }}>
+          <div className="expense-form-section-label">📝 {t('selectCategory')}</div>
+          <CategoryChipSelector
+            selected={category.id}
+            onSelect={handleCategorySelect}
+          />
+          <AnimatePresence>
+            {category && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                style={{ marginTop: '0.75rem' }}
+              >
+                <input
+                  type="text"
+                  className="expense-form-description"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  disabled={loading}
+                  placeholder={`e.g., ${category.emoji} ${category.label}`}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
 
-          <div className="form-group">
-            <label className="form-label" htmlFor="guest-amount">
-              {t('amountVnd')}
-            </label>
-            <input
-              id="guest-amount"
-              type="text"
-              inputMode="numeric"
-              className="form-input"
-              value={displayAmount}
-              onChange={handleAmountChange}
-              disabled={loading}
-              placeholder="0"
-            />
-          </div>
-
-          <div className="form-group">
-            <label className="form-label" htmlFor="guest-date">
-              {t('date')}
-            </label>
-            <input
-              id="guest-date"
-              type="date"
-              className="form-input"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              disabled={loading}
-            />
+        {/* 3. Who Paid — Avatar Picker */}
+        <div style={{ marginBottom: '1.5rem' }}>
+          <div className="expense-form-section-label">🧑 {t('whoPaid')}</div>
+          <div className="avatar-picker">
+            {members.map((m) => (
+              <motion.button
+                key={m.userId}
+                type="button"
+                className={`avatar-picker-item ${payer === m.displayName ? 'selected' : ''}`}
+                onClick={() => setPayer(m.displayName)}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Avatar name={m.displayName} size="lg" />
+                <span className="avatar-picker-name">{m.displayName.split(' ')[0]}</span>
+              </motion.button>
+            ))}
           </div>
         </div>
 
-        <button type="submit" disabled={loading} className="btn btn-primary">
-          {loading ? '⏳ ' + t('addingExpense') : '➕ ' + t('addExpenseGuest')}
-        </button>
+        {/* Error */}
+        <AnimatePresence>
+          {error && (
+            <motion.div
+              className="alert alert-error"
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+            >
+              <span>⚠️</span>
+              <span>{error}</span>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-        {error && (
-          <div className="alert alert-error" style={{ marginTop: '1rem' }}>
-            ⚠️ {error}
-          </div>
-        )}
+        {/* 5. CTA Button — Sticky */}
+        <div className="expense-form-cta">
+          <motion.button
+            type="submit"
+            disabled={loading || !payer || !amount || !title.trim()}
+            className="btn btn-primary"
+            whileTap={{ scale: 0.98 }}
+          >
+            {loading ? '⏳ ' + t('addingExpense') : '💸 ' + t('addExpenseGuest')}
+          </motion.button>
+        </div>
       </form>
     </div>
   );

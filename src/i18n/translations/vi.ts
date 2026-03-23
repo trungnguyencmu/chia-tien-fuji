@@ -42,6 +42,8 @@ export const vi: Translations = {
   addExpense: 'Thêm Chi Tiêu',
   failedToAddExpense: 'Thêm chi tiêu thất bại',
   amountPlaceholder: '0',
+  enterAmount: 'Nhập số tiền',
+  selectCategory: 'Chi cho gì?',
 
   // ExpenseList
   expenses: 'Chi Tiêu',

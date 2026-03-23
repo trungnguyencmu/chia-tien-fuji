@@ -581,6 +581,200 @@ tbody td {
   color: #be185d;
 }
 
+/* ===== Expense Form Redesign ===== */
+
+/* Hero amount input */
+.expense-form-amount-wrapper {
+  text-align: center;
+  padding: 1.5rem 0.5rem;
+  background: linear-gradient(135deg, rgba(116, 185, 255, 0.08) 0%, rgba(85, 239, 196, 0.08) 100%);
+  border-radius: var(--border-radius);
+  margin-bottom: 1.5rem;
+}
+
+.expense-form-amount-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--gray-600);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.75rem;
+}
+
+.expense-form-amount-input {
+  width: 100%;
+  max-width: 320px;
+  border: none;
+  background: transparent;
+  font-size: 3rem;
+  font-weight: 800;
+  text-align: center;
+  color: var(--gray-900);
+  outline: none;
+  caret-color: var(--primary-dark);
+  letter-spacing: -0.02em;
+}
+
+.expense-form-amount-input::placeholder {
+  color: var(--gray-300);
+}
+
+.expense-form-amount-currency {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--gray-600);
+  margin-top: 0.25rem;
+}
+
+/* Category horizontal scroll chips */
+.category-scroll-container {
+  display: flex;
+  gap: 0.625rem;
+  overflow-x: auto;
+  padding: 0.25rem 0;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.category-scroll-container::-webkit-scrollbar {
+  display: none;
+}
+
+.category-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.75rem 1rem;
+  border-radius: var(--border-radius-sm);
+  font-size: 0.8rem;
+  font-weight: 500;
+  background: var(--gray-50);
+  color: var(--gray-700);
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  scroll-snap-align: start;
+  flex-shrink: 0;
+  min-width: 72px;
+}
+
+.category-chip-emoji {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.category-chip:hover {
+  background: var(--gray-100);
+  transform: scale(1.02);
+}
+
+.category-chip.selected {
+  background: linear-gradient(135deg, #e0f2fe 0%, var(--primary-light) 100%);
+  border-color: var(--primary);
+  color: var(--primary-dark);
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgb(116 185 255 / 0.25);
+}
+
+/* Avatar picker */
+.avatar-picker {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.avatar-picker-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.625rem;
+  border-radius: var(--border-radius-sm);
+  border: 2px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  min-width: 72px;
+}
+
+.avatar-picker-item:hover {
+  background: var(--gray-50);
+  transform: scale(1.03);
+}
+
+.avatar-picker-item.selected {
+  border-color: var(--primary);
+  background: var(--primary-light);
+  transform: scale(1.08);
+  box-shadow: 0 4px 12px rgb(116 185 255 / 0.3);
+}
+
+.avatar-picker-item.selected .avatar {
+  box-shadow: 0 0 0 3px var(--primary), 0 4px 12px rgb(116 185 255 / 0.3);
+}
+
+.avatar-picker-name {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--gray-700);
+  max-width: 72px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: center;
+}
+
+/* Section label for form sections */
+.expense-form-section-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--gray-600);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Sticky CTA */
+.expense-form-cta {
+  position: sticky;
+  bottom: 0;
+  padding: 1rem 0 0;
+  background: linear-gradient(to top, rgba(255,255,255,0.98) 60%, rgba(255,255,255,0));
+  z-index: 10;
+}
+
+.expense-form-cta .btn {
+  width: 100%;
+  padding: 1.125rem;
+  font-size: 1.1rem;
+  border-radius: var(--border-radius);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+/* Description input inline */
+.expense-form-description {
+  border: none;
+  border-bottom: 2px solid var(--gray-200);
+  border-radius: 0;
+  padding: 0.75rem 0.75rem;
+  font-size: 0.95rem;
+  background: transparent;
+  width: 100%;
+  transition: border-color 0.2s ease;
+}
+
+.expense-form-description:focus {
+  outline: none;
+  border-bottom-color: var(--primary);
+}
+
 /* Auth pages */
 .auth-container {
   display: flex;

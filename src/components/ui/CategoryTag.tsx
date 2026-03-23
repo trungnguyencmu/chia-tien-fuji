@@ -34,6 +34,25 @@ export function CategoryTag({ category, selected, onClick }: CategoryTagProps) {
   );
 }
 
+interface CategoryChipProps {
+  category: Category;
+  selected?: boolean;
+  onClick?: () => void;
+}
+
+export function CategoryChip({ category, selected, onClick }: CategoryChipProps) {
+  return (
+    <button
+      type="button"
+      className={`category-chip ${selected ? 'selected' : ''}`}
+      onClick={onClick}
+    >
+      <span className="category-chip-emoji">{category.emoji}</span>
+      <span>{category.label}</span>
+    </button>
+  );
+}
+
 interface CategorySelectorProps {
   selected?: string;
   onSelect: (category: Category) => void;
@@ -44,6 +63,21 @@ export function CategorySelector({ selected, onSelect }: CategorySelectorProps) 
     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
       {CATEGORIES.map((cat) => (
         <CategoryTag
+          key={cat.id}
+          category={cat}
+          selected={selected === cat.id}
+          onClick={() => onSelect(cat)}
+        />
+      ))}
+    </div>
+  );
+}
+
+export function CategoryChipSelector({ selected, onSelect }: CategorySelectorProps) {
+  return (
+    <div className="category-scroll-container" style={{ paddingLeft: '1rem', paddingRight: '1rem' }}>
+      {CATEGORIES.map((cat) => (
+        <CategoryChip
           key={cat.id}
           category={cat}
           selected={selected === cat.id}

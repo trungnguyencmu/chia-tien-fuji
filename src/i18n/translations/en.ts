@@ -42,6 +42,8 @@ export const en: Translations = {
   addExpense: 'Add Expense',
   failedToAddExpense: 'Failed to add expense',
   amountPlaceholder: '0',
+  enterAmount: 'Enter amount',
+  selectCategory: 'What for?',
 
   // ExpenseList
   expenses: 'Expenses',
