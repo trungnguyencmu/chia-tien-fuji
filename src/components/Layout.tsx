@@ -296,9 +296,9 @@ export function Layout() {
               alignItems: 'center',
               gap: '0.75rem',
               padding: '0.75rem 1rem',
-              background: 'rgba(255, 158, 193, 0.1)',
+              background: 'rgba(116, 185, 255, 0.1)',
               borderRadius: '12px',
-              border: '1px solid rgba(255, 158, 193, 0.3)',
+              border: '1px solid rgba(116, 185, 255, 0.3)',
             }}
           >
             <span style={{ fontSize: '1.25rem' }}>✈️</span>
