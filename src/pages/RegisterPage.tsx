@@ -16,6 +16,7 @@ export default function RegisterPage() {
   const [step, setStep] = useState<Step>('register');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [name, setName] = useState('');
   const [confirmationCode, setConfirmationCode] = useState('');
   const [error, setError] = useState('');
@@ -143,17 +144,27 @@ export default function RegisterPage() {
               <label className="form-label" htmlFor="password">
                 {t('password')}
               </label>
-              <input
-                id="password"
-                type="password"
-                className="form-input"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder={t('min8Chars')}
-                required
-                minLength={8}
-                autoComplete="new-password"
-              />
+              <div className="password-input-wrapper">
+                <input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  className="form-input"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder={t('min8Chars')}
+                  required
+                  minLength={8}
+                  autoComplete="new-password"
+                />
+                <button
+                  type="button"
+                  className="password-toggle"
+                  onClick={() => setShowPassword(!showPassword)}
+                  tabIndex={-1}
+                >
+                  {showPassword ? '🙈' : '👁️'}
+                </button>
+              </div>
             </div>
 
             <button
