@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import { CreateExpenseRequest, fetchPayerNames } from '../api/api';
 import { getCurrentTripId } from '../utils/storage';
 
@@ -107,16 +106,9 @@ export function ExpenseForm({ onSubmit }: ExpenseFormProps) {
 
   return (
     <div className="card">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-        <h2 style={{ fontSize: '1.5rem', fontWeight: '700', margin: 0 }}>
-          💸 Add New Expense
-        </h2>
-        {payerNames.length === 0 && (
-          <Link to="/admin" className="btn btn-secondary" style={{ textDecoration: 'none', fontSize: '0.875rem' }}>
-            ⚙️ Add Payers
-          </Link>
-        )}
-      </div>
+      <h2 style={{ marginBottom: '1.5rem', fontSize: '1.5rem', fontWeight: '700' }}>
+        💸 Add New Expense
+      </h2>
 
       <form onSubmit={handleSubmit}>
         <div className="grid grid-2">
@@ -162,7 +154,7 @@ export function ExpenseForm({ onSubmit }: ExpenseFormProps) {
                 value={payer}
                 onChange={(e) => setPayer(e.target.value)}
                 disabled={loading}
-                placeholder="Enter name (or add payers in admin)"
+                placeholder="Enter payer name"
               />
             )}
           </div>
