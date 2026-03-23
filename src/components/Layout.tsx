@@ -267,19 +267,19 @@ export function Layout() {
               style={{
                 padding: '0.625rem 1rem',
                 borderRadius: '15px',
-                background: 'rgba(255, 179, 186, 0.3)',
+                background: 'rgba(116, 185, 255, 0.3)',
                 color: 'var(--gray-700)',
-                border: '1px solid rgba(255, 179, 186, 0.4)',
+                border: '1px solid rgba(116, 185, 255, 0.4)',
                 cursor: 'pointer',
                 fontSize: '0.8rem',
                 fontWeight: '600',
                 transition: 'all 0.2s ease',
               }}
               onMouseOver={(e) => {
-                e.currentTarget.style.background = 'rgba(255, 179, 186, 0.5)';
+                e.currentTarget.style.background = 'rgba(116, 185, 255, 0.5)';
               }}
               onMouseOut={(e) => {
-                e.currentTarget.style.background = 'rgba(255, 179, 186, 0.3)';
+                e.currentTarget.style.background = 'rgba(116, 185, 255, 0.3)';
               }}
               title={userEmail || 'Sign out'}
             >
@@ -359,9 +359,9 @@ export function Layout() {
               style={{
                 padding: '0.5rem 0.75rem',
                 borderRadius: '8px',
-                background: 'rgba(255, 179, 186, 0.2)',
+                background: 'rgba(116, 185, 255, 0.2)',
                 color: '#991b1b',
-                border: '1px solid rgba(255, 179, 186, 0.3)',
+                border: '1px solid rgba(116, 185, 255, 0.3)',
                 fontSize: '0.875rem',
                 fontWeight: '600',
                 cursor: tripLoading ? 'not-allowed' : 'pointer',
@@ -369,10 +369,10 @@ export function Layout() {
                 opacity: tripLoading ? 0.5 : 1,
               }}
               onMouseOver={(e) => {
-                if (!tripLoading) e.currentTarget.style.background = 'rgba(255, 179, 186, 0.4)';
+                if (!tripLoading) e.currentTarget.style.background = 'rgba(116, 185, 255, 0.4)';
               }}
               onMouseOut={(e) => {
-                if (!tripLoading) e.currentTarget.style.background = 'rgba(255, 179, 186, 0.2)';
+                if (!tripLoading) e.currentTarget.style.background = 'rgba(116, 185, 255, 0.2)';
               }}
               title="Delete current trip"
             >
