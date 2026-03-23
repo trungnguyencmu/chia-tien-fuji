@@ -5,8 +5,8 @@
 }
 
 :root {
-  --primary: #ff9ec1;
-  --primary-dark: #ff7eb3;
+  --primary: #74b9ff;
+  --primary-dark: #0984e3;
   --primary-light: #e0f2fe;
   --success: #a8e6cf;
   --success-dark: #10b981;
@@ -26,10 +26,10 @@
   --border-radius: 24px;
   --border-radius-sm: 12px;
   --border-radius-lg: 32px;
-  --shadow-sm: 0 2px 8px 0 rgb(255 158 193 / 0.1);
-  --shadow: 0 4px 16px 0 rgb(255 158 193 / 0.12), 0 2px 4px -1px rgb(255 158 193 / 0.08);
-  --shadow-lg: 0 12px 32px -4px rgb(255 158 193 / 0.18), 0 8px 16px -8px rgb(199 180 243 / 0.15);
-  --shadow-xl: 0 24px 48px -8px rgb(255 158 193 / 0.22);
+  --shadow-sm: 0 2px 8px 0 rgb(116 185 255 / 0.1);
+  --shadow: 0 4px 16px 0 rgb(116 185 255 / 0.12), 0 2px 4px -1px rgb(116 185 255 / 0.08);
+  --shadow-lg: 0 12px 32px -4px rgb(116 185 255 / 0.18), 0 8px 16px -8px rgb(116 185 255 / 0.15);
+  --shadow-xl: 0 24px 48px -8px rgb(116 185 255 / 0.22);
 }
 
 body {
@@ -121,12 +121,12 @@ select.form-input {
 .btn-primary {
   background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
   color: white;
-  box-shadow: 0 4px 16px rgb(255 126 179 / 0.35);
+  box-shadow: 0 4px 16px rgb(116 185 255 / 0.35);
 }
 
 .btn-primary:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgb(255 126 179 / 0.45);
+  box-shadow: 0 8px 24px rgb(116 185 255 / 0.45);
 }
 
 .btn-primary:active:not(:disabled) {

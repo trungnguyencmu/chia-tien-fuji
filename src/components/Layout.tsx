@@ -214,7 +214,7 @@ export function Layout() {
           borderRadius: '20px',
           padding: '1.25rem',
           marginBottom: '2rem',
-          boxShadow: '0 8px 24px rgb(255 158 193 / 0.2)',
+          boxShadow: '0 8px 24px rgb(116 185 255 / 0.2)',
           border: '2px solid rgba(255, 255, 255, 0.6)',
           backdropFilter: 'blur(10px)',
         }}
@@ -227,9 +227,9 @@ export function Layout() {
               borderRadius: '15px',
               fontWeight: '700',
               fontSize: '0.95rem',
-              background: 'linear-gradient(135deg, #ff9ec1 0%, #ffc4e1 100%)',
+              background: 'linear-gradient(135deg, #74b9ff 0%, #55efc4 100%)',
               color: 'white',
-              boxShadow: '0 4px 12px rgb(255 158 193 / 0.3)',
+              boxShadow: '0 4px 12px rgb(116 185 255 / 0.3)',
             }}
           >
             💰 Share Money
