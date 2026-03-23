@@ -1,15 +1,19 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/auth-context';
+import { GuestProvider } from './contexts/guest-context';
 import { Layout } from './components/Layout';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { PublicRoute } from './components/PublicRoute';
+import { GuestRoute } from './components/GuestRoute';
 
 // Lazy load pages to reduce initial bundle size
 const LandingPage = lazy(() => import('./pages/landing/LandingPage'));
 const HomePage = lazy(() => import('./pages/HomePage'));
 const LoginPage = lazy(() => import('./pages/LoginPage'));
 const RegisterPage = lazy(() => import('./pages/RegisterPage'));
+const JoinPage = lazy(() => import('./pages/JoinPage'));
+const GuestTripPage = lazy(() => import('./pages/guest-trip/GuestTripPage'));
 
 // Loading fallback component
 function PageLoader() {
@@ -27,61 +31,83 @@ function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <Routes>
-          {/* Public routes — redirect to /app if already logged in */}
-          <Route
-            path="/"
-            element={
-              <PublicRoute>
-                <Suspense fallback={<PageLoader />}>
-                  <LandingPage />
-                </Suspense>
-              </PublicRoute>
-            }
-          />
-          <Route
-            path="/login"
-            element={
-              <PublicRoute>
-                <Suspense fallback={<PageLoader />}>
-                  <LoginPage />
-                </Suspense>
-              </PublicRoute>
-            }
-          />
-          <Route
-            path="/register"
-            element={
-              <PublicRoute>
-                <Suspense fallback={<PageLoader />}>
-                  <RegisterPage />
-                </Suspense>
-              </PublicRoute>
-            }
-          />
-
-          {/* Protected app routes — redirect to / if not logged in */}
-          <Route
-            path="/app"
-            element={
-              <ProtectedRoute>
-                <Layout />
-              </ProtectedRoute>
-            }
-          >
+        <GuestProvider>
+          <Routes>
+            {/* Public routes — redirect to /app if already logged in */}
             <Route
-              index
+              path="/"
+              element={
+                <PublicRoute>
+                  <Suspense fallback={<PageLoader />}>
+                    <LandingPage />
+                  </Suspense>
+                </PublicRoute>
+              }
+            />
+            <Route
+              path="/login"
+              element={
+                <PublicRoute>
+                  <Suspense fallback={<PageLoader />}>
+                    <LoginPage />
+                  </Suspense>
+                </PublicRoute>
+              }
+            />
+            <Route
+              path="/register"
+              element={
+                <PublicRoute>
+                  <Suspense fallback={<PageLoader />}>
+                    <RegisterPage />
+                  </Suspense>
+                </PublicRoute>
+              }
+            />
+
+            {/* Guest routes */}
+            <Route
+              path="/join/:code?"
               element={
                 <Suspense fallback={<PageLoader />}>
-                  <HomePage />
+                  <JoinPage />
                 </Suspense>
               }
             />
-          </Route>
+            <Route
+              path="/trips/:tripId"
+              element={
+                <GuestRoute>
+                  <Suspense fallback={<PageLoader />}>
+                    <GuestTripPage />
+                  </Suspense>
+                </GuestRoute>
+              }
+            />
 
-          {/* Catch all */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+            {/* Protected app routes — redirect to / if not logged in */}
+            <Route
+              path="/app"
+              element={
+                <ProtectedRoute>
+                  <Layout />
+                </ProtectedRoute>
+              }
+            >
+              <Route
+                index
+                element={
+                  <Suspense fallback={<PageLoader />}>
+                    <HomePage />
+                  </Suspense>
+                }
+              />
+            </Route>
+
+            {/* Catch all */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </GuestProvider>
       </AuthProvider>
     </BrowserRouter>
   );
