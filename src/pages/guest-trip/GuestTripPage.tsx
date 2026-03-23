@@ -18,6 +18,7 @@ import { GuestExpenseForm } from './guest-expense-form';
 import { GuestExpenseList } from './guest-expense-list';
 import { GuestSettlement } from './guest-settlement';
 import { GuestMemberList } from './guest-member-list';
+import { useLanguage } from '../../i18n';
 
 type Tab = 'expenses' | 'settlement' | 'members';
 
@@ -25,6 +26,7 @@ export default function GuestTripPage() {
   const { tripId } = useParams<{ tripId: string }>();
   const navigate = useNavigate();
   const { displayName, leave } = useGuest();
+  const { t } = useLanguage();
 
   const [activeTab, setActiveTab] = useState<Tab>('expenses');
   const [trip, setTrip] = useState<Trip | null>(null);
@@ -99,7 +101,7 @@ export default function GuestTripPage() {
       <div style={{ textAlign: 'center', padding: '3rem' }}>
         <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>⏳</div>
         <div style={{ color: 'white', fontSize: '1.25rem', fontWeight: '600' }}>
-          Loading trip...
+          {t('loadingTrip')}
         </div>
       </div>
     );
@@ -111,7 +113,7 @@ export default function GuestTripPage() {
         <div className="card">
           <div className="alert alert-error">⚠️ {error}</div>
           <button className="btn btn-primary" onClick={loadData} style={{ marginTop: '1rem' }}>
-            🔄 Retry
+            🔄 {t('retry')}
           </button>
         </div>
       </div>
@@ -132,10 +134,10 @@ export default function GuestTripPage() {
       >
         <div>
           <h1 style={{ fontSize: '1.5rem', fontWeight: '700', margin: 0 }}>
-            {trip?.tripName || 'Trip'}
+            {trip?.tripName || t('loadingTrip')}
           </h1>
           <p style={{ margin: '0.25rem 0 0', color: '#6b7280', fontSize: '0.9rem' }}>
-            Logged in as <strong>{displayName}</strong>
+            {t('loggedInAs')} <strong>{displayName}</strong>
           </p>
         </div>
         <button
@@ -143,7 +145,7 @@ export default function GuestTripPage() {
           className="btn btn-secondary"
           style={{ fontSize: '0.875rem' }}
         >
-          🚪 Leave
+          🚪 {t('leave')}
         </button>
       </div>
 
@@ -159,9 +161,9 @@ export default function GuestTripPage() {
         }}
       >
         {([
-          { key: 'expenses', label: '💸 Expenses' },
-          { key: 'settlement', label: '💰 Settlement' },
-          { key: 'members', label: '👥 Members' },
+          { key: 'expenses', label: '💸 ' + t('expensesTab') },
+          { key: 'settlement', label: '💰 ' + t('settlementTab') },
+          { key: 'members', label: '👥 ' + t('members') },
         ] as const).map(({ key, label }) => (
           <button
             key={key}

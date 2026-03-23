@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { TripMember, CreateGuestExpenseRequest } from '../../api/guest-api';
+import { useLanguage } from '../../i18n';
 
 interface GuestExpenseFormProps {
   members: TripMember[];
@@ -7,6 +8,7 @@ interface GuestExpenseFormProps {
 }
 
 export function GuestExpenseForm({ members, onSubmit }: GuestExpenseFormProps) {
+  const { t } = useLanguage();
   const [payer, setPayer] = useState('');
   const [title, setTitle] = useState('');
   const [amount, setAmount] = useState('');
@@ -26,13 +28,13 @@ export function GuestExpenseForm({ members, onSubmit }: GuestExpenseFormProps) {
     setError(null);
 
     if (!payer || !title || !amount || !date) {
-      setError('All fields are required');
+      setError(t('allFieldsRequired'));
       return;
     }
 
     const amountNum = parseFloat(amount);
     if (isNaN(amountNum) || amountNum <= 0) {
-      setError('Amount must be a positive number');
+      setError(t('amountMustBePositive'));
       return;
     }
 
@@ -46,7 +48,7 @@ export function GuestExpenseForm({ members, onSubmit }: GuestExpenseFormProps) {
       setDisplayAmount('');
       setDate(new Date().toISOString().split('T')[0]);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to add expense');
+      setError(err instanceof Error ? err.message : t('failedToAdd'));
     } finally {
       setLoading(false);
     }
@@ -55,14 +57,14 @@ export function GuestExpenseForm({ members, onSubmit }: GuestExpenseFormProps) {
   return (
     <div className="card">
       <h2 style={{ marginBottom: '1.5rem', fontSize: '1.5rem', fontWeight: '700' }}>
-        💸 Add New Expense
+        💸 {t('addNewExpense')}
       </h2>
 
       <form onSubmit={handleSubmit}>
         <div className="grid grid-2">
           <div className="form-group">
             <label className="form-label" htmlFor="guest-payer">
-              Payer Name
+              {t('payerName')}
             </label>
             <select
               id="guest-payer"
@@ -72,7 +74,7 @@ export function GuestExpenseForm({ members, onSubmit }: GuestExpenseFormProps) {
               disabled={loading}
               style={{ cursor: 'pointer' }}
             >
-              <option value="">Select a payer...</option>
+              <option value="">{t('selectPayer')}</option>
               {members.map((m) => (
                 <option key={m.userId} value={m.displayName}>
                   {m.displayName}
@@ -83,7 +85,7 @@ export function GuestExpenseForm({ members, onSubmit }: GuestExpenseFormProps) {
 
           <div className="form-group">
             <label className="form-label" htmlFor="guest-title">
-              Title
+              {t('title')}
             </label>
             <input
               id="guest-title"
@@ -99,7 +101,7 @@ export function GuestExpenseForm({ members, onSubmit }: GuestExpenseFormProps) {
 
           <div className="form-group">
             <label className="form-label" htmlFor="guest-amount">
-              Amount (VND)
+              {t('amountVnd')}
             </label>
             <input
               id="guest-amount"
@@ -115,7 +117,7 @@ export function GuestExpenseForm({ members, onSubmit }: GuestExpenseFormProps) {
 
           <div className="form-group">
             <label className="form-label" htmlFor="guest-date">
-              Date
+              {t('date')}
             </label>
             <input
               id="guest-date"
@@ -129,7 +131,7 @@ export function GuestExpenseForm({ members, onSubmit }: GuestExpenseFormProps) {
         </div>
 
         <button type="submit" disabled={loading} className="btn btn-primary">
-          {loading ? '⏳ Adding...' : '➕ Add Expense'}
+          {loading ? '⏳ ' + t('addingExpense') : '➕ ' + t('addExpenseGuest')}
         </button>
 
         {error && (

@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { Expense, calculateBalances, calculateTransactions } from '../utils/calculation';
 import { Avatar } from './ui/Avatar';
+import { useLanguage } from '../i18n';
 
 interface SettlementProps {
   expenses: Expense[];
@@ -8,6 +9,7 @@ interface SettlementProps {
 }
 
 export function Settlement({ expenses, payerNames }: SettlementProps) {
+  const { t } = useLanguage();
   const balances = useMemo(() => calculateBalances(expenses, payerNames), [expenses, payerNames]);
   const transactions = useMemo(() => calculateTransactions(balances), [balances]);
   const total = useMemo(() => expenses.reduce((sum, e) => sum + e.amount, 0), [expenses]);
@@ -21,19 +23,19 @@ export function Settlement({ expenses, payerNames }: SettlementProps) {
   return (
     <div className="card">
       <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1.5rem' }}>
-        💰 Settlement
+        💰 {t('settlement')}
       </h2>
 
       {/* Summary */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
         <div className="stat-card" style={{ borderLeftColor: '#4f46e5' }}>
-          <div className="stat-label">Total Spent</div>
+          <div className="stat-label">{t('totalSpent')}</div>
           <div className="stat-value" style={{ fontSize: '1.25rem' }}>
             {total.toLocaleString()} VND
           </div>
         </div>
         <div className="stat-card" style={{ borderLeftColor: '#10b981' }}>
-          <div className="stat-label">Your Share</div>
+          <div className="stat-label">{t('yourShare')}</div>
           <div className="stat-value" style={{ fontSize: '1.25rem' }}>
             {sharePerPerson.toLocaleString()} VND
           </div>
@@ -43,14 +45,14 @@ export function Settlement({ expenses, payerNames }: SettlementProps) {
       {/* Who Owes Who - The Most Important Part */}
       <div style={{ marginBottom: '1.5rem' }}>
         <h3 style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--gray-700)', marginBottom: '1rem' }}>
-          🔄 Who Owes Who
+          🔄 {t('whoOwesWho')}
         </h3>
 
         {transactions.length === 0 ? (
           <div className="empty-state" style={{ padding: '2rem' }}>
             <div className="empty-state-icon">✅</div>
             <p style={{ fontSize: '1.1rem', fontWeight: 600, color: '#10b981' }}>
-              All settled up!
+              {t('allSettledUp')}
             </p>
           </div>
         ) : (
@@ -61,7 +63,7 @@ export function Settlement({ expenses, payerNames }: SettlementProps) {
                 <div className="settlement-arrow">→</div>
                 <div className="settlement-names">
                   <div className="settlement-from">{transaction.from}</div>
-                  <div className="settlement-to">owes {transaction.to}</div>
+                  <div className="settlement-to">{t('owes')} {transaction.to}</div>
                 </div>
                 <div className="settlement-amount">
                   {transaction.amount.toLocaleString()} VND
@@ -76,7 +78,7 @@ export function Settlement({ expenses, payerNames }: SettlementProps) {
       {balances.length > 0 && (
         <div>
           <h3 style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--gray-700)', marginBottom: '0.75rem' }}>
-            💼 Balances
+            💼 {t('balances')}
           </h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
             {balances.map((balance) => {
@@ -101,12 +103,12 @@ export function Settlement({ expenses, payerNames }: SettlementProps) {
                   <div style={{ flex: 1 }}>
                     <div style={{ fontWeight: 600, fontSize: '0.95rem' }}>{balance.member}</div>
                     <div style={{ fontSize: '0.75rem', color: 'var(--gray-600)' }}>
-                      Paid {Math.round(balance.totalPaid).toLocaleString()} VND
+                      {t('paid')} {Math.round(balance.totalPaid).toLocaleString()} VND
                     </div>
                   </div>
                   <div style={{ textAlign: 'right' }}>
                     {isSettled ? (
-                      <span className="badge badge-neutral">Settled</span>
+                      <span className="badge badge-neutral">{t('settled')}</span>
                     ) : isPositive ? (
                       <span className="badge badge-success">
                         +{Math.round(balance.balance).toLocaleString()} VND

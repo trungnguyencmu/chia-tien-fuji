@@ -1,10 +1,12 @@
 import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/auth-context';
+import { useLanguage } from '../i18n';
 
 export default function LoginPage() {
   const navigate = useNavigate();
   const { login } = useAuth();
+  const { t } = useLanguage();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -21,7 +23,7 @@ export default function LoginPage() {
       navigate('/app');
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : 'Login failed. Please try again.',
+        err instanceof Error ? err.message : t('loginFailed'),
       );
     } finally {
       setLoading(false);
@@ -33,8 +35,8 @@ export default function LoginPage() {
       <div className="auth-card card">
         <div className="auth-header">
           <div className="auth-icon">💰</div>
-          <h1 className="auth-title">Welcome Back</h1>
-          <p className="auth-subtitle">Sign in to Share Money</p>
+          <h1 className="auth-title">{t('welcomeBack')}</h1>
+          <p className="auth-subtitle">{t('signInToShareMoney')}</p>
         </div>
 
         {error && (
@@ -47,7 +49,7 @@ export default function LoginPage() {
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label className="form-label" htmlFor="email">
-              Email
+              {t('emailLogin')}
             </label>
             <input
               id="email"
@@ -63,7 +65,7 @@ export default function LoginPage() {
 
           <div className="form-group">
             <label className="form-label" htmlFor="password">
-              Password
+              {t('password')}
             </label>
             <input
               id="password"
@@ -71,7 +73,7 @@ export default function LoginPage() {
               className="form-input"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter your password"
+              placeholder={t('enterYourPassword')}
               required
               autoComplete="current-password"
             />
@@ -82,14 +84,14 @@ export default function LoginPage() {
             className="btn btn-primary auth-submit"
             disabled={loading}
           >
-            {loading ? 'Signing in...' : 'Sign In'}
+            {loading ? t('signingIn') : t('signIn')}
           </button>
         </form>
 
         <div className="auth-footer">
-          Don't have an account?{' '}
+          {t('dontHaveAccount')}{' '}
           <Link to="/register" className="auth-link">
-            Sign up
+            {t('signUp')}
           </Link>
         </div>
       </div>

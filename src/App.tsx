@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/auth-context';
 import { GuestProvider } from './contexts/guest-context';
+import { LanguageProvider } from './i18n';
 import { Layout } from './components/Layout';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { PublicRoute } from './components/PublicRoute';
@@ -32,7 +33,8 @@ function App() {
     <BrowserRouter>
       <AuthProvider>
         <GuestProvider>
-          <Routes>
+          <LanguageProvider>
+            <Routes>
             {/* Public routes — redirect to /app if already logged in */}
             <Route
               path="/"
@@ -107,6 +109,7 @@ function App() {
             {/* Catch all */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
+          </LanguageProvider>
         </GuestProvider>
       </AuthProvider>
     </BrowserRouter>

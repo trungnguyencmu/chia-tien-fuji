@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { CreateExpenseRequest } from '../api/api';
 import { Avatar } from './ui/Avatar';
 import { CategorySelector, type Category } from './ui/CategoryTag';
+import { useLanguage } from '../i18n';
 
 interface ExpenseFormProps {
   members: string[];
@@ -9,6 +10,7 @@ interface ExpenseFormProps {
 }
 
 export function ExpenseForm({ members, onSubmit }: ExpenseFormProps) {
+  const { t } = useLanguage();
   const [payer, setPayer] = useState('');
   const [amount, setAmount] = useState('');
   const [displayAmount, setDisplayAmount] = useState('');
@@ -40,13 +42,13 @@ export function ExpenseForm({ members, onSubmit }: ExpenseFormProps) {
     setError(null);
 
     if (!payer || !amount || !title.trim()) {
-      setError('Please fill in all fields');
+      setError(t('pleaseFillAllFields'));
       return;
     }
 
     const amountNum = parseFloat(amount);
     if (isNaN(amountNum) || amountNum <= 0) {
-      setError('Please enter a valid amount');
+      setError(t('pleaseEnterValidAmount'));
       return;
     }
 
@@ -66,7 +68,7 @@ export function ExpenseForm({ members, onSubmit }: ExpenseFormProps) {
       setCategory(null);
       setTitle('');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to add expense');
+      setError(err instanceof Error ? err.message : t('failedToAddExpense'));
     } finally {
       setLoading(false);
     }
@@ -76,7 +78,7 @@ export function ExpenseForm({ members, onSubmit }: ExpenseFormProps) {
     <form onSubmit={handleSubmit}>
       {/* Who Paid - Avatar Selector */}
       <div className="form-group">
-        <label className="form-label">Who paid?</label>
+        <label className="form-label">{t('whoPaid')}</label>
         <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
           {members.map((name) => (
             <button
@@ -108,7 +110,7 @@ export function ExpenseForm({ members, onSubmit }: ExpenseFormProps) {
 
       {/* Amount */}
       <div className="form-group">
-        <label className="form-label">How much?</label>
+        <label className="form-label">{t('howMuch')}</label>
         <div style={{ position: 'relative' }}>
           <span style={{
             position: 'absolute',
@@ -142,7 +144,7 @@ export function ExpenseForm({ members, onSubmit }: ExpenseFormProps) {
 
       {/* Category */}
       <div className="form-group">
-        <label className="form-label">What for?</label>
+        <label className="form-label">{t('whatFor')}</label>
         <CategorySelector
           selected={category?.id}
           onSelect={handleCategorySelect}
@@ -152,7 +154,7 @@ export function ExpenseForm({ members, onSubmit }: ExpenseFormProps) {
       {/* Title (auto-filled from category, editable) */}
       {category && (
         <div className="form-group">
-          <label className="form-label">Description</label>
+          <label className="form-label">{t('description')}</label>
           <input
             type="text"
             className="form-input"
@@ -179,7 +181,7 @@ export function ExpenseForm({ members, onSubmit }: ExpenseFormProps) {
         className="btn btn-primary"
         style={{ width: '100%', padding: '1rem', fontSize: '1.1rem' }}
       >
-        {loading ? '⏳ Adding...' : '💸 Add Expense'}
+        {loading ? '⏳ ' + t('adding') : '💸 ' + t('addExpense')}
       </button>
     </form>
   );

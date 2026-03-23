@@ -1,4 +1,5 @@
 import { TripMember } from '../../api/guest-api';
+import { useLanguage } from '../../i18n';
 
 interface GuestMemberListProps {
   members: TripMember[];
@@ -11,15 +12,16 @@ const roleBadgeClass: Record<string, string> = {
 };
 
 export function GuestMemberList({ members }: GuestMemberListProps) {
+  const { t } = useLanguage();
   if (members.length === 0) {
     return (
       <div className="card">
         <h2 style={{ marginBottom: '1rem', fontSize: '1.5rem', fontWeight: '700' }}>
-          👥 Members
+          👥 {t('members')}
         </h2>
         <div className="empty-state">
           <div className="empty-state-icon">🤷</div>
-          <p>No members found</p>
+          <p>{t('noMembersFound')}</p>
         </div>
       </div>
     );
@@ -36,7 +38,7 @@ export function GuestMemberList({ members }: GuestMemberListProps) {
         }}
       >
         <h2 style={{ fontSize: '1.5rem', fontWeight: '700', margin: 0 }}>
-          👥 Members
+          👥 {t('members')}
         </h2>
         <div className="badge badge-neutral">{members.length} members</div>
       </div>
@@ -45,9 +47,9 @@ export function GuestMemberList({ members }: GuestMemberListProps) {
         <table>
           <thead>
             <tr>
-              <th>Name</th>
-              <th>Role</th>
-              <th>Joined</th>
+              <th>{t('name')}</th>
+              <th>{t('role')}</th>
+              <th>{t('joined')}</th>
             </tr>
           </thead>
           <tbody>

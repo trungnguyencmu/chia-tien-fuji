@@ -5,11 +5,13 @@ import {
   confirmRegistration,
   resendConfirmationCode,
 } from '../api/auth-api';
+import { useLanguage } from '../i18n';
 
 type Step = 'register' | 'confirm';
 
 export default function RegisterPage() {
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   const [step, setStep] = useState<Step>('register');
   const [email, setEmail] = useState('');
@@ -33,7 +35,7 @@ export default function RegisterPage() {
       setError(
         err instanceof Error
           ? err.message
-          : 'Registration failed. Please try again.',
+          : t('registrationFailed'),
       );
     } finally {
       setLoading(false);
@@ -81,12 +83,12 @@ export default function RegisterPage() {
         <div className="auth-header">
           <div className="auth-icon">✨</div>
           <h1 className="auth-title">
-            {step === 'register' ? 'Create Account' : 'Verify Email'}
+            {step === 'register' ? t('createAccount') : t('verifyEmail')}
           </h1>
           <p className="auth-subtitle">
             {step === 'register'
-              ? 'Sign up for Share Money'
-              : `Enter the code sent to ${email}`}
+              ? t('signUpForShareMoney')
+              : t('enterCodeSentTo', { email })}
           </p>
         </div>
 
@@ -108,7 +110,7 @@ export default function RegisterPage() {
           <form onSubmit={handleRegister}>
             <div className="form-group">
               <label className="form-label" htmlFor="name">
-                Name (optional)
+                {t('nameOptional')}
               </label>
               <input
                 id="name"
@@ -123,7 +125,7 @@ export default function RegisterPage() {
 
             <div className="form-group">
               <label className="form-label" htmlFor="email">
-                Email
+                {t('email')}
               </label>
               <input
                 id="email"
@@ -139,7 +141,7 @@ export default function RegisterPage() {
 
             <div className="form-group">
               <label className="form-label" htmlFor="password">
-                Password
+                {t('password')}
               </label>
               <input
                 id="password"
@@ -147,7 +149,7 @@ export default function RegisterPage() {
                 className="form-input"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Min 8 chars, uppercase, lowercase, number"
+                placeholder={t('min8Chars')}
                 required
                 minLength={8}
                 autoComplete="new-password"
@@ -159,14 +161,14 @@ export default function RegisterPage() {
               className="btn btn-primary auth-submit"
               disabled={loading}
             >
-              {loading ? 'Creating account...' : 'Create Account'}
+              {loading ? t('creatingAccount') : t('createAccount')}
             </button>
           </form>
         ) : (
           <form onSubmit={handleConfirm}>
             <div className="form-group">
               <label className="form-label" htmlFor="code">
-                Verification Code
+                {t('verificationCode')}
               </label>
               <input
                 id="code"
@@ -174,7 +176,7 @@ export default function RegisterPage() {
                 className="form-input"
                 value={confirmationCode}
                 onChange={(e) => setConfirmationCode(e.target.value)}
-                placeholder="Enter 6-digit code"
+                placeholder={t('enter6DigitCode')}
                 required
                 autoComplete="one-time-code"
               />
@@ -185,7 +187,7 @@ export default function RegisterPage() {
               className="btn btn-primary auth-submit"
               disabled={loading}
             >
-              {loading ? 'Verifying...' : 'Verify Email'}
+              {loading ? t('verifying') : t('verifyEmail')}
             </button>
 
             <button
@@ -194,15 +196,15 @@ export default function RegisterPage() {
               onClick={handleResendCode}
               style={{ marginTop: '0.75rem' }}
             >
-              Resend Code
+              {t('resendCode')}
             </button>
           </form>
         )}
 
         <div className="auth-footer">
-          Already have an account?{' '}
+          {t('alreadyHaveAccount')}{' '}
           <Link to="/login" className="auth-link">
-            Sign in
+            {t('signIn')}
           </Link>
         </div>
       </div>

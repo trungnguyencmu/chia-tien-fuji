@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Trip, TripMember, fetchTripMembers, addTripMember, removeTripMember, regenerateInviteCode, updateMyDisplayName } from '../api/api';
 import { useAuth } from '../contexts/auth-context';
+import { useLanguage } from '../i18n';
 
 interface TripMembersProps {
   trip: Trip;
@@ -9,6 +10,7 @@ interface TripMembersProps {
 
 export function TripMembers({ trip, onMembersChanged }: TripMembersProps) {
   const { userEmail } = useAuth();
+  const { t } = useLanguage();
   const [members, setMembers] = useState<TripMember[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -37,7 +39,7 @@ export function TripMembers({ trip, onMembersChanged }: TripMembersProps) {
       const data = await fetchTripMembers(trip.tripId);
       setMembers(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load members');
+      setError(err instanceof Error ? err.message : t('loadingMembers'));
     } finally {
       setLoading(false);
     }
@@ -55,14 +57,14 @@ export function TripMembers({ trip, onMembersChanged }: TripMembersProps) {
       await loadMembers();
       onMembersChanged();
     } catch (err) {
-      setAddError(err instanceof Error ? err.message : 'Failed to add member');
+      setAddError(err instanceof Error ? err.message : t('invite') + ' failed');
     } finally {
       setAdding(false);
     }
   };
 
-  const handleRemoveMember = async (userId: string, displayName: string) => {
-    if (!window.confirm(`Remove "${displayName}" from this trip?`)) return;
+  const handleRemoveMember = async (userId: string, _displayName: string) => {
+    if (!window.confirm(t('deleteMemberConfirm'))) return;
 
     try {
       await removeTripMember(trip.tripId, userId);
@@ -70,12 +72,12 @@ export function TripMembers({ trip, onMembersChanged }: TripMembersProps) {
       setMembers((prev) => prev.filter((m) => m.userId !== userId));
       onMembersChanged();
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to remove member');
+      alert(err instanceof Error ? err.message : t('remove') + ' failed');
     }
   };
 
   const handleRegenerateCode = async () => {
-    if (!window.confirm('Regenerate invite code? The old code will stop working.')) return;
+    if (!window.confirm(t('oldCodeStopWorking'))) return;
 
     setRegenerating(true);
     try {
@@ -83,7 +85,7 @@ export function TripMembers({ trip, onMembersChanged }: TripMembersProps) {
       // Update the trip with new invite code via callback
       window.dispatchEvent(new CustomEvent('tripUpdated', { detail: updatedTrip }));
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to regenerate code');
+      alert(err instanceof Error ? err.message : t('regenerateInviteCode'));
     } finally {
       setRegenerating(false);
     }
@@ -115,7 +117,7 @@ export function TripMembers({ trip, onMembersChanged }: TripMembersProps) {
       setEditDisplayName('');
       onMembersChanged();
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to update display name');
+      alert(err instanceof Error ? err.message : t('clickToEdit'));
     } finally {
       setUpdatingDisplayName(false);
     }
@@ -124,7 +126,7 @@ export function TripMembers({ trip, onMembersChanged }: TripMembersProps) {
   if (loading) {
     return (
       <div className="card">
-        <div style={{ textAlign: 'center', padding: '1rem' }}>Loading members...</div>
+        <div style={{ textAlign: 'center', padding: '1rem' }}>{t('loadingMembers')}</div>
       </div>
     );
   }
@@ -132,14 +134,14 @@ export function TripMembers({ trip, onMembersChanged }: TripMembersProps) {
   return (
     <div className="card">
       <h2 style={{ marginBottom: '1.5rem', fontSize: '1.5rem', fontWeight: '700' }}>
-        👥 Members ({members.length})
+        👥 {t('membersCount', { count: members.length })}
       </h2>
 
       {/* Invite Code Section */}
       {trip.inviteCode && (
         <div style={{ marginBottom: '1.5rem', padding: '1rem', background: 'var(--gray-50)', borderRadius: '8px' }}>
           <div style={{ fontSize: '0.75rem', color: 'var(--gray-600)', fontWeight: '600', marginBottom: '0.25rem' }}>
-            INVITE LINK
+            {t('inviteLink')}
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
             <code style={{
@@ -163,7 +165,7 @@ export function TripMembers({ trip, onMembersChanged }: TripMembersProps) {
                 const url = `${window.location.origin}/join/${trip.inviteCode}`;
                 try {
                   await navigator.clipboard.writeText(url);
-                  alert('Invite link copied to clipboard!');
+                  alert(t('copied'));
                 } catch {
                   prompt('Copy this invite link:', url);
                 }
@@ -178,9 +180,9 @@ export function TripMembers({ trip, onMembersChanged }: TripMembersProps) {
                 fontWeight: '600',
                 cursor: 'pointer',
               }}
-              title="Copy invite link"
+              title={t('copyInviteLink')}
             >
-              📋 Copy
+              📋 {t('copy')}
             </button>
             <button
               onClick={handleRegenerateCode}
@@ -195,13 +197,13 @@ export function TripMembers({ trip, onMembersChanged }: TripMembersProps) {
                 cursor: regenerating ? 'not-allowed' : 'pointer',
                 opacity: regenerating ? 0.5 : 1,
               }}
-              title="Regenerate invite link"
+              title={t('regenerateInviteCode')}
             >
               {regenerating ? '⏳' : '🔄'}
             </button>
           </div>
           <div style={{ fontSize: '0.75rem', color: 'var(--gray-500)', marginTop: '0.5rem' }}>
-            Share this link with friends to invite them to the trip
+            {t('shareLinkToInvite')}
           </div>
         </div>
       )}
@@ -216,11 +218,11 @@ export function TripMembers({ trip, onMembersChanged }: TripMembersProps) {
               value={newEmail}
               onChange={(e) => setNewEmail(e.target.value)}
               disabled={adding}
-              placeholder="Enter email to invite"
+              placeholder={t('enterEmailToInvite')}
               style={{ flex: 1 }}
             />
             <button type="submit" className="btn btn-primary" disabled={adding || !newEmail.trim()}>
-              {adding ? '⏳' : '➕ Invite'}
+              {adding ? '⏳' : '➕'} {t('invite')}
             </button>
           </div>
           {addError && (
@@ -242,16 +244,16 @@ export function TripMembers({ trip, onMembersChanged }: TripMembersProps) {
       {members.length === 0 ? (
         <div className="empty-state">
           <div className="empty-state-icon">👤</div>
-          <p>No members yet.</p>
+          <p>{t('noMembersYet')}</p>
         </div>
       ) : (
         <div className="table-container">
           <table>
             <thead>
               <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Role</th>
+                <th>{t('name')}</th>
+                <th>{t('email')}</th>
+                <th>{t('role')}</th>
                 {isOwner && <th></th>}
               </tr>
             </thead>
@@ -309,10 +311,10 @@ export function TripMembers({ trip, onMembersChanged }: TripMembersProps) {
                       <span
                         style={{ cursor: member.email === userEmail ? 'pointer' : 'default' }}
                         onClick={() => member.email === userEmail && handleStartEdit(member)}
-                        title={member.email === userEmail ? 'Click to edit your display name' : undefined}
+                        title={member.email === userEmail ? t('clickToEdit') : undefined}
                       >
                         <strong>{member.displayName}</strong>
-                        {member.email === userEmail && ' (you)'}
+                        {member.email === userEmail && ' ' + t('you')}
                         {member.email === userEmail && (
                           <span style={{ marginLeft: '0.5rem', fontSize: '0.75rem', opacity: 0.6 }}>✏️</span>
                         )}
@@ -322,7 +324,7 @@ export function TripMembers({ trip, onMembersChanged }: TripMembersProps) {
                   <td>{member.email}</td>
                   <td>
                     <span className={`badge ${member.role === 'owner' ? 'badge-success' : 'badge-neutral'}`}>
-                      {member.role}
+                      {member.role === 'owner' ? t('owner') : t('memberRole')}
                     </span>
                   </td>
                   {isOwner && member.role !== 'owner' && (
@@ -337,7 +339,7 @@ export function TripMembers({ trip, onMembersChanged }: TripMembersProps) {
                           color: '#991b1b',
                           padding: '0.25rem 0.5rem',
                         }}
-                        title={`Remove ${member.displayName}`}
+                        title={t('remove')}
                       >
                         ✕
                       </button>

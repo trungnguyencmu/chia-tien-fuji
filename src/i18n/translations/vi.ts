@@ -1,0 +1,170 @@
+import type { TranslationKey } from '../types';
+
+type Translations = {
+  [K in TranslationKey]: string;
+};
+
+export const vi: Translations = {
+  // Layout
+  appTitle: 'Chia Tiền',
+  refresh: 'Làm mới',
+  signOut: 'Đăng xuất',
+  newTrip: 'Chuyến đi mới',
+  create: 'Tạo',
+  cancel: 'Hủy',
+  currentTrip: 'CHUYẾN ĐI HIỆN TẠI',
+  deleteTrip: 'Xóa chuyến đi',
+  loading: 'Đang tải...',
+  newTripNamePlaceholder: 'Tên chuyến đi...',
+
+  // HomePage
+  createFirstTrip: 'Tạo Chuyến Đi Đầu Tiên',
+  getStartedCreateTrip: 'Bắt đầu bằng cách tạo một chuyến đi để theo dõi chi tiêu chung!',
+  noTripSelected: 'Chưa Chọn Chuyến Đi',
+  selectTripFromHeader: 'Chọn một chuyến đi từ phần header để bắt đầu.',
+  loadingExpenses: 'Đang tải chi tiêu...',
+  error: 'Lỗi',
+  retry: 'Thử lại',
+  dangerZone: 'Khu Vực Nguy Hiểm',
+  permanentlyDeleteAll: 'Xóa VĨNH VIỄN TẤT CẢ chi tiêu trong chuyến đi này.',
+  enterPassword: 'Nhập mật khẩu',
+  deleteAll: 'Xóa tất cả',
+  deleting: 'Đang xóa...',
+
+  // ExpenseForm
+  whoPaid: 'Ai trả tiền?',
+  howMuch: 'Bao nhiêu?',
+  whatFor: 'Chi cho gì?',
+  description: 'Mô tả',
+  pleaseFillAllFields: 'Vui lòng điền đầy đủ thông tin',
+  pleaseEnterValidAmount: 'Vui lòng nhập số tiền hợp lệ',
+  adding: 'Đang thêm...',
+  addExpense: 'Thêm Chi Tiêu',
+  failedToAddExpense: 'Thêm chi tiêu thất bại',
+  amountPlaceholder: '0',
+
+  // ExpenseList
+  expenses: 'Chi Tiêu',
+  noExpensesYet: 'Chưa có chi tiêu nào',
+  addFirstExpense: 'Thêm chi tiêu đầu tiên để bắt đầu chia!',
+  items: 'mục',
+  people: 'người',
+  paid: 'đã trả',
+  deleteExpense: 'Xóa chi tiêu',
+  today: 'Hôm nay',
+  yesterday: 'Hôm qua',
+
+  // Settlement
+  settlement: 'Tính Toán',
+  totalSpent: 'Tổng Chi',
+  yourShare: 'Phần Của Bạn',
+  whoOwesWho: 'Ai Nợ Ai',
+  allSettledUp: 'Đã thanh toán hết!',
+  owes: 'nợ',
+  balances: 'Số Dư',
+  paidVnd: 'Đã trả {amount} VND',
+  settled: 'Đã thanh toán',
+  memberBalances: 'Số Dư Thành Viên',
+  totalExpenses: 'Tổng Chi Tiêu',
+  members: 'Thành viên',
+  sharePerPerson: 'Mỗi Người',
+  member: 'Thành viên',
+  paidCol: 'Đã trả',
+  share: 'Phần',
+  balance: 'Số dư',
+  everyoneIsSettled: 'Mọi người đã thanh toán xong!',
+  from: 'từ',
+  to: 'đến',
+  amount: 'Số tiền',
+
+  // TripMembers
+  membersCount: 'Thành viên ({count})',
+  inviteLink: 'LIÊN KẾT MỜI',
+  shareLinkToInvite: 'Chia sẻ liên kết này để mời bạn bè tham gia chuyến đi',
+  copy: 'Sao chép',
+  copied: 'Đã sao chép!',
+  regenerate: 'Tạo lại',
+  enterEmailToInvite: 'Nhập email để mời',
+  invite: 'Mời',
+  name: 'Tên',
+  email: 'Email',
+  role: 'Vai trò',
+  you: '(bạn)',
+  clickToEdit: 'Nhấn để sửa tên hiển thị',
+  remove: 'Xóa',
+  noMembersYet: 'Chưa có thành viên.',
+  loadingMembers: 'Đang tải thành viên...',
+  copyInviteLink: 'Sao chép liên kết mời',
+  regenerateInviteCode: 'Tạo lại liên kết mời',
+  oldCodeStopWorking: 'Tạo lại mã mời? Mã cũ sẽ không còn hoạt động.',
+  owner: 'Chủ chuyến',
+  memberRole: 'Thành viên',
+  inviting: 'Đang mời...',
+  deleteConfirm: 'Bạn có chắc muốn xóa không?',
+  deleteMemberConfirm: 'Bạn có chắc muốn xóa thành viên này không?',
+
+  // LoginPage
+  welcomeBack: 'Chào Trở Lại',
+  signInToShareMoney: 'Đăng nhập Chia Tiền',
+  loginFailed: 'Đăng nhập thất bại. Vui lòng thử lại.',
+  signIn: 'Đăng Nhập',
+  signingIn: 'Đang đăng nhập...',
+  dontHaveAccount: 'Chưa có tài khoản?',
+  signUp: 'Đăng ký',
+  emailLogin: 'Email',
+  password: 'Mật khẩu',
+  enterYourPassword: 'Nhập mật khẩu',
+
+  // RegisterPage
+  createAccount: 'Tạo Tài Khoản',
+  verifyEmail: 'Xác Minh Email',
+  signUpForShareMoney: 'Đăng ký Chia Tiền',
+  enterCodeSentTo: 'Nhập mã đã gửi đến {email}',
+  registrationFailed: 'Đăng ký thất bại. Vui lòng thử lại.',
+  nameOptional: 'Tên (tùy chọn)',
+  min8Chars: 'Tối thiểu 8 ký tự, chữ hoa, chữ thường, số',
+  creatingAccount: 'Đang tạo tài khoản...',
+  verificationCode: 'Mã Xác Minh',
+  enter6DigitCode: 'Nhập mã 6 chữ số',
+  verifying: 'Đang xác minh...',
+  resendCode: 'Gửi lại mã',
+  alreadyHaveAccount: 'Đã có tài khoản?',
+
+  // JoinPage
+  joinTrip: 'Tham Gia Chuyến Đi',
+  enterInviteCode: 'Nhập mã mời được chia sẻ bởi người tổ chức',
+  yourName: 'Tên Của Bạn',
+  howShouldOthersSeeYou: 'Người khác sẽ thấy bạn là ai?',
+  bothRequired: 'Cần cả mã mời và tên hiển thị',
+  joining: 'Đang tham gia...',
+  join: 'Tham Gia',
+  haveAccount: 'Đã có tài khoản?',
+
+  // GuestTripPage
+  loadingTrip: 'Đang tải chuyến đi...',
+  loggedInAs: 'Đăng nhập với',
+  leave: 'Rời đi',
+  expensesTab: 'Chi Tiêu',
+  settlementTab: 'Tính Toán',
+
+  // GuestExpenseForm
+  addNewExpense: 'Thêm Chi Tiêu Mới',
+  payerName: 'Người Trả',
+  selectPayer: 'Chọn người trả...',
+  title: 'Nội dung',
+  amountVnd: 'Số tiền (VND)',
+  date: 'Ngày',
+  allFieldsRequired: 'Cần điền đầy đủ thông tin',
+  amountMustBePositive: 'Số tiền phải lớn hơn 0',
+  failedToAdd: 'Thêm chi tiêu thất bại',
+  addExpenseGuest: 'Thêm Chi Tiêu',
+  addingExpense: 'Đang thêm...',
+
+  // GuestSettlement
+  addExpensesToSeeWhoOwes: 'Thêm chi tiêu để xem ai nợ ai',
+  everyoneIsSettledGuest: 'Mọi người đã thanh toán xong!',
+
+  // GuestMemberList
+  noMembersFound: 'Không tìm thấy thành viên',
+  joined: 'Tham gia',
+};

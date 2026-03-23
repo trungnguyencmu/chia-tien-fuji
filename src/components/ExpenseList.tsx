@@ -4,6 +4,7 @@ import { Avatar } from './ui/Avatar';
 import { getEmojiForTitle } from './ui/CategoryTag';
 import { deleteExpense } from '../api/api';
 import { getCurrentTripId } from '../utils/storage';
+import { useLanguage } from '../i18n';
 
 interface ExpenseListProps {
   expenses: Expense[];
@@ -49,12 +50,13 @@ function groupByDate(expenses: Expense[]): Map<string, Expense[]> {
 }
 
 export const ExpenseList = memo(function ExpenseList({ expenses, members, onExpenseDeleted }: ExpenseListProps) {
+  const { t } = useLanguage();
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const handleDelete = useCallback(async (expenseId: string, expenseTitle: string) => {
     const tripId = getCurrentTripId();
     if (!tripId) {
-      alert('No trip selected');
+      alert('No trip selected'); // TODO: translate
       return;
     }
 
@@ -70,7 +72,7 @@ export const ExpenseList = memo(function ExpenseList({ expenses, members, onExpe
       await deleteExpense(tripId, expenseId, password);
       onExpenseDeleted();
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to delete expense');
+      alert(err instanceof Error ? err.message : t('deleteExpense') + ' failed');
     } finally {
       setDeletingId(null);
     }
@@ -87,8 +89,8 @@ export const ExpenseList = memo(function ExpenseList({ expenses, members, onExpe
       <div className="card">
         <div className="empty-state">
           <div className="empty-state-icon">🧾</div>
-          <h3>No expenses yet</h3>
-          <p>Add your first expense to start splitting!</p>
+          <h3>{t('noExpensesYet')}</h3>
+          <p>{t('addFirstExpense')}</p>
         </div>
       </div>
     );
@@ -100,10 +102,10 @@ export const ExpenseList = memo(function ExpenseList({ expenses, members, onExpe
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
         <div>
           <h2 style={{ fontSize: '1.5rem', fontWeight: 700, margin: 0 }}>
-            📋 Expenses
+            📋 {t('expenses')}
           </h2>
           <p style={{ fontSize: '0.875rem', color: 'var(--gray-600)', margin: '0.25rem 0 0' }}>
-            {expenses.length} {expenses.length === 1 ? 'item' : 'items'} • Total {totalAmount.toLocaleString()} VND
+            {expenses.length} {expenses.length === 1 ? t('items').slice(0, -1) : t('items')} • {t('totalExpenses')} {totalAmount.toLocaleString()} VND
           </p>
         </div>
       </div>
@@ -123,12 +125,12 @@ export const ExpenseList = memo(function ExpenseList({ expenses, members, onExpe
                   <div className="expense-title">
                     {expense.title}
                     <span className="expense-split">
-                      • {members.length > 0 ? `${members.length} people` : 'everyone'}
+                      • {members.length > 0 ? `${members.length} ${t('people')}` : 'everyone'}
                     </span>
                   </div>
                   <div className="expense-meta">
                     <Avatar name={expense.payer} size="sm" />
-                    <span>{expense.payer} paid</span>
+                    <span>{expense.payer} {t('paid')}</span>
                   </div>
                 </div>
                 <div style={{ textAlign: 'right' }}>
@@ -145,7 +147,7 @@ export const ExpenseList = memo(function ExpenseList({ expenses, members, onExpe
                       padding: '0.25rem',
                       marginTop: '0.25rem',
                     }}
-                    title="Delete expense"
+                    title={t('deleteExpense')}
                   >
                     {deletingId === expense.id ? '⏳' : '🗑️'}
                   </button>

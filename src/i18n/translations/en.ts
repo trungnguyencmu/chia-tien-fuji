@@ -1,0 +1,170 @@
+import type { TranslationKey } from '../types';
+
+type Translations = {
+  [K in TranslationKey]: string;
+};
+
+export const en: Translations = {
+  // Layout
+  appTitle: 'Share Money',
+  refresh: 'Refresh Data',
+  signOut: 'Sign Out',
+  newTrip: 'New Trip',
+  create: 'Create',
+  cancel: 'Cancel',
+  currentTrip: 'CURRENT TRIP',
+  deleteTrip: 'Delete current trip',
+  loading: 'Loading...',
+  newTripNamePlaceholder: 'New trip name...',
+
+  // HomePage
+  createFirstTrip: 'Create Your First Trip',
+  getStartedCreateTrip: 'Get started by creating a trip to track shared expenses!',
+  noTripSelected: 'No Trip Selected',
+  selectTripFromHeader: 'Select a trip from the header to get started.',
+  loadingExpenses: 'Loading expenses...',
+  error: 'Error',
+  retry: 'Retry',
+  dangerZone: 'Danger Zone',
+  permanentlyDeleteAll: 'Permanently delete ALL expenses in this trip.',
+  enterPassword: 'Enter password',
+  deleteAll: 'Delete All',
+  deleting: 'Deleting...',
+
+  // ExpenseForm
+  whoPaid: 'Who paid?',
+  howMuch: 'How much?',
+  whatFor: 'What for?',
+  description: 'Description',
+  pleaseFillAllFields: 'Please fill in all fields',
+  pleaseEnterValidAmount: 'Please enter a valid amount',
+  adding: 'Adding...',
+  addExpense: 'Add Expense',
+  failedToAddExpense: 'Failed to add expense',
+  amountPlaceholder: '0',
+
+  // ExpenseList
+  expenses: 'Expenses',
+  noExpensesYet: 'No expenses yet',
+  addFirstExpense: 'Add your first expense to start splitting!',
+  items: 'items',
+  people: 'people',
+  paid: 'paid',
+  deleteExpense: 'Delete expense',
+  today: 'Today',
+  yesterday: 'Yesterday',
+
+  // Settlement
+  settlement: 'Settlement',
+  totalSpent: 'Total Spent',
+  yourShare: 'Your Share',
+  whoOwesWho: 'Who Owes Who',
+  allSettledUp: 'All settled up!',
+  owes: 'owes',
+  balances: 'Balances',
+  paidVnd: 'Paid {amount} VND',
+  settled: 'Settled',
+  memberBalances: 'Member Balances',
+  totalExpenses: 'Total Expenses',
+  members: 'Members',
+  sharePerPerson: 'Share per Person',
+  member: 'Member',
+  paidCol: 'Paid',
+  share: 'Share',
+  balance: 'Balance',
+  everyoneIsSettled: 'Everyone is settled!',
+  from: 'from',
+  to: 'to',
+  amount: 'Amount',
+
+  // TripMembers
+  membersCount: 'Members ({count})',
+  inviteLink: 'INVITE LINK',
+  shareLinkToInvite: 'Share this link with friends to invite them to the trip',
+  copy: 'Copy',
+  copied: 'Copied!',
+  regenerate: 'Regenerate',
+  enterEmailToInvite: 'Enter email to invite',
+  invite: 'Invite',
+  name: 'Name',
+  email: 'Email',
+  role: 'Role',
+  you: '(you)',
+  clickToEdit: 'Click to edit your display name',
+  remove: 'Remove',
+  noMembersYet: 'No members yet.',
+  loadingMembers: 'Loading members...',
+  copyInviteLink: 'Copy invite link',
+  regenerateInviteCode: 'Regenerate invite link',
+  oldCodeStopWorking: 'Regenerate invite code? The old code will stop working.',
+  owner: 'Owner',
+  memberRole: 'Member',
+  inviting: 'Inviting...',
+  deleteConfirm: 'Are you sure you want to delete this?',
+  deleteMemberConfirm: 'Are you sure you want to remove this member?',
+
+  // LoginPage
+  welcomeBack: 'Welcome Back',
+  signInToShareMoney: 'Sign in to Share Money',
+  loginFailed: 'Login failed. Please try again.',
+  signIn: 'Sign In',
+  signingIn: 'Signing in...',
+  dontHaveAccount: "Don't have an account?",
+  signUp: 'Sign up',
+  emailLogin: 'Email',
+  password: 'Password',
+  enterYourPassword: 'Enter your password',
+
+  // RegisterPage
+  createAccount: 'Create Account',
+  verifyEmail: 'Verify Email',
+  signUpForShareMoney: 'Sign up for Share Money',
+  enterCodeSentTo: 'Enter the code sent to {email}',
+  registrationFailed: 'Registration failed. Please try again.',
+  nameOptional: 'Name (optional)',
+  min8Chars: 'Min 8 chars, uppercase, lowercase, number',
+  creatingAccount: 'Creating account...',
+  verificationCode: 'Verification Code',
+  enter6DigitCode: 'Enter 6-digit code',
+  verifying: 'Verifying...',
+  resendCode: 'Resend Code',
+  alreadyHaveAccount: 'Already have an account?',
+
+  // JoinPage
+  joinTrip: 'Join a Trip',
+  enterInviteCode: 'Enter the invite code shared by your trip organizer',
+  yourName: 'Your Name',
+  howShouldOthersSeeYou: 'How should others see you?',
+  bothRequired: 'Both invite code and display name are required',
+  joining: 'Joining...',
+  join: 'Join Trip',
+  haveAccount: 'Have an account?',
+
+  // GuestTripPage
+  loadingTrip: 'Loading trip...',
+  loggedInAs: 'Logged in as',
+  leave: 'Leave',
+  expensesTab: 'Expenses',
+  settlementTab: 'Settlement',
+
+  // GuestExpenseForm
+  addNewExpense: 'Add New Expense',
+  payerName: 'Payer Name',
+  selectPayer: 'Select a payer...',
+  title: 'Title',
+  amountVnd: 'Amount (VND)',
+  date: 'Date',
+  allFieldsRequired: 'All fields are required',
+  amountMustBePositive: 'Amount must be a positive number',
+  failedToAdd: 'Failed to add expense',
+  addExpenseGuest: 'Add Expense',
+  addingExpense: 'Adding...',
+
+  // GuestSettlement
+  addExpensesToSeeWhoOwes: 'Add expenses to see who owes whom',
+  everyoneIsSettledGuest: 'Everyone is settled!',
+
+  // GuestMemberList
+  noMembersFound: 'No members found',
+  joined: 'Joined',
+};

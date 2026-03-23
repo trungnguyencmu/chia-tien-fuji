@@ -4,6 +4,7 @@ import { getCurrentTripId, setCurrentTripId, clearCurrentTripId } from '../utils
 import { fetchTrips, fetchCurrentTrip, fetchExpenses, fetchTripMembers, createTrip, deleteTrip, Trip, TripMember } from '../api/api';
 import { Expense } from '../utils/calculation';
 import { useAuth } from '../contexts/auth-context';
+import { useLanguage } from '../i18n';
 
 export interface LayoutContext {
   trips: Trip[];
@@ -20,6 +21,7 @@ export interface LayoutContext {
 export function Layout() {
   const navigate = useNavigate();
   const { userEmail, logout } = useAuth();
+  const { language, setLanguage, t } = useLanguage();
   const [newTripName, setNewTripName] = useState('');
   const [showCreateTrip, setShowCreateTrip] = useState(false);
   const [tripLoading, setTripLoading] = useState(false);
@@ -232,7 +234,7 @@ export function Layout() {
               boxShadow: '0 4px 12px rgb(116 185 255 / 0.3)',
             }}
           >
-            💰 Share Money
+            💰 {t('appTitle')}
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -258,9 +260,32 @@ export function Layout() {
                 e.currentTarget.style.transform = 'scale(1) rotate(0deg)';
                 e.currentTarget.style.boxShadow = '0 4px 12px rgb(180 228 255 / 0.3)';
               }}
-              title="Refresh Data"
+              title={t('refresh')}
             >
               🔄
+            </button>
+            <button
+              onClick={() => setLanguage(language === 'en' ? 'vi' : 'en')}
+              style={{
+                padding: '0.625rem 1rem',
+                borderRadius: '15px',
+                background: 'rgba(116, 185, 255, 0.3)',
+                color: 'var(--gray-700)',
+                border: '1px solid rgba(116, 185, 255, 0.4)',
+                cursor: 'pointer',
+                fontSize: '0.8rem',
+                fontWeight: '600',
+                transition: 'all 0.2s ease',
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.background = 'rgba(116, 185, 255, 0.5)';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.background = 'rgba(116, 185, 255, 0.3)';
+              }}
+              title={language === 'en' ? 'Switch to Vietnamese' : 'Switch to English'}
+            >
+              {language === 'en' ? '🇺🇸 EN' : '🇻🇳 VI'}
             </button>
             <button
               onClick={() => { logout(); navigate('/'); }}
@@ -281,9 +306,9 @@ export function Layout() {
               onMouseOut={(e) => {
                 e.currentTarget.style.background = 'rgba(116, 185, 255, 0.3)';
               }}
-              title={userEmail || 'Sign out'}
+              title={userEmail || t('signOut')}
             >
-              Sign Out
+              {t('signOut')}
             </button>
           </div>
         </div>
@@ -304,7 +329,7 @@ export function Layout() {
             <span style={{ fontSize: '1.25rem' }}>✈️</span>
             <div style={{ flex: 1 }}>
               <div style={{ fontSize: '0.75rem', color: 'var(--gray-600)', fontWeight: '600' }}>
-                CURRENT TRIP
+                {t('currentTrip')}
               </div>
               <div style={{ fontSize: '1rem', fontWeight: '700', color: 'var(--gray-900)' }}>
                 {currentTrip.tripName}
@@ -349,7 +374,7 @@ export function Layout() {
               onMouseOut={(e) => {
                 e.currentTarget.style.background = 'rgba(199, 180, 243, 0.2)';
               }}
-              title="New Trip"
+              title={t('newTrip')}
             >
               ➕
             </button>
@@ -374,7 +399,7 @@ export function Layout() {
               onMouseOut={(e) => {
                 if (!tripLoading) e.currentTarget.style.background = 'rgba(116, 185, 255, 0.2)';
               }}
-              title="Delete current trip"
+              title={t('deleteTrip')}
             >
               🗑️
             </button>
@@ -401,7 +426,7 @@ export function Layout() {
               value={newTripName}
               onChange={(e) => setNewTripName(e.target.value)}
               disabled={tripLoading}
-              placeholder="New trip name..."
+              placeholder={t('newTripNamePlaceholder')}
               style={{ flex: 1, padding: '0.5rem 1rem', fontSize: '0.875rem' }}
               autoFocus
             />
@@ -411,7 +436,7 @@ export function Layout() {
               disabled={tripLoading || !newTripName.trim()}
               style={{ padding: '0.5rem 1rem', fontSize: '0.875rem' }}
             >
-              {tripLoading ? '⏳' : 'Create'}
+              {tripLoading ? '⏳' : t('create')}
             </button>
             <button
               type="button"
@@ -426,7 +451,7 @@ export function Layout() {
                 color: 'var(--gray-600)',
               }}
             >
-              ✕
+              {t('cancel')}
             </button>
           </form>
         )}
@@ -438,7 +463,7 @@ export function Layout() {
         <div style={{ textAlign: 'center', padding: '3rem' }}>
           <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>⏳</div>
           <div style={{ color: 'white', fontSize: '1.25rem', fontWeight: '600' }}>
-            Loading...
+            {t('loading')}
           </div>
         </div>
       )}

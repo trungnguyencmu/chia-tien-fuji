@@ -7,9 +7,11 @@ import { ExpenseForm } from '../components/ExpenseForm';
 import { ExpenseList } from '../components/ExpenseList';
 import { Settlement } from '../components/Settlement';
 import { TripMembers } from '../components/TripMembers';
+import { useLanguage } from '../i18n';
 
 function HomePage() {
   const { trips, currentTrip, currentTripId, expenses, memberNames, loading, error, reloadData, reloadTrips } = useOutletContext<LayoutContext>();
+  const { t } = useLanguage();
 
   // Create trip state
   const [newTripName, setNewTripName] = useState('');
@@ -47,7 +49,7 @@ function HomePage() {
     e.preventDefault();
     if (!currentTripId || !deletePassword) return;
 
-    if (!window.confirm('This will permanently delete ALL expenses in this trip. Are you sure?')) return;
+    if (!window.confirm(t('permanentlyDeleteAll'))) return;
 
     setDeleteLoading(true);
     try {
@@ -67,10 +69,10 @@ function HomePage() {
       <div className="card" style={{ textAlign: 'center', padding: '3rem' }}>
         <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>✈️</div>
         <h2 style={{ fontSize: '1.5rem', fontWeight: '700', marginBottom: '1rem', color: 'var(--gray-900)' }}>
-          Create Your First Trip
+          {t('createFirstTrip')}
         </h2>
         <p style={{ color: 'var(--gray-600)', marginBottom: '2rem', fontSize: '1.1rem' }}>
-          Get started by creating a trip to track shared expenses!
+          {t('getStartedCreateTrip')}
         </p>
         <form onSubmit={handleCreateTrip} style={{ maxWidth: '400px', margin: '0 auto' }}>
           <div style={{ display: 'flex', gap: '0.75rem' }}>
@@ -84,7 +86,7 @@ function HomePage() {
               style={{ flex: 1 }}
             />
             <button type="submit" className="btn btn-primary" disabled={creating || !newTripName.trim()}>
-              {creating ? '⏳' : '➕ Create'}
+              {creating ? '⏳' : '➕'} {t('create')}
             </button>
           </div>
         </form>
@@ -98,10 +100,10 @@ function HomePage() {
       <div className="card" style={{ textAlign: 'center', padding: '3rem' }}>
         <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>✈️</div>
         <h2 style={{ fontSize: '1.5rem', fontWeight: '700', marginBottom: '1rem', color: 'var(--gray-900)' }}>
-          No Trip Selected
+          {t('noTripSelected')}
         </h2>
         <p style={{ color: 'var(--gray-600)', fontSize: '1.1rem' }}>
-          Select a trip from the header to get started.
+          {t('selectTripFromHeader')}
         </p>
       </div>
     );
@@ -112,7 +114,7 @@ function HomePage() {
       <div style={{ textAlign: 'center', padding: '3rem' }}>
         <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>⏳</div>
         <div style={{ color: 'white', fontSize: '1.25rem', fontWeight: '600' }}>
-          Loading expenses...
+          {t('loadingExpenses')}
         </div>
       </div>
     );
@@ -124,10 +126,10 @@ function HomePage() {
         <div className="alert alert-error">
           <span style={{ fontSize: '1.5rem' }}>⚠️</span>
           <div style={{ flex: 1 }}>
-            <strong>Error:</strong> {error}
+            <strong>{t('error')}:</strong> {error}
           </div>
           <button onClick={() => reloadData()} className="btn btn-primary">
-            Retry
+            {t('retry')}
           </button>
         </div>
       )}
@@ -145,11 +147,11 @@ function HomePage() {
       {/* Danger Zone */}
       <div className="card" style={{ background: '#fef2f2', border: '2px solid #fca5a5' }}>
         <h2 style={{ marginBottom: '1rem', fontSize: '1.25rem', fontWeight: '700', color: '#991b1b' }}>
-          🗑️ Danger Zone
+          🗑️ {t('dangerZone')}
         </h2>
         <form onSubmit={handleDeleteAllExpenses}>
           <p style={{ color: '#991b1b', fontSize: '0.875rem', marginBottom: '0.75rem' }}>
-            Permanently delete ALL expenses in this trip.
+            {t('permanentlyDeleteAll')}
           </p>
           <div style={{ display: 'flex', gap: '0.75rem' }}>
             <input
@@ -158,7 +160,7 @@ function HomePage() {
               value={deletePassword}
               onChange={(e) => setDeletePassword(e.target.value)}
               disabled={deleteLoading}
-              placeholder="Enter password"
+              placeholder={t('enterPassword')}
               style={{ flex: 1 }}
             />
             <button
@@ -176,7 +178,7 @@ function HomePage() {
                 opacity: deleteLoading ? 0.6 : 1,
               }}
             >
-              {deleteLoading ? '⏳ Deleting...' : '🗑️ Delete All'}
+              {deleteLoading ? '⏳ ' + t('deleting') : '🗑️ ' + t('deleteAll')}
             </button>
           </div>
         </form>

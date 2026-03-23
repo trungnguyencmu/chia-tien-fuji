@@ -1,11 +1,13 @@
 import { useState, useEffect, type FormEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useGuest } from '../contexts/guest-context';
+import { useLanguage } from '../i18n';
 
 export default function JoinPage() {
   const navigate = useNavigate();
   const { code: urlCode } = useParams<{ code: string }>();
   const { isGuest, tripId, join } = useGuest();
+  const { t } = useLanguage();
 
   const [code, setCode] = useState(urlCode || '');
   const [displayName, setDisplayName] = useState('');
@@ -27,7 +29,7 @@ export default function JoinPage() {
     const trimmedName = displayName.trim();
 
     if (!trimmedCode || !trimmedName) {
-      setError('Both invite code and display name are required');
+      setError(t('bothRequired'));
       return;
     }
 
@@ -50,9 +52,9 @@ export default function JoinPage() {
       <div className="auth-card card">
         <div className="auth-header">
           <div className="auth-icon">🎒</div>
-          <h1 className="auth-title">Join a Trip</h1>
+          <h1 className="auth-title">{t('joinTrip')}</h1>
           <p className="auth-subtitle">
-            Enter the invite code shared by your trip organizer
+            {t('enterInviteCode')}
           </p>
         </div>
 
@@ -66,7 +68,7 @@ export default function JoinPage() {
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label className="form-label" htmlFor="code">
-              Invite Code
+              {t('inviteLink')}
             </label>
             <input
               id="code"
@@ -84,7 +86,7 @@ export default function JoinPage() {
 
           <div className="form-group">
             <label className="form-label" htmlFor="displayName">
-              Your Name
+              {t('yourName')}
             </label>
             <input
               id="displayName"
@@ -92,7 +94,7 @@ export default function JoinPage() {
               className="form-input"
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
-              placeholder="How should others see you?"
+              placeholder={t('howShouldOthersSeeYou')}
               required
               autoComplete="name"
             />
@@ -103,14 +105,14 @@ export default function JoinPage() {
             className="btn btn-primary auth-submit"
             disabled={loading}
           >
-            {loading ? 'Joining...' : '🚀 Join Trip'}
+            {loading ? t('joining') : '🚀 ' + t('join')}
           </button>
         </form>
 
         <div className="auth-footer">
-          Have an account?{' '}
+          {t('haveAccount')}{' '}
           <Link to="/login" className="auth-link">
-            Sign in
+            {t('signIn')}
           </Link>
         </div>
       </div>
