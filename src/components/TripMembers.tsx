@@ -66,7 +66,8 @@ export function TripMembers({ trip, onMembersChanged }: TripMembersProps) {
 
     try {
       await removeTripMember(trip.tripId, userId);
-      await loadMembers();
+      // Update local state instead of reloading
+      setMembers((prev) => prev.filter((m) => m.userId !== userId));
       onMembersChanged();
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Failed to remove member');
@@ -104,9 +105,14 @@ export function TripMembers({ trip, onMembersChanged }: TripMembersProps) {
     setUpdatingDisplayName(true);
     try {
       await updateMyDisplayName(editDisplayName.trim());
+      // Update local state instead of reloading
+      setMembers((prev) =>
+        prev.map((m) =>
+          m.email === userEmail ? { ...m, displayName: editDisplayName.trim() } : m
+        )
+      );
       setEditingUserId(null);
       setEditDisplayName('');
-      await loadMembers();
       onMembersChanged();
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Failed to update display name');

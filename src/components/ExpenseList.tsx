@@ -1,14 +1,54 @@
-import { useState, useMemo, useCallback, memo } from 'react';
+import { useMemo, memo, useCallback, useState } from 'react';
 import { Expense } from '../utils/calculation';
+import { Avatar } from './ui/Avatar';
+import { getEmojiForTitle } from './ui/CategoryTag';
 import { deleteExpense } from '../api/api';
 import { getCurrentTripId } from '../utils/storage';
 
 interface ExpenseListProps {
   expenses: Expense[];
+  members: string[];
   onExpenseDeleted: () => void;
 }
 
-export const ExpenseList = memo(function ExpenseList({ expenses, onExpenseDeleted }: ExpenseListProps) {
+function formatDate(dateStr: string): { label: string; isToday: boolean; isYesterday: boolean } {
+  const date = new Date(dateStr);
+  const today = new Date();
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+
+  const isToday = date.toDateString() === today.toDateString();
+  const isYesterday = date.toDateString() === yesterday.toDateString();
+
+  if (isToday) return { label: 'Today', isToday: true, isYesterday: false };
+  if (isYesterday) return { label: 'Yesterday', isToday: false, isYesterday: true };
+
+  return {
+    label: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+    isToday: false,
+    isYesterday: false,
+  };
+}
+
+function groupByDate(expenses: Expense[]): Map<string, Expense[]> {
+  const groups = new Map<string, Expense[]>();
+
+  const sorted = [...expenses].sort((a, b) =>
+    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
+
+  for (const expense of sorted) {
+    const dateKey = expense.date;
+    if (!groups.has(dateKey)) {
+      groups.set(dateKey, []);
+    }
+    groups.get(dateKey)!.push(expense);
+  }
+
+  return groups;
+}
+
+export const ExpenseList = memo(function ExpenseList({ expenses, members, onExpenseDeleted }: ExpenseListProps) {
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const handleDelete = useCallback(async (expenseId: string, expenseTitle: string) => {
@@ -19,7 +59,7 @@ export const ExpenseList = memo(function ExpenseList({ expenses, onExpenseDelete
     }
 
     const password = window.prompt(
-      `⚠️ Delete "${expenseTitle}"?\n\nEnter password to confirm:`
+      `Delete "${expenseTitle}"?\n\nEnter password to confirm:`
     );
 
     if (!password) return;
@@ -36,27 +76,19 @@ export const ExpenseList = memo(function ExpenseList({ expenses, onExpenseDelete
     }
   }, [onExpenseDeleted]);
 
-  // Memoize sorted expenses
-  const sorted = useMemo(() => {
-    return [...expenses].sort((a, b) => {
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-    });
-  }, [expenses]);
-
-  // Memoize total calculation
   const totalAmount = useMemo(() => {
     return expenses.reduce((sum, e) => sum + e.amount, 0);
   }, [expenses]);
 
+  const grouped = useMemo(() => groupByDate(expenses), [expenses]);
+
   if (expenses.length === 0) {
     return (
       <div className="card">
-        <h2 style={{ marginBottom: '1rem', fontSize: '1.5rem', fontWeight: '700' }}>
-          📋 Expenses
-        </h2>
         <div className="empty-state">
-          <div className="empty-state-icon">💳</div>
-          <p>No expenses yet. Add one above!</p>
+          <div className="empty-state-icon">🧾</div>
+          <h3>No expenses yet</h3>
+          <p>Add your first expense to start splitting!</p>
         </div>
       </div>
     );
@@ -64,73 +96,65 @@ export const ExpenseList = memo(function ExpenseList({ expenses, onExpenseDelete
 
   return (
     <div className="card">
+      {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-        <h2 style={{ fontSize: '1.5rem', fontWeight: '700', margin: 0 }}>
-          📋 Expenses
-        </h2>
-        <div className="badge badge-neutral">
-          {expenses.length} {expenses.length === 1 ? 'expense' : 'expenses'}
+        <div>
+          <h2 style={{ fontSize: '1.5rem', fontWeight: 700, margin: 0 }}>
+            📋 Expenses
+          </h2>
+          <p style={{ fontSize: '0.875rem', color: 'var(--gray-600)', margin: '0.25rem 0 0' }}>
+            {expenses.length} {expenses.length === 1 ? 'item' : 'items'} • Total {totalAmount.toLocaleString()} VND
+          </p>
         </div>
       </div>
 
-      <div className="stat-card" style={{ marginBottom: '1.5rem' }}>
-        <div className="stat-label">Total Expenses</div>
-        <div className="stat-value">{totalAmount.toLocaleString()} VND</div>
-      </div>
-
-      <div className="table-container">
-        <table>
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Payer</th>
-              <th>Title</th>
-              <th className="text-right">Amount (VND)</th>
-              <th style={{ width: '100px' }}>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sorted.map((expense) => (
-              <tr key={expense.id}>
-                <td>{expense.date}</td>
-                <td>
-                  <strong>{expense.payer}</strong>
-                </td>
-                <td>{expense.title}</td>
-                <td className="text-right" style={{ fontWeight: '600' }}>
-                  {expense.amount.toLocaleString()}
-                </td>
-                <td>
+      {/* Timeline */}
+      {Array.from(grouped.entries()).map(([dateKey, dateExpenses]) => {
+        const { label } = formatDate(dateKey);
+        return (
+          <div key={dateKey}>
+            <div className="timeline-date">{label}</div>
+            {dateExpenses.map((expense) => (
+              <div key={expense.id} className="expense-card">
+                <div className="expense-emoji">
+                  {getEmojiForTitle(expense.title)}
+                </div>
+                <div className="expense-details">
+                  <div className="expense-title">
+                    {expense.title}
+                    <span className="expense-split">
+                      • {members.length > 0 ? `${members.length} people` : 'everyone'}
+                    </span>
+                  </div>
+                  <div className="expense-meta">
+                    <Avatar name={expense.payer} size="sm" />
+                    <span>{expense.payer} paid</span>
+                  </div>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <div className="expense-amount">{expense.amount.toLocaleString()}</div>
                   <button
                     onClick={() => handleDelete(expense.id, expense.title)}
                     disabled={deletingId === expense.id}
                     style={{
-                      padding: '0.375rem 0.75rem',
-                      background: '#fee2e2',
-                      color: '#991b1b',
-                      borderRadius: '6px',
+                      background: 'none',
                       border: 'none',
-                      fontWeight: '600',
-                      fontSize: '0.75rem',
                       cursor: deletingId === expense.id ? 'not-allowed' : 'pointer',
-                      transition: 'all 0.2s',
-                      opacity: deletingId === expense.id ? 0.6 : 1,
+                      fontSize: '0.75rem',
+                      color: 'var(--gray-500)',
+                      padding: '0.25rem',
+                      marginTop: '0.25rem',
                     }}
-                    onMouseOver={(e) => {
-                      if (deletingId !== expense.id) e.currentTarget.style.background = '#fecaca';
-                    }}
-                    onMouseOut={(e) => {
-                      if (deletingId !== expense.id) e.currentTarget.style.background = '#fee2e2';
-                    }}
+                    title="Delete expense"
                   >
                     {deletingId === expense.id ? '⏳' : '🗑️'}
                   </button>
-                </td>
-              </tr>
+                </div>
+              </div>
             ))}
-          </tbody>
-        </table>
-      </div>
+          </div>
+        );
+      })}
     </div>
   );
 });

@@ -132,9 +132,9 @@ function HomePage() {
         </div>
       )}
 
-      <ExpenseForm onSubmit={handleAddExpense} />
+      <ExpenseForm members={memberNames} onSubmit={handleAddExpense} />
 
-      <ExpenseList expenses={expenses} onExpenseDeleted={reloadData} />
+      <ExpenseList expenses={expenses} members={memberNames} onExpenseDeleted={reloadData} />
 
       <Settlement expenses={expenses} payerNames={memberNames} />
 
