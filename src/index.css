@@ -7,7 +7,7 @@
 :root {
   --primary: #ff9ec1;
   --primary-dark: #ff7eb3;
-  --primary-light: #fff0f5;
+  --primary-light: #e0f2fe;
   --success: #a8e6cf;
   --success-dark: #10b981;
   --danger: #ffb3ba;
@@ -15,7 +15,7 @@
   --warning: #ffd97d;
   --accent-purple: #c7b4f3;
   --accent-blue: #b4d4ff;
-  --accent-pink: #ffc4e1;
+  --accent-pink: #74b9ff;
   --gray-50: #fafaff;
   --gray-100: #f5f5fa;
   --gray-200: #ebe9f5;
@@ -218,7 +218,7 @@ select.form-input {
 }
 
 .badge-primary {
-  background: linear-gradient(135deg, #fce7f3 0%, #ffc4e1 100%);
+  background: linear-gradient(135deg, #e0f2fe 0%, #74b9ff 100%);
   color: #be185d;
 }
 
@@ -432,7 +432,7 @@ tbody td {
 }
 
 .category-tag.selected {
-  background: linear-gradient(135deg, #fce7f3 0%, #ffc4e1 100%);
+  background: linear-gradient(135deg, #e0f2fe 0%, #74b9ff 100%);
   border-color: var(--primary);
   color: #be185d;
 }
@@ -576,7 +576,7 @@ tbody td {
 }
 
 .quick-amount-btn.selected {
-  background: linear-gradient(135deg, #fce7f3 0%, #ffc4e1 100%);
+  background: linear-gradient(135deg, #e0f2fe 0%, #74b9ff 100%);
   border-color: var(--primary);
   color: #be185d;
 }
