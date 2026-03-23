@@ -14,6 +14,7 @@ const TripsPage = lazy(() => import('./pages/TripsPage'));
 const TripDetailPage = lazy(() => import('./pages/TripDetailPage'));
 const LoginPage = lazy(() => import('./pages/LoginPage'));
 const RegisterPage = lazy(() => import('./pages/RegisterPage'));
+const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'));
 const JoinPage = lazy(() => import('./pages/JoinPage'));
 const GuestTripPage = lazy(() => import('./pages/guest-trip/GuestTripPage'));
 
@@ -63,6 +64,16 @@ function App() {
                 <PublicRoute>
                   <Suspense fallback={<PageLoader />}>
                     <RegisterPage />
+                  </Suspense>
+                </PublicRoute>
+              }
+            />
+            <Route
+              path="/forgot-password"
+              element={
+                <PublicRoute>
+                  <Suspense fallback={<PageLoader />}>
+                    <ForgotPasswordPage />
                   </Suspense>
                 </PublicRoute>
               }

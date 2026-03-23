@@ -67,3 +67,17 @@ export function resendConfirmationCode(
 ): Promise<AuthMessage> {
   return authFetch<AuthMessage>('resend-code', { email });
 }
+
+export function forgotPassword(
+  email: string,
+): Promise<AuthMessage> {
+  return authFetch<AuthMessage>('forgot-password', { email });
+}
+
+export function resetPassword(
+  email: string,
+  code: string,
+  newPassword: string,
+): Promise<AuthMessage> {
+  return authFetch<AuthMessage>('reset-password', { email, code, newPassword });
+}

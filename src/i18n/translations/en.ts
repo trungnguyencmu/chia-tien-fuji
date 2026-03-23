@@ -132,6 +132,19 @@ export const en: Translations = {
   verifying: 'Verifying...',
   resendCode: 'Resend Code',
   alreadyHaveAccount: 'Already have an account?',
+  // ForgotPasswordPage
+  forgotPassword: 'Forgot Password',
+  forgotPasswordSubtitle: 'Enter your email and we\'ll send you a reset code',
+  sendResetCode: 'Send Reset Code',
+  sendingCode: 'Sending...',
+  resetPassword: 'Reset Password',
+  newPassword: 'New Password',
+  enterNewPassword: 'Enter new password',
+  resettingPassword: 'Resetting...',
+  resetCode: 'Reset Code',
+  enterResetCode: 'Enter code from email',
+  passwordResetSuccess: 'Password reset! You can now sign in.',
+  backToLogin: 'Back to sign in',
 
   // JoinPage
   joinTrip: 'Join a Trip',

@@ -97,6 +97,12 @@ export default function LoginPage() {
           >
             {loading ? t('signingIn') : t('signIn')}
           </button>
+
+          <div style={{ textAlign: 'right', marginTop: '0.5rem' }}>
+            <Link to="/forgot-password" className="auth-link" style={{ fontSize: '0.85rem' }}>
+              {t('forgotPassword')}?
+            </Link>
+          </div>
         </form>
 
         <div className="auth-footer">

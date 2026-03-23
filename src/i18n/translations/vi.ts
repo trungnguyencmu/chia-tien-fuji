@@ -132,6 +132,19 @@ export const vi: Translations = {
   verifying: 'Đang xác minh...',
   resendCode: 'Gửi lại mã',
   alreadyHaveAccount: 'Đã có tài khoản?',
+  // ForgotPasswordPage
+  forgotPassword: 'Quên Mật Khẩu',
+  forgotPasswordSubtitle: 'Nhập email và chúng tôi sẽ gửi mã đặt lại cho bạn',
+  sendResetCode: 'Gửi Mã Đặt Lại',
+  sendingCode: 'Đang gửi...',
+  resetPassword: 'Đặt Lại Mật Khẩu',
+  newPassword: 'Mật khẩu mới',
+  enterNewPassword: 'Nhập mật khẩu mới',
+  resettingPassword: 'Đang đặt lại...',
+  resetCode: 'Mã đặt lại',
+  enterResetCode: 'Nhập mã từ email',
+  passwordResetSuccess: 'Đặt lại mật khẩu thành công! Bạn có thể đăng nhập.',
+  backToLogin: 'Quay lại đăng nhập',
 
   // JoinPage
   joinTrip: 'Tham Gia Chuyến Đi',
