@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Expense } from '../utils/calculation';
 import { Avatar } from './ui/Avatar';
 import { getEmojiForTitle } from './ui/CategoryTag';
-import { deleteExpense } from '../api/api';
+import { deleteExpense, deleteImage, fetchImages } from '../api/api';
 import { useLanguage } from '../i18n';
 
 interface ExpenseListProps {
@@ -53,7 +53,8 @@ function groupByDate(expenses: Expense[]): Map<string, Expense[]> {
 export const ExpenseList = memo(function ExpenseList({ tripId, expenses, members, onExpenseDeleted }: ExpenseListProps) {
   const { t } = useLanguage();
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [lightboxImage, setLightboxImage] = useState<string | null>(null);
+  const [lightboxExpense, setLightboxExpense] = useState<Expense | null>(null);
+  const [deletingBill, setDeletingBill] = useState(false);
 
   const handleDelete = useCallback(async (expenseId: string, expenseTripId: string, expenseTitle: string) => {
     // Safety check: ensure expense belongs to this trip
@@ -135,7 +136,7 @@ export const ExpenseList = memo(function ExpenseList({ tripId, expenses, members
                     <span>{expense.payer} {t('paid')}</span>
                     {expense.billImageUrl && (
                       <button
-                        onClick={() => setLightboxImage(expense.billImageUrl!)}
+                        onClick={() => setLightboxExpense(expense)}
                         style={{
                           background: 'rgba(79, 70, 229, 0.1)',
                           border: '1px solid rgba(79, 70, 229, 0.3)',
@@ -180,22 +181,22 @@ export const ExpenseList = memo(function ExpenseList({ tripId, expenses, members
 
       {/* Bill Image Lightbox */}
       <AnimatePresence>
-        {lightboxImage && (
+        {lightboxExpense && (
           <motion.div
             className="photo-lightbox"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={() => setLightboxImage(null)}
+            onClick={() => setLightboxExpense(null)}
           >
             <button
               className="photo-lightbox-close"
-              onClick={() => setLightboxImage(null)}
+              onClick={() => setLightboxExpense(null)}
             >
               ✕
             </button>
             <motion.img
-              src={lightboxImage}
+              src={lightboxExpense.billImageUrl!}
               alt="Receipt"
               initial={{ scale: 0.9 }}
               animate={{ scale: 1 }}
@@ -203,6 +204,34 @@ export const ExpenseList = memo(function ExpenseList({ tripId, expenses, members
               onClick={(e) => e.stopPropagation()}
               style={{ maxWidth: '90vw', maxHeight: '80vh', objectFit: 'contain' }}
             />
+            <div className="photo-lightbox-actions">
+              <button
+                className="btn btn-danger"
+                style={{ fontSize: '0.85rem', padding: '0.5rem 1rem' }}
+                onClick={async (e) => {
+                  e.stopPropagation();
+                  if (!window.confirm(t('deleteReceiptConfirm'))) return;
+                  setDeletingBill(true);
+                  try {
+                    // Find the imageId by looking up trip images
+                    const images = await fetchImages(tripId);
+                    const image = images.find(img => img.url === lightboxExpense.billImageUrl);
+                    if (image) {
+                      await deleteImage(tripId, image.imageId);
+                    }
+                    setLightboxExpense(null);
+                    onExpenseDeleted();
+                  } catch (err) {
+                    alert(err instanceof Error ? err.message : t('failedToDeleteReceipt'));
+                  } finally {
+                    setDeletingBill(false);
+                  }
+                }}
+                disabled={deletingBill}
+              >
+                {deletingBill ? '⏳' : '🗑️'} {t('deleteReceipt')}
+              </button>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

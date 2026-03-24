@@ -290,4 +290,7 @@ export type TranslationKey =
   | 'scanBillFailed'
   | 'enterDescription'
   | 'viewReceipt'
-  | 'receipt';
+  | 'receipt'
+  | 'deleteReceipt'
+  | 'deleteReceiptConfirm'
+  | 'failedToDeleteReceipt';

@@ -27,10 +27,20 @@ export function TripEditModal({ trip, onClose, onTripUpdated }: TripEditModalPro
     setLoading(true);
     setError(null);
     try {
+      const status: 'active' | 'upcoming' | 'settled' = (() => {
+        if (startDate) {
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          const start = new Date(startDate);
+          if (start > today) return 'upcoming';
+        }
+        return 'active';
+      })();
       const updated = await updateTrip(trip.tripId, {
         tripName: tripName.trim(),
         startDate: startDate || undefined,
         endDate: endDate || undefined,
+        status,
       });
       onTripUpdated(updated);
       onClose();
