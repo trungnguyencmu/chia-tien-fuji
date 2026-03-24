@@ -194,6 +194,7 @@ export function ScanBillModal({ tripId, members, onClose, onExpenseCreated }: Sc
                 ref={fileInputRef}
                 type="file"
                 accept="image/jpeg,image/png,image/webp,image/heic"
+                capture="environment"
                 onChange={handleFileSelect}
                 style={{ display: 'none' }}
               />
