@@ -296,6 +296,23 @@ export async function deleteImage(tripId: string, imageId: string): Promise<void
 
 // --- Bill Scanning ---
 
+interface BillUploadUrlResponse {
+  uploadUrl: string;
+  s3Key: string;
+  billId: string;
+}
+
+export async function getBillUploadUrl(
+  tripId: string,
+  fileName: string,
+  contentType: string,
+): Promise<BillUploadUrlResponse> {
+  return apiFetch<BillUploadUrlResponse>(`/trips/${tripId}/scan-bill/upload-url`, {
+    method: 'POST',
+    body: JSON.stringify({ fileName, contentType }),
+  });
+}
+
 export interface ScannedBill {
   billId: string;
   totalAmount: number;

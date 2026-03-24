@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CreateExpenseRequest, ScannedBill, getImageUploadUrl, scanBill, saveImage } from '../api/api';
+import { CreateExpenseRequest, ScannedBill, getBillUploadUrl, scanBill } from '../api/api';
 import { Avatar } from './ui/Avatar';
 import { useLanguage } from '../i18n';
 
@@ -40,12 +40,11 @@ export function ScanBillModal({ tripId, members, onClose, onExpenseCreated }: Sc
     setPreviewUrl(URL.createObjectURL(file));
 
     try {
-      // 1. Get presigned URL
-      const { uploadUrl, imageId, s3Key } = await getImageUploadUrl(
+      // 1. Get presigned URL for bill
+      const { uploadUrl, s3Key } = await getBillUploadUrl(
         tripId,
         file.name,
         file.type,
-        file.size,
       );
 
       // 2. Upload to S3
@@ -55,15 +54,7 @@ export function ScanBillModal({ tripId, members, onClose, onExpenseCreated }: Sc
         body: file,
       });
 
-      // 3. Save image metadata
-      await saveImage(tripId, {
-        imageId,
-        fileName: file.name,
-        size: file.size,
-        contentType: file.type,
-      });
-
-      // 4. Scan the bill
+      // 3. Scan the bill
       const bill = await scanBill(tripId, s3Key);
       setScannedBill(bill);
       setAmount(bill.totalAmount.toString());
