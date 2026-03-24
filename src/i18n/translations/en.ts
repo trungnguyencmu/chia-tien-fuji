@@ -190,6 +190,27 @@ export const en: Translations = {
   removeCoverPhoto: 'Remove cover',
   uploadingCover: 'Uploading cover...',
 
+  // Trip status
+  statusUpcoming: 'Upcoming',
+  statusInProgress: 'In Progress',
+  statusSettled: 'Settled',
+  startsInDays: 'Starts in {days} days',
+  tripDates: '{startDate} - {endDate}',
+  tripInProgress: 'In progress',
+  tripSettled: 'Settled',
+  unsettled: 'Unsettled',
+  markSettled: 'Mark Settled',
+  markUnsettled: 'Mark Unsettled',
+  allTrips: 'All',
+
+  // TripEditModal
+  editTrip: 'Edit Trip',
+  failedToUpdateTrip: 'Failed to update trip',
+  save: 'Save',
+  tripName: 'Trip Name',
+  startDate: 'Start Date',
+  endDate: 'End Date',
+
   // Photos
   photosTab: 'Photos',
   tripPhotos: 'Trip Photos',

@@ -260,4 +260,23 @@ export type TranslationKey =
   | 'landingHeroTravelers'
   | 'landingTestimonial1Text'
   | 'landingTestimonial2Text'
-  | 'landingTestimonial3Text';
+  | 'landingTestimonial3Text'
+  // Trip status
+  | 'statusUpcoming'
+  | 'statusInProgress'
+  | 'statusSettled'
+  | 'startsInDays'
+  | 'tripDates'
+  | 'tripInProgress'
+  | 'tripSettled'
+  | 'unsettled'
+  | 'markSettled'
+  | 'markUnsettled'
+  | 'allTrips'
+  // TripEditModal
+  | 'editTrip'
+  | 'failedToUpdateTrip'
+  | 'save'
+  | 'tripName'
+  | 'startDate'
+  | 'endDate';

@@ -190,6 +190,27 @@ export const vi: Translations = {
   removeCoverPhoto: 'Xóa ảnh bìa',
   uploadingCover: 'Đang tải ảnh bìa...',
 
+  // Trip status
+  statusUpcoming: 'Sắp tới',
+  statusInProgress: 'Đang diễn ra',
+  statusSettled: 'Đã thanh toán',
+  startsInDays: 'Bắt đầu sau {days} ngày',
+  tripDates: '{startDate} - {endDate}',
+  tripInProgress: 'Đang diễn ra',
+  tripSettled: 'Đã thanh toán',
+  unsettled: 'Chưa thanh toán',
+  markSettled: 'Đánh dấu đã thanh toán',
+  markUnsettled: 'Bỏ đánh dấu',
+  allTrips: 'Tất cả',
+
+  // TripEditModal
+  editTrip: 'Sửa Chuyến Đi',
+  failedToUpdateTrip: 'Không thể cập nhật chuyến đi',
+  save: 'Lưu',
+  tripName: 'Tên Chuyến Đi',
+  startDate: 'Ngày Bắt Đầu',
+  endDate: 'Ngày Kết Thúc',
+
   // Photos
   photosTab: 'Ảnh',
   tripPhotos: 'Ảnh Chuyến Đi',

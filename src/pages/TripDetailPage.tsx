@@ -13,12 +13,14 @@ import {
   saveImage,
   TripMember,
   CreateExpenseRequest,
+  Trip,
 } from '../api/api';
 import { ExpenseForm } from '../components/ExpenseForm';
 import { ExpenseList } from '../components/ExpenseList';
 import { Settlement } from '../components/Settlement';
 import { TripMembers } from '../components/TripMembers';
 import { TripPhotos } from '../components/TripPhotos';
+import { TripEditModal } from '../components/TripEditModal';
 import { useLanguage } from '../i18n';
 
 export default function TripDetailPage() {
@@ -34,6 +36,9 @@ export default function TripDetailPage() {
   // Delete all expenses state
   const [deletePassword, setDeletePassword] = useState('');
   const [deleteLoading, setDeleteLoading] = useState(false);
+
+  // Edit trip modal state
+  const [showEditModal, setShowEditModal] = useState(false);
 
   // Queries
   const { data: trip, isLoading: tripLoading, error: tripError } = useQuery({
@@ -73,7 +78,6 @@ export default function TripDetailPage() {
     return map;
   }, [members]);
 
-  const isOwner = !!trip?.inviteCode;
   const loading = tripLoading || expensesLoading;
   const error = tripError?.message || null;
 
@@ -286,28 +290,28 @@ export default function TripDetailPage() {
             {coverUploading ? '⏳' : '📷'} {coverUploading ? t('uploadingCover') : t('addCoverPhoto')}
           </button>
         )}
+        {/* Edit trip button */}
+        {trip && (
+          <button
+            onClick={() => setShowEditModal(true)}
+            style={{
+              marginLeft: '0.5rem',
+              padding: '0.5rem 0.75rem',
+              borderRadius: '10px',
+              background: 'rgba(255,255,255,0.2)',
+              color: 'white',
+              border: '1px solid rgba(255,255,255,0.3)',
+              cursor: 'pointer',
+              fontSize: '0.8rem',
+              fontWeight: '600',
+              transition: 'all 0.2s',
+              backdropFilter: 'blur(4px)',
+            }}
+          >
+            ✏️ {t('editTrip')}
+          </button>
+        )}
       </div>
-
-      {/* Date inputs section - owner only */}
-      {isOwner && trip && (
-        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
-          <input
-            type="date"
-            value={trip.startDate || ''}
-            onChange={(e) => updateTrip(tripId!, { startDate: e.target.value })}
-            className="form-input"
-            style={{ minWidth: '130px' }}
-          />
-          <span style={{ color: 'rgba(255,255,255,0.7)' }}>-</span>
-          <input
-            type="date"
-            value={trip.endDate || ''}
-            onChange={(e) => updateTrip(tripId!, { endDate: e.target.value })}
-            className="form-input"
-            style={{ minWidth: '130px' }}
-          />
-        </div>
-      )}
 
       {error && (
         <div className="alert alert-error">
@@ -374,6 +378,17 @@ export default function TripDetailPage() {
           </div>
         </form>
       </div>
+
+      {/* Edit Trip Modal */}
+      {showEditModal && trip && (
+        <TripEditModal
+          trip={trip}
+          onClose={() => setShowEditModal(false)}
+          onTripUpdated={(updated: Trip) => {
+            queryClient.setQueryData(['trip', tripId], updated);
+          }}
+        />
+      )}
     </div>
   );
 }
