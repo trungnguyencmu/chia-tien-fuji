@@ -1,5 +1,6 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   fetchCurrentTrip,
   fetchExpenses,
@@ -10,12 +11,9 @@ import {
   updateTrip,
   getImageUploadUrl,
   saveImage,
-  Trip,
   TripMember,
-  TripImage,
   CreateExpenseRequest,
 } from '../api/api';
-import { Expense } from '../utils/calculation';
 import { ExpenseForm } from '../components/ExpenseForm';
 import { ExpenseList } from '../components/ExpenseList';
 import { Settlement } from '../components/Settlement';
@@ -27,13 +25,7 @@ export default function TripDetailPage() {
   const { tripId } = useParams<{ tripId: string }>();
   const navigate = useNavigate();
   const { t } = useLanguage();
-
-  const [trip, setTrip] = useState<Trip | null>(null);
-  const [expenses, setExpenses] = useState<Expense[]>([]);
-  const [memberNames, setMemberNames] = useState<string[]>([]);
-  const [images, setImages] = useState<TripImage[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
   // Cover image state
   const coverInputRef = useRef<HTMLInputElement>(null);
@@ -43,48 +35,59 @@ export default function TripDetailPage() {
   const [deletePassword, setDeletePassword] = useState('');
   const [deleteLoading, setDeleteLoading] = useState(false);
 
-  const loadData = useCallback(async () => {
-    if (!tripId) return;
-    setLoading(true);
-    setError(null);
+  // Queries
+  const { data: trip, isLoading: tripLoading, error: tripError } = useQuery({
+    queryKey: ['trip', tripId],
+    queryFn: () => fetchCurrentTrip(tripId!),
+    enabled: !!tripId,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
 
-    try {
-      const [tripData, expensesData, membersData, imagesData] = await Promise.all([
-        fetchCurrentTrip(tripId),
-        fetchExpenses(tripId),
-        fetchTripMembers(tripId),
-        fetchImages(tripId),
-      ]);
+  const { data: expenses = [], isLoading: expensesLoading } = useQuery({
+    queryKey: ['expenses', tripId],
+    queryFn: () => fetchExpenses(tripId!),
+    enabled: !!tripId,
+    staleTime: 60 * 1000, // 1 minute
+  });
 
-      setTrip(tripData);
-      setExpenses(expensesData);
-      setMemberNames(membersData.map((m: TripMember) => m.displayName));
-      setImages(imagesData);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load data');
-    } finally {
-      setLoading(false);
-    }
-  }, [tripId]);
+  const { data: members = [] } = useQuery({
+    queryKey: ['members', tripId],
+    queryFn: () => fetchTripMembers(tripId!),
+    enabled: !!tripId,
+    staleTime: 2 * 60 * 1000, // 2 minutes
+  });
 
-  const reloadImages = useCallback(async () => {
-    if (!tripId) return;
-    try {
-      const imagesData = await fetchImages(tripId);
-      setImages(imagesData);
-    } catch (err) {
-      console.error('Failed to load images:', err);
-    }
-  }, [tripId]);
+  const { data: images = [] } = useQuery({
+    queryKey: ['images', tripId],
+    queryFn: () => fetchImages(tripId!),
+    enabled: !!tripId,
+    staleTime: 2 * 60 * 1000, // 2 minutes
+  });
 
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
+  const memberNames = useMemo(() => members.map((m: TripMember) => m.displayName), [members]);
+
+  // Create settlement status map from members data
+  const memberSettledStatus = useMemo(() => {
+    const map = new Map<string, boolean>();
+    members.forEach((m) => map.set(m.displayName, m.isSettled));
+    return map;
+  }, [members]);
+
+  const isOwner = !!trip?.inviteCode;
+  const loading = tripLoading || expensesLoading;
+  const error = tripError?.message || null;
+
+  // Mutations
+  const addExpenseMutation = useMutation({
+    mutationFn: (expense: CreateExpenseRequest) => createExpense(tripId!, expense),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['expenses', tripId] });
+    },
+  });
 
   const handleAddExpense = async (expense: CreateExpenseRequest) => {
     if (!tripId) throw new Error('No trip selected');
-    await createExpense(tripId, expense);
-    await loadData();
+    await addExpenseMutation.mutateAsync(expense);
   };
 
   const handleDeleteAllExpenses = async (e: React.FormEvent) => {
@@ -97,7 +100,7 @@ export default function TripDetailPage() {
     try {
       await deleteAllExpenses(tripId, deletePassword);
       setDeletePassword('');
-      await loadData();
+      queryClient.invalidateQueries({ queryKey: ['expenses', tripId] });
     } catch (err) {
       console.error('Failed to delete expenses:', err);
     } finally {
@@ -131,9 +134,8 @@ export default function TripDetailPage() {
 
       await updateTrip(tripId, { imageS3Key: s3Key });
 
-      // Reload trip to get new imageUrl
-      const updatedTrip = await fetchCurrentTrip(tripId);
-      setTrip(updatedTrip);
+      // Invalidate trip query to refetch with new imageUrl
+      queryClient.invalidateQueries({ queryKey: ['trip', tripId] });
     } catch (err) {
       console.error('Failed to upload cover:', err);
     } finally {
@@ -146,14 +148,30 @@ export default function TripDetailPage() {
     setCoverUploading(true);
     try {
       await updateTrip(tripId, { imageS3Key: '' });
-      const updatedTrip = await fetchCurrentTrip(tripId);
-      setTrip(updatedTrip);
+      queryClient.invalidateQueries({ queryKey: ['trip', tripId] });
     } catch (err) {
       console.error('Failed to remove cover:', err);
     } finally {
       setCoverUploading(false);
     }
   };
+
+  // Invalidation callbacks for child components
+  const handleExpenseDeleted = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: ['expenses', tripId] });
+  }, [queryClient, tripId]);
+
+  const handleMembersChanged = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: ['members', tripId] });
+  }, [queryClient, tripId]);
+
+  const handleImagesChanged = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: ['images', tripId] });
+  }, [queryClient, tripId]);
+
+  const handleRetry = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: ['trip', tripId] });
+  }, [queryClient, tripId]);
 
   if (loading) {
     return (
@@ -270,13 +288,34 @@ export default function TripDetailPage() {
         )}
       </div>
 
+      {/* Date inputs section - owner only */}
+      {isOwner && trip && (
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
+          <input
+            type="date"
+            value={trip.startDate || ''}
+            onChange={(e) => updateTrip(tripId!, { startDate: e.target.value })}
+            className="form-input"
+            style={{ minWidth: '130px' }}
+          />
+          <span style={{ color: 'rgba(255,255,255,0.7)' }}>-</span>
+          <input
+            type="date"
+            value={trip.endDate || ''}
+            onChange={(e) => updateTrip(tripId!, { endDate: e.target.value })}
+            className="form-input"
+            style={{ minWidth: '130px' }}
+          />
+        </div>
+      )}
+
       {error && (
         <div className="alert alert-error">
           <span style={{ fontSize: '1.5rem' }}>⚠️</span>
           <div style={{ flex: 1 }}>
             <strong>{t('error')}:</strong> {error}
           </div>
-          <button onClick={() => loadData()} className="btn btn-primary">
+          <button onClick={handleRetry} className="btn btn-primary">
             {t('retry')}
           </button>
         </div>
@@ -284,16 +323,16 @@ export default function TripDetailPage() {
 
       <ExpenseForm members={memberNames} onSubmit={handleAddExpense} />
 
-      <ExpenseList tripId={tripId!} expenses={expenses} members={memberNames} onExpenseDeleted={loadData} />
+      <ExpenseList tripId={tripId!} expenses={expenses} members={memberNames} onExpenseDeleted={handleExpenseDeleted} />
 
-      <Settlement expenses={expenses} payerNames={memberNames} />
+      <Settlement expenses={expenses} payerNames={memberNames} memberSettledStatus={memberSettledStatus} />
 
       {tripId && (
-        <TripPhotos tripId={tripId} images={images} onImagesChanged={reloadImages} />
+        <TripPhotos tripId={tripId} images={images} onImagesChanged={handleImagesChanged} />
       )}
 
       {trip && (
-        <TripMembers trip={trip} onMembersChanged={loadData} />
+        <TripMembers trip={trip} onMembersChanged={handleMembersChanged} />
       )}
 
       {/* Danger Zone */}

@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   fetchTrips,
-  fetchTripMembers,
   createTrip,
   deleteTrip,
   updateTrip,
@@ -13,48 +12,33 @@ import {
 } from '../api/api';
 import { useLanguage } from '../i18n';
 
-interface TripCardData {
-  trip: Trip;
-  memberCount: number;
-}
-
 export default function TripsPage() {
   const navigate = useNavigate();
   const { t } = useLanguage();
 
-  const [trips, setTrips] = useState<TripCardData[]>([]);
+  const [trips, setTrips] = useState<Trip[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
   const [newTripName, setNewTripName] = useState('');
+  const [newStartDate, setNewStartDate] = useState('');
+  const [newEndDate, setNewEndDate] = useState('');
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'upcoming' | 'settled'>('all');
   const coverInputRef = useRef<HTMLInputElement>(null);
 
   const loadTrips = useCallback(async () => {
     setLoading(true);
     try {
       const data = await fetchTrips();
-      const activeTrips = data.filter((t) => t.isActive);
-
-      // Fetch member counts in parallel
-      const tripCards = await Promise.all(
-        activeTrips.map(async (trip) => {
-          try {
-            const members = await fetchTripMembers(trip.tripId);
-            return { trip, memberCount: members.length };
-          } catch {
-            return { trip, memberCount: 0 };
-          }
-        }),
-      );
 
       // Sort by newest first
-      tripCards.sort(
-        (a, b) => new Date(b.trip.createdAt).getTime() - new Date(a.trip.createdAt).getTime(),
+      data.sort(
+        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
       );
 
-      setTrips(tripCards);
+      setTrips(data);
     } catch (err) {
       console.error('Failed to load trips:', err);
     } finally {
@@ -88,7 +72,13 @@ export default function TripsPage() {
     setCreating(true);
     try {
       // 1. Create the trip
-      const newTrip = await createTrip(newTripName);
+      const newTrip = await createTrip(
+        newTripName,
+        undefined,
+        undefined,
+        newStartDate || undefined,
+        newEndDate || undefined
+      );
 
       // 2. If cover photo selected, upload it
       if (coverFile) {
@@ -124,6 +114,8 @@ export default function TripsPage() {
 
       // Reset form
       setNewTripName('');
+      setNewStartDate('');
+      setNewEndDate('');
       removeCover();
       setShowCreate(false);
       navigate(`/app/trips/${newTrip.tripId}`);
@@ -153,6 +145,40 @@ export default function TripsPage() {
       day: 'numeric',
     });
   };
+
+  const formatDateRange = (startDate: string, endDate: string) => {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const startStr = start.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+    const endStr = end.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+    return `${startStr} - ${endStr}`;
+  };
+
+  const getStatusLabel = (status: 'active' | 'upcoming' | 'settled') => {
+    switch (status) {
+      case 'upcoming': return t('statusUpcoming');
+      case 'active': return t('statusInProgress');
+      case 'settled': return t('statusSettled');
+    }
+  };
+
+  const getStatusMessage = (trip: Trip): string | null => {
+    if (!trip.startDate) return null;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const start = new Date(trip.startDate);
+
+    if (trip.status === 'upcoming') {
+      const diffDays = Math.ceil((start.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+      if (diffDays > 0) return t('startsInDays', { days: diffDays });
+    }
+    return null;
+  };
+
+  const filteredTrips = trips.filter((trip) => {
+    if (statusFilter === 'all') return true;
+    return trip.status === statusFilter;
+  });
 
   if (loading) {
     return (
@@ -192,6 +218,38 @@ export default function TripsPage() {
         </button>
       </div>
 
+      {/* Status filter buttons */}
+      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
+        <button
+          className={statusFilter === 'all' ? 'btn btn-primary' : 'btn btn-secondary'}
+          onClick={() => setStatusFilter('all')}
+          style={{ fontSize: '0.85rem' }}
+        >
+          {t('allTrips')}
+        </button>
+        <button
+          className={statusFilter === 'active' ? 'btn btn-primary' : 'btn btn-secondary'}
+          onClick={() => setStatusFilter('active')}
+          style={{ fontSize: '0.85rem' }}
+        >
+          {t('statusInProgress')}
+        </button>
+        <button
+          className={statusFilter === 'upcoming' ? 'btn btn-primary' : 'btn btn-secondary'}
+          onClick={() => setStatusFilter('upcoming')}
+          style={{ fontSize: '0.85rem' }}
+        >
+          {t('statusUpcoming')}
+        </button>
+        <button
+          className={statusFilter === 'settled' ? 'btn btn-primary' : 'btn btn-secondary'}
+          onClick={() => setStatusFilter('settled')}
+          style={{ fontSize: '0.85rem' }}
+        >
+          {t('statusSettled')}
+        </button>
+      </div>
+
       {/* Create trip form */}
       <AnimatePresence>
         {showCreate && (
@@ -203,7 +261,7 @@ export default function TripsPage() {
             style={{ marginBottom: '1.5rem' }}
           >
             <form onSubmit={handleCreate}>
-              <div style={{ display: 'flex', gap: '0.75rem', marginBottom: coverPreview ? '0.75rem' : 0 }}>
+              <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '0.75rem' }}>
                 <input
                   type="text"
                   className="form-input"
@@ -224,10 +282,31 @@ export default function TripsPage() {
                 <button
                   type="button"
                   className="btn btn-secondary"
-                  onClick={() => { setShowCreate(false); setNewTripName(''); removeCover(); }}
+                  onClick={() => { setShowCreate(false); setNewTripName(''); setNewStartDate(''); setNewEndDate(''); removeCover(); }}
                 >
                   {t('cancel')}
                 </button>
+              </div>
+
+              {/* Date inputs */}
+              <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', marginBottom: '0.75rem' }}>
+                <input
+                  type="date"
+                  className="form-input"
+                  value={newStartDate}
+                  onChange={(e) => setNewStartDate(e.target.value)}
+                  disabled={creating}
+                  style={{ minWidth: '130px' }}
+                />
+                <span style={{ color: 'var(--gray-500)' }}>-</span>
+                <input
+                  type="date"
+                  className="form-input"
+                  value={newEndDate}
+                  onChange={(e) => setNewEndDate(e.target.value)}
+                  disabled={creating}
+                  style={{ minWidth: '130px' }}
+                />
               </div>
 
               {/* Cover photo picker */}
@@ -304,7 +383,19 @@ export default function TripsPage() {
       </AnimatePresence>
 
       {/* Empty state */}
-      {trips.length === 0 && (
+      {filteredTrips.length === 0 && statusFilter !== 'all' && (
+        <div className="card" style={{ textAlign: 'center', padding: '2rem' }}>
+          <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🔍</div>
+          <p style={{ color: 'var(--gray-600)' }}>
+            {statusFilter === 'upcoming' && t('noTripsYet')}
+            {statusFilter === 'active' && t('noTripsYet')}
+            {statusFilter === 'settled' && t('noTripsYet')}
+          </p>
+        </div>
+      )}
+
+      {/* Empty state */}
+      {filteredTrips.length === 0 && statusFilter === 'all' && (
         <div className="card" style={{ textAlign: 'center', padding: '3rem' }}>
           <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>✈️</div>
           <h2 style={{ fontSize: '1.5rem', fontWeight: '700', marginBottom: '1rem', color: 'var(--gray-900)' }}>
@@ -324,9 +415,9 @@ export default function TripsPage() {
       )}
 
       {/* Trip cards grid */}
-      {trips.length > 0 && (
+      {filteredTrips.length > 0 && (
         <div className="trip-card-grid">
-          {trips.map(({ trip, memberCount }, i) => (
+          {filteredTrips.map((trip, i) => (
             <motion.div
               key={trip.tripId}
               className="trip-card"
@@ -352,11 +443,29 @@ export default function TripsPage() {
                     </button>
                   </div>
                   <div style={{ padding: '0.75rem 1.25rem 1.25rem' }}>
-                    <h3 className="trip-card-name" style={{ marginBottom: '0.5rem' }}>{trip.tripName}</h3>
+                    <h3 className="trip-card-name" style={{ marginBottom: '0.5rem' }}>
+                      {trip.tripName}
+                      <span
+                        className={`badge badge-${trip.status === 'upcoming' ? 'info' : trip.status === 'active' ? 'success' : 'neutral'}`}
+                        style={{ marginLeft: '0.5rem', fontSize: '0.7rem', verticalAlign: 'middle' }}
+                      >
+                        {getStatusLabel(trip.status)}
+                      </span>
+                    </h3>
                     <div className="trip-card-meta">
-                      <span>👥 {t('tripMembers', { count: memberCount })}</span>
-                      <span>📅 {t('createdOn', { date: formatDate(trip.createdAt) })}</span>
+                      <span>👥 {t('tripMembers', { count: trip.memberCount ?? 0 })}</span>
+                      {trip.startDate && trip.endDate && (
+                        <span>📅 {formatDateRange(trip.startDate, trip.endDate)}</span>
+                      )}
+                      {!trip.startDate && (
+                        <span>📅 {t('createdOn', { date: formatDate(trip.createdAt) })}</span>
+                      )}
                     </div>
+                    {getStatusMessage(trip) && (
+                      <div style={{ fontSize: '0.75rem', color: 'var(--gray-500)', marginTop: '0.25rem' }}>
+                        {getStatusMessage(trip)}
+                      </div>
+                    )}
                   </div>
                 </>
               ) : (
@@ -371,11 +480,29 @@ export default function TripsPage() {
                       🗑️
                     </button>
                   </div>
-                  <h3 className="trip-card-name">{trip.tripName}</h3>
+                  <h3 className="trip-card-name">
+                    {trip.tripName}
+                    <span
+                      className={`badge badge-${trip.status === 'upcoming' ? 'info' : trip.status === 'active' ? 'success' : 'neutral'}`}
+                      style={{ marginLeft: '0.5rem', fontSize: '0.7rem', verticalAlign: 'middle' }}
+                    >
+                      {getStatusLabel(trip.status)}
+                    </span>
+                  </h3>
                   <div className="trip-card-meta">
-                    <span>👥 {t('tripMembers', { count: memberCount })}</span>
-                    <span>📅 {t('createdOn', { date: formatDate(trip.createdAt) })}</span>
+                    <span>👥 {t('tripMembers', { count: trip.memberCount ?? 0 })}</span>
+                    {trip.startDate && trip.endDate && (
+                      <span>📅 {formatDateRange(trip.startDate, trip.endDate)}</span>
+                    )}
+                    {!trip.startDate && (
+                      <span>📅 {t('createdOn', { date: formatDate(trip.createdAt) })}</span>
+                    )}
                   </div>
+                  {getStatusMessage(trip) && (
+                    <div style={{ fontSize: '0.75rem', color: 'var(--gray-500)', marginTop: '0.25rem' }}>
+                      {getStatusMessage(trip)}
+                    </div>
+                  )}
                 </>
               )}
             </motion.div>

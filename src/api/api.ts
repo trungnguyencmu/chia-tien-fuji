@@ -7,10 +7,13 @@ export interface Trip {
   userId: string;
   tripName: string;
   createdAt: string;
-  isActive: boolean;
+  status: 'active' | 'upcoming' | 'settled';
+  startDate?: string;
+  endDate?: string;
   inviteCode?: string;
   imageS3Key?: string;
   imageUrl?: string;
+  memberCount?: number;
 }
 
 export interface TripMember {
@@ -20,6 +23,7 @@ export interface TripMember {
   email: string;
   role: 'owner' | 'member';
   joinedAt: string;
+  isSettled: boolean;
 }
 
 export interface CreateExpenseRequest {
@@ -71,16 +75,31 @@ export async function fetchTrips(): Promise<Trip[]> {
   return apiFetch<Trip[]>('/trips');
 }
 
-export async function createTrip(tripName: string, imageS3Key?: string): Promise<Trip> {
+export async function createTrip(
+  tripName: string,
+  imageS3Key?: string,
+  status?: 'active' | 'upcoming' | 'settled',
+  startDate?: string,
+  endDate?: string
+): Promise<Trip> {
   const body: Record<string, string> = { tripName };
   if (imageS3Key) body.imageS3Key = imageS3Key;
+  if (status) body.status = status;
+  if (startDate) body.startDate = startDate;
+  if (endDate) body.endDate = endDate;
   return apiFetch<Trip>('/trips', {
     method: 'POST',
     body: JSON.stringify(body),
   });
 }
 
-export async function updateTrip(tripId: string, data: { tripName?: string; imageS3Key?: string }): Promise<Trip> {
+export async function updateTrip(tripId: string, data: {
+  tripName?: string;
+  imageS3Key?: string;
+  status?: 'active' | 'upcoming' | 'settled';
+  startDate?: string;
+  endDate?: string;
+}): Promise<Trip> {
   return apiFetch<Trip>(`/trips/${tripId}`, {
     method: 'PATCH',
     body: JSON.stringify(data),
@@ -121,6 +140,28 @@ export async function updateMyDisplayName(displayName: string): Promise<void> {
     method: 'PATCH',
     body: JSON.stringify({ displayName }),
   });
+}
+
+export async function updateMemberSettled(
+  tripId: string,
+  userId: string,
+  isSettled: boolean
+): Promise<TripMember> {
+  return apiFetch<TripMember>(`/trips/${tripId}/members/${userId}/settled`, {
+    method: 'PATCH',
+    body: JSON.stringify({ isSettled }),
+  });
+}
+
+export interface SettlementStatus {
+  userId: string;
+  displayName: string;
+  isSettled: boolean;
+  balance: number;
+}
+
+export async function fetchSettlement(tripId: string): Promise<SettlementStatus[]> {
+  return apiFetch<SettlementStatus[]>(`/trips/${tripId}/settlement`);
 }
 
 // --- User Search ---
