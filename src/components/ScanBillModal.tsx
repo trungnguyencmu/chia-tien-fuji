@@ -163,7 +163,7 @@ export function ScanBillModal({ tripId, members, onClose, onExpenseCreated }: Sc
                 </div>
               ) : previewUrl ? (
                 <div
-                  onClick={() => fileInputRef.current?.click()}
+                  onClick={() => galleryInputRef.current?.click()}
                   style={{
                     border: '2px dashed var(--gray-300)',
                     borderRadius: '12px',
