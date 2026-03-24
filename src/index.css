@@ -250,6 +250,12 @@ select.form-input {
   color: #be185d;
 }
 
+.badge-info,
+.badge-upcoming {
+  background: linear-gradient(135deg, #ede9fe 0%, #c7b4f3 100%);
+  color: #6d28d9;
+}
+
 /* Alerts */
 .alert {
   padding: 1rem 1.25rem;
@@ -1043,6 +1049,21 @@ tbody td {
 /* Remove top gradient bar when card has cover */
 .trip-card:has(.trip-card-cover)::before {
   display: none;
+}
+
+/* Upcoming trip card - distinct purple accent */
+.trip-card.trip-card-upcoming {
+  border-color: rgba(199, 180, 243, 0.6);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(237, 233, 254, 0.4) 100%);
+}
+
+.trip-card.trip-card-upcoming::before {
+  background: linear-gradient(90deg, #c7b4f3, #a78bfa, #8b5cf6);
+}
+
+.trip-card.trip-card-upcoming:hover {
+  border-color: #c7b4f3;
+  box-shadow: 0 8px 24px rgba(167, 139, 250, 0.25);
 }
 
 /* ===== Trip Detail Cover ===== */

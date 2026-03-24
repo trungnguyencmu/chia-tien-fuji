@@ -72,10 +72,19 @@ export default function TripsPage() {
     setCreating(true);
     try {
       // 1. Create the trip
+      const status: 'active' | 'upcoming' | 'settled' = (() => {
+        if (newStartDate) {
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          const start = new Date(newStartDate);
+          if (start > today) return 'upcoming';
+        }
+        return 'active';
+      })();
       const newTrip = await createTrip(
         newTripName,
         undefined,
-        undefined,
+        status,
         newStartDate || undefined,
         newEndDate || undefined
       );
@@ -420,7 +429,7 @@ export default function TripsPage() {
           {filteredTrips.map((trip, i) => (
             <motion.div
               key={trip.tripId}
-              className="trip-card"
+              className={`trip-card${trip.status === 'upcoming' ? ' trip-card-upcoming' : ''}`}
               onClick={() => navigate(`/app/trips/${trip.tripId}`)}
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
@@ -446,7 +455,7 @@ export default function TripsPage() {
                     <h3 className="trip-card-name" style={{ marginBottom: '0.5rem' }}>
                       {trip.tripName}
                       <span
-                        className={`badge badge-${trip.status === 'upcoming' ? 'info' : trip.status === 'active' ? 'success' : 'neutral'}`}
+                        className={`badge badge-${trip.status === 'upcoming' ? 'upcoming' : trip.status === 'active' ? 'success' : 'neutral'}`}
                         style={{ marginLeft: '0.5rem', fontSize: '0.7rem', verticalAlign: 'middle' }}
                       >
                         {getStatusLabel(trip.status)}
