@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Trip, TripMember, UserSearchResult, fetchTripMembers, addTripMember, removeTripMember, regenerateInviteCode, updateMyDisplayName, searchUsers } from '../api/api';
+import { Trip, TripMember, UserSearchResult, fetchTripMembers, addTripMember, removeTripMember, regenerateInviteCode, updateMyDisplayName, searchUsers, updateMemberSettled } from '../api/api';
 import { useAuth } from '../contexts/auth-context';
 import { useLanguage } from '../i18n';
 
@@ -180,6 +180,16 @@ export function TripMembers({ trip, onMembersChanged }: TripMembersProps) {
     }
   };
 
+  const handleToggleSettled = async (member: TripMember) => {
+    try {
+      await updateMemberSettled(trip.tripId, member.userId, !member.isSettled);
+      await loadMembers();
+      onMembersChanged();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to update settlement status');
+    }
+  };
+
   if (loading) {
     return (
       <div className="card">
@@ -357,6 +367,7 @@ export function TripMembers({ trip, onMembersChanged }: TripMembersProps) {
                 <th>{t('name')}</th>
                 <th>{t('email')}</th>
                 <th>{t('role')}</th>
+                <th>{t('settled')}</th>
                 {isOwner && <th></th>}
               </tr>
             </thead>
@@ -430,8 +441,30 @@ export function TripMembers({ trip, onMembersChanged }: TripMembersProps) {
                       {member.role === 'owner' ? t('owner') : t('memberRole')}
                     </span>
                   </td>
+                  <td>
+                    {member.isSettled ? (
+                      <span className="badge badge-success">✓ {t('settled')}</span>
+                    ) : (
+                      <span className="badge badge-neutral">{t('unsettled')}</span>
+                    )}
+                  </td>
                   {isOwner && member.role !== 'owner' && (
                     <td style={{ textAlign: 'right' }}>
+                      <button
+                        onClick={() => handleToggleSettled(member)}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          cursor: 'pointer',
+                          fontSize: '0.75rem',
+                          color: '#4f46e5',
+                          padding: '0.25rem 0.5rem',
+                          marginRight: '0.25rem',
+                        }}
+                        title={member.isSettled ? t('markUnsettled') : t('markSettled')}
+                      >
+                        {member.isSettled ? t('markUnsettled') : t('markSettled')}
+                      </button>
                       <button
                         onClick={() => handleRemoveMember(member.userId, member.displayName)}
                         style={{
@@ -449,6 +482,7 @@ export function TripMembers({ trip, onMembersChanged }: TripMembersProps) {
                     </td>
                   )}
                   {isOwner && member.role === 'owner' && <td></td>}
+                  {!isOwner && <td></td>}
                 </tr>
               ))}
             </tbody>

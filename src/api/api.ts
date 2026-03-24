@@ -31,6 +31,7 @@ export interface CreateExpenseRequest {
   title: string;
   amount: number;
   date: string;
+  billId?: string;
 }
 
 function getAuthToken(): string | null {
@@ -186,6 +187,7 @@ interface ExpenseResponse {
   amount: number;
   date: string;
   createdAt: string;
+  billImageUrl?: string;
 }
 
 function mapExpense(e: ExpenseResponse): Expense {
@@ -197,6 +199,7 @@ function mapExpense(e: ExpenseResponse): Expense {
     amount: e.amount,
     date: e.date,
     createdAt: e.createdAt,
+    billImageUrl: e.billImageUrl,
   };
 }
 
@@ -289,5 +292,22 @@ export async function fetchImages(tripId: string): Promise<TripImage[]> {
 
 export async function deleteImage(tripId: string, imageId: string): Promise<void> {
   return apiFetch<void>(`/trips/${tripId}/images/${imageId}`, { method: 'DELETE' });
+}
+
+// --- Bill Scanning ---
+
+export interface ScannedBill {
+  billId: string;
+  totalAmount: number;
+  currency: string;
+  billDate: string;
+  s3Key: string;
+}
+
+export async function scanBill(tripId: string, s3Key: string): Promise<ScannedBill> {
+  return apiFetch<ScannedBill>(`/trips/${tripId}/scan-bill`, {
+    method: 'POST',
+    body: JSON.stringify({ s3Key }),
+  });
 }
 

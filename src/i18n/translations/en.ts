@@ -211,6 +211,18 @@ export const en: Translations = {
   startDate: 'Start Date',
   endDate: 'End Date',
 
+  // ScanBillModal
+  scanBill: 'Scan Bill',
+  scanning: 'Scanning receipt...',
+  tapToUploadBill: 'Tap to upload a receipt',
+  tapToChange: 'Tap to change image',
+  rescan: 'Rescan',
+  createExpense: 'Create Expense',
+  scanBillFailed: 'Failed to scan bill',
+  enterDescription: 'Enter description...',
+  viewReceipt: 'View receipt',
+  receipt: 'Receipt',
+
   // Photos
   photosTab: 'Photos',
   tripPhotos: 'Trip Photos',

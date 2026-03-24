@@ -6,6 +6,7 @@ export interface Expense {
   amount: number;
   date: string;
   createdAt: string;
+  billImageUrl?: string;
 }
 
 export interface MemberBalance {
@@ -13,6 +14,7 @@ export interface MemberBalance {
   totalPaid: number;
   share: number;
   balance: number;
+  isSettled?: boolean;
 }
 
 export interface Transaction {

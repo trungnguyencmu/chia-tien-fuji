@@ -21,6 +21,7 @@ import { Settlement } from '../components/Settlement';
 import { TripMembers } from '../components/TripMembers';
 import { TripPhotos } from '../components/TripPhotos';
 import { TripEditModal } from '../components/TripEditModal';
+import { ScanBillModal } from '../components/ScanBillModal';
 import { useLanguage } from '../i18n';
 
 export default function TripDetailPage() {
@@ -39,6 +40,9 @@ export default function TripDetailPage() {
 
   // Edit trip modal state
   const [showEditModal, setShowEditModal] = useState(false);
+
+  // Scan bill modal state
+  const [showScanBillModal, setShowScanBillModal] = useState(false);
 
   // Queries
   const { data: trip, isLoading: tripLoading, error: tripError } = useQuery({
@@ -325,6 +329,17 @@ export default function TripDetailPage() {
         </div>
       )}
 
+      {/* Add expense buttons */}
+      <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1rem' }}>
+        <button
+          className="btn btn-secondary"
+          onClick={() => setShowScanBillModal(true)}
+          style={{ flex: 1 }}
+        >
+          📸 {t('scanBill')}
+        </button>
+      </div>
+
       <ExpenseForm members={memberNames} onSubmit={handleAddExpense} />
 
       <ExpenseList tripId={tripId!} expenses={expenses} members={memberNames} onExpenseDeleted={handleExpenseDeleted} />
@@ -386,6 +401,18 @@ export default function TripDetailPage() {
           onClose={() => setShowEditModal(false)}
           onTripUpdated={(updated: Trip) => {
             queryClient.setQueryData(['trip', tripId], updated);
+          }}
+        />
+      )}
+
+      {/* Scan Bill Modal */}
+      {showScanBillModal && (
+        <ScanBillModal
+          tripId={tripId!}
+          members={memberNames}
+          onClose={() => setShowScanBillModal(false)}
+          onExpenseCreated={async (expense) => {
+            await addExpenseMutation.mutateAsync(expense);
           }}
         />
       )}

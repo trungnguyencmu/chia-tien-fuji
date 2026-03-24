@@ -211,6 +211,18 @@ export const vi: Translations = {
   startDate: 'Ngày Bắt Đầu',
   endDate: 'Ngày Kết Thúc',
 
+  // ScanBillModal
+  scanBill: 'Quét Hóa Đơn',
+  scanning: 'Đang quét hóa đơn...',
+  tapToUploadBill: 'Nhấn để tải lên hóa đơn',
+  tapToChange: 'Nhấn để thay đổi ảnh',
+  rescan: 'Quét lại',
+  createExpense: 'Tạo Chi Tiêu',
+  scanBillFailed: 'Không thể quét hóa đơn',
+  enterDescription: 'Nhập mô tả...',
+  viewReceipt: 'Xem hóa đơn',
+  receipt: 'Hóa đơn',
+
   // Photos
   photosTab: 'Ảnh',
   tripPhotos: 'Ảnh Chuyến Đi',

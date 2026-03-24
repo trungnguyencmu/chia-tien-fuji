@@ -1,4 +1,5 @@
 import { useMemo, memo, useCallback, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Expense } from '../utils/calculation';
 import { Avatar } from './ui/Avatar';
 import { getEmojiForTitle } from './ui/CategoryTag';
@@ -52,6 +53,7 @@ function groupByDate(expenses: Expense[]): Map<string, Expense[]> {
 export const ExpenseList = memo(function ExpenseList({ tripId, expenses, members, onExpenseDeleted }: ExpenseListProps) {
   const { t } = useLanguage();
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [lightboxImage, setLightboxImage] = useState<string | null>(null);
 
   const handleDelete = useCallback(async (expenseId: string, expenseTripId: string, expenseTitle: string) => {
     // Safety check: ensure expense belongs to this trip
@@ -131,6 +133,24 @@ export const ExpenseList = memo(function ExpenseList({ tripId, expenses, members
                   <div className="expense-meta">
                     <Avatar name={expense.payer} size="sm" />
                     <span>{expense.payer} {t('paid')}</span>
+                    {expense.billImageUrl && (
+                      <button
+                        onClick={() => setLightboxImage(expense.billImageUrl!)}
+                        style={{
+                          background: 'rgba(79, 70, 229, 0.1)',
+                          border: '1px solid rgba(79, 70, 229, 0.3)',
+                          borderRadius: '6px',
+                          cursor: 'pointer',
+                          fontSize: '0.75rem',
+                          color: '#4f46e5',
+                          padding: '0.2rem 0.5rem',
+                          marginLeft: '0.5rem',
+                        }}
+                        title={t('viewReceipt')}
+                      >
+                        🧾 {t('receipt')}
+                      </button>
+                    )}
                   </div>
                 </div>
                 <div style={{ textAlign: 'right' }}>
@@ -157,6 +177,35 @@ export const ExpenseList = memo(function ExpenseList({ tripId, expenses, members
           </div>
         );
       })}
+
+      {/* Bill Image Lightbox */}
+      <AnimatePresence>
+        {lightboxImage && (
+          <motion.div
+            className="photo-lightbox"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setLightboxImage(null)}
+          >
+            <button
+              className="photo-lightbox-close"
+              onClick={() => setLightboxImage(null)}
+            >
+              ✕
+            </button>
+            <motion.img
+              src={lightboxImage}
+              alt="Receipt"
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.9 }}
+              onClick={(e) => e.stopPropagation()}
+              style={{ maxWidth: '90vw', maxHeight: '80vh', objectFit: 'contain' }}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 });

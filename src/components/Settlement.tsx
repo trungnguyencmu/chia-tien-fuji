@@ -6,9 +6,10 @@ import { useLanguage } from '../i18n';
 interface SettlementProps {
   expenses: Expense[];
   payerNames?: string[];
+  memberSettledStatus?: Map<string, boolean>;
 }
 
-export function Settlement({ expenses, payerNames }: SettlementProps) {
+export function Settlement({ expenses, payerNames, memberSettledStatus }: SettlementProps) {
   const { t } = useLanguage();
   const balances = useMemo(() => calculateBalances(expenses, payerNames), [expenses, payerNames]);
   const transactions = useMemo(() => calculateTransactions(balances), [balances]);
@@ -84,7 +85,10 @@ export function Settlement({ expenses, payerNames }: SettlementProps) {
             {balances.map((balance) => {
               const isPositive = balance.balance > 0.01;
               const isNegative = balance.balance < -0.01;
-              const isSettled = !isPositive && !isNegative;
+              // Manual member.isSettled flag takes precedence over balance-based calculation
+              const isSettled = memberSettledStatus?.has(balance.member)
+                ? memberSettledStatus.get(balance.member)!
+                : (!isPositive && !isNegative);
 
               return (
                 <div

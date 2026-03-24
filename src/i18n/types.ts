@@ -279,4 +279,15 @@ export type TranslationKey =
   | 'save'
   | 'tripName'
   | 'startDate'
-  | 'endDate';
+  | 'endDate'
+  // ScanBillModal
+  | 'scanBill'
+  | 'scanning'
+  | 'tapToUploadBill'
+  | 'tapToChange'
+  | 'rescan'
+  | 'createExpense'
+  | 'scanBillFailed'
+  | 'enterDescription'
+  | 'viewReceipt'
+  | 'receipt';
