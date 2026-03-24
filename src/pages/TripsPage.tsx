@@ -72,19 +72,10 @@ export default function TripsPage() {
     setCreating(true);
     try {
       // 1. Create the trip
-      const status: 'active' | 'upcoming' | 'settled' = (() => {
-        if (newStartDate) {
-          const today = new Date();
-          today.setHours(0, 0, 0, 0);
-          const start = new Date(newStartDate);
-          if (start > today) return 'upcoming';
-        }
-        return 'active';
-      })();
       const newTrip = await createTrip(
         newTripName,
         undefined,
-        status,
+        undefined,
         newStartDate || undefined,
         newEndDate || undefined
       );
