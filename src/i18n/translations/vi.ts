@@ -225,6 +225,8 @@ export const vi: Translations = {
   deleteReceipt: 'Xóa Hóa Đơn',
   deleteReceiptConfirm: 'Bạn có chắc muốn xóa hình hóa đơn này không?',
   failedToDeleteReceipt: 'Không thể xóa hóa đơn',
+  takePhoto: 'Chụp Ảnh',
+  chooseFromGallery: 'Chọn từ Thư viện',
 
   // Photos
   photosTab: 'Ảnh',

@@ -13,7 +13,8 @@ interface ScanBillModalProps {
 
 export function ScanBillModal({ tripId, members, onClose, onExpenseCreated }: ScanBillModalProps) {
   const { t } = useLanguage();
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
 
   const [step, setStep] = useState<'upload' | 'review'>('upload');
   const [loading, setLoading] = useState(false);
@@ -147,51 +148,90 @@ export function ScanBillModal({ tripId, members, onClose, onExpenseCreated }: Sc
           {step === 'upload' && (
             <>
               {/* Upload zone */}
-              <div
-                onClick={() => fileInputRef.current?.click()}
-                style={{
-                  border: '2px dashed var(--gray-300)',
-                  borderRadius: '12px',
-                  padding: '3rem 2rem',
-                  textAlign: 'center',
-                  cursor: loading ? 'wait' : 'pointer',
-                  background: loading ? 'var(--gray-50)' : 'transparent',
-                  transition: 'all 0.2s',
-                }}
-              >
-                {loading ? (
-                  <>
-                    <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>⏳</div>
-                    <p style={{ color: 'var(--gray-600)', margin: 0 }}>{t('scanning')}</p>
-                  </>
-                ) : previewUrl ? (
-                  <>
-                    <img
-                      src={previewUrl}
-                      alt="Receipt preview"
-                      style={{
-                        maxWidth: '100%',
-                        maxHeight: '200px',
-                        borderRadius: '8px',
-                        marginBottom: '1rem',
-                      }}
-                    />
-                    <p style={{ color: 'var(--gray-500)', fontSize: '0.875rem', margin: 0 }}>
-                      {t('tapToChange')}
-                    </p>
-                  </>
-                ) : (
-                  <>
-                    <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📷</div>
-                    <p style={{ fontWeight: 600, marginBottom: '0.5rem' }}>{t('tapToUploadBill')}</p>
-                    <p style={{ color: 'var(--gray-500)', fontSize: '0.875rem', margin: 0 }}>
-                      JPG, PNG, HEIC
-                    </p>
-                  </>
-                )}
-              </div>
+              {loading ? (
+                <div
+                  style={{
+                    border: '2px dashed var(--gray-300)',
+                    borderRadius: '12px',
+                    padding: '3rem 2rem',
+                    textAlign: 'center',
+                    background: 'var(--gray-50)',
+                  }}
+                >
+                  <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>⏳</div>
+                  <p style={{ color: 'var(--gray-600)', margin: 0 }}>{t('scanning')}</p>
+                </div>
+              ) : previewUrl ? (
+                <div
+                  onClick={() => fileInputRef.current?.click()}
+                  style={{
+                    border: '2px dashed var(--gray-300)',
+                    borderRadius: '12px',
+                    padding: '1.5rem',
+                    textAlign: 'center',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <img
+                    src={previewUrl}
+                    alt="Receipt preview"
+                    style={{
+                      maxWidth: '100%',
+                      maxHeight: '200px',
+                      borderRadius: '8px',
+                      marginBottom: '1rem',
+                    }}
+                  />
+                  <p style={{ color: 'var(--gray-500)', fontSize: '0.875rem', margin: 0 }}>
+                    {t('tapToChange')}
+                  </p>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', gap: '1rem' }}>
+                  {/* Camera option */}
+                  <div
+                    onClick={() => cameraInputRef.current?.click()}
+                    style={{
+                      flex: 1,
+                      border: '2px dashed var(--gray-300)',
+                      borderRadius: '12px',
+                      padding: '2rem 1rem',
+                      textAlign: 'center',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                    }}
+                  >
+                    <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>📷</div>
+                    <p style={{ fontWeight: 600, fontSize: '0.9rem', margin: 0 }}>{t('takePhoto')}</p>
+                  </div>
+                  {/* Gallery option */}
+                  <div
+                    onClick={() => galleryInputRef.current?.click()}
+                    style={{
+                      flex: 1,
+                      border: '2px dashed var(--gray-300)',
+                      borderRadius: '12px',
+                      padding: '2rem 1rem',
+                      textAlign: 'center',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                    }}
+                  >
+                    <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>🖼️</div>
+                    <p style={{ fontWeight: 600, fontSize: '0.9rem', margin: 0 }}>{t('chooseFromGallery')}</p>
+                  </div>
+                </div>
+              )}
               <input
-                ref={fileInputRef}
+                ref={cameraInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/heic"
+                capture="environment"
+                onChange={handleFileSelect}
+                style={{ display: 'none' }}
+              />
+              <input
+                ref={galleryInputRef}
                 type="file"
                 accept="image/jpeg,image/png,image/webp,image/heic"
                 onChange={handleFileSelect}

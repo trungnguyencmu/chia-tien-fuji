@@ -225,6 +225,8 @@ export const en: Translations = {
   deleteReceipt: 'Delete Receipt',
   deleteReceiptConfirm: 'Are you sure you want to delete this receipt image?',
   failedToDeleteReceipt: 'Failed to delete receipt',
+  takePhoto: 'Take Photo',
+  chooseFromGallery: 'Choose from Gallery',
 
   // Photos
   photosTab: 'Photos',

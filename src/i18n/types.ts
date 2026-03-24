@@ -293,4 +293,6 @@ export type TranslationKey =
   | 'receipt'
   | 'deleteReceipt'
   | 'deleteReceiptConfirm'
-  | 'failedToDeleteReceipt';
+  | 'failedToDeleteReceipt'
+  | 'takePhoto'
+  | 'chooseFromGallery';
