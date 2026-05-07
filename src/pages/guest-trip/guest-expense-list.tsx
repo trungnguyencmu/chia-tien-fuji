@@ -76,7 +76,7 @@ export const GuestExpenseList = memo(function GuestExpenseList({
               <tr key={expense.id}>
                 <td>{expense.date}</td>
                 <td>
-                  <strong>{expense.payer}</strong>
+                  <strong>{expense.payerName ?? expense.payerUserId}</strong>
                 </td>
                 <td>{expense.title}</td>
                 <td className="text-right" style={{ fontWeight: '600' }}>

@@ -3,13 +3,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Expense } from '../utils/calculation';
 import { Avatar } from './ui/Avatar';
 import { getEmojiForTitle } from './ui/CategoryTag';
-import { deleteExpense, deleteImage, fetchImages } from '../api/api';
+import { deleteExpense, deleteImage, fetchImages, TripMember } from '../api/api';
 import { useLanguage } from '../i18n';
 
 interface ExpenseListProps {
   tripId: string;
   expenses: Expense[];
-  members: string[];
+  members: TripMember[];
   onExpenseDeleted: () => void;
 }
 
@@ -87,6 +87,12 @@ export const ExpenseList = memo(function ExpenseList({ tripId, expenses, members
 
   const grouped = useMemo(() => groupByDate(expenses), [expenses]);
 
+  const memberNameById = useMemo(() => {
+    const map = new Map<string, string>();
+    members.forEach((m) => map.set(m.userId, m.displayName));
+    return map;
+  }, [members]);
+
   if (expenses.length === 0) {
     return (
       <div className="card">
@@ -132,8 +138,17 @@ export const ExpenseList = memo(function ExpenseList({ tripId, expenses, members
                     </span>
                   </div>
                   <div className="expense-meta">
-                    <Avatar name={expense.payer} size="sm" />
-                    <span>{expense.payer} {t('paid')}</span>
+                    {(() => {
+                      const payerName = expense.payerName
+                        ?? memberNameById.get(expense.payerUserId)
+                        ?? expense.payerUserId;
+                      return (
+                        <>
+                          <Avatar name={payerName} size="sm" />
+                          <span>{payerName} {t('paid')}</span>
+                        </>
+                      );
+                    })()}
                     {expense.billImageUrl && (
                       <button
                         onClick={() => setLightboxExpense(expense)}

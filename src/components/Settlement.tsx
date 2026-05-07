@@ -1,19 +1,25 @@
 import { useMemo } from 'react';
-import { Expense, calculateBalances, calculateTransactions } from '../utils/calculation';
+import { Expense, calculateBalances, calculateTransactions, BalanceMember } from '../utils/calculation';
 import { Avatar } from './ui/Avatar';
 import { useLanguage } from '../i18n';
 
 interface SettlementProps {
   expenses: Expense[];
-  payerNames?: string[];
+  members?: BalanceMember[];
   memberSettledStatus?: Map<string, boolean>;
 }
 
-export function Settlement({ expenses, payerNames, memberSettledStatus }: SettlementProps) {
+export function Settlement({ expenses, members, memberSettledStatus }: SettlementProps) {
   const { t } = useLanguage();
-  const balances = useMemo(() => calculateBalances(expenses, payerNames), [expenses, payerNames]);
+  const balances = useMemo(() => calculateBalances(expenses, members), [expenses, members]);
   const transactions = useMemo(() => calculateTransactions(balances), [balances]);
   const total = useMemo(() => expenses.reduce((sum, e) => sum + e.amount, 0), [expenses]);
+
+  const memberNameById = useMemo(() => {
+    const map = new Map<string, string>();
+    members?.forEach((m) => map.set(m.userId, m.displayName));
+    return map;
+  }, [members]);
 
   if (expenses.length === 0) {
     return null;
@@ -58,19 +64,26 @@ export function Settlement({ expenses, payerNames, memberSettledStatus }: Settle
           </div>
         ) : (
           <div>
-            {transactions.map((transaction, index) => (
-              <div key={index} className="settlement-card">
-                <Avatar name={transaction.from} size="md" />
-                <div className="settlement-arrow">→</div>
-                <div className="settlement-names">
-                  <div className="settlement-from">{transaction.from}</div>
-                  <div className="settlement-to">{t('owes')} {transaction.to}</div>
+            {transactions.map((transaction, index) => {
+              const fromName = (transaction.fromUserId && memberNameById.get(transaction.fromUserId)) || transaction.from;
+              const toName = (transaction.toUserId && memberNameById.get(transaction.toUserId)) || transaction.to;
+              const key = transaction.fromUserId && transaction.toUserId
+                ? `${transaction.fromUserId}->${transaction.toUserId}`
+                : index;
+              return (
+                <div key={key} className="settlement-card">
+                  <Avatar name={fromName} size="md" />
+                  <div className="settlement-arrow">→</div>
+                  <div className="settlement-names">
+                    <div className="settlement-from">{fromName}</div>
+                    <div className="settlement-to">{t('owes')} {toName}</div>
+                  </div>
+                  <div className="settlement-amount">
+                    {transaction.amount.toLocaleString()} {t('currency')}
+                  </div>
                 </div>
-                <div className="settlement-amount">
-                  {transaction.amount.toLocaleString()} {t('currency')}
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
@@ -85,14 +98,16 @@ export function Settlement({ expenses, payerNames, memberSettledStatus }: Settle
             {balances.map((balance) => {
               const isPositive = balance.balance > 0.01;
               const isNegative = balance.balance < -0.01;
+              const settledKey = balance.userId ?? balance.member;
+              const displayName = (balance.userId && memberNameById.get(balance.userId)) || balance.member;
               // Manual member.isSettled flag takes precedence over balance-based calculation
-              const isSettled = memberSettledStatus?.has(balance.member)
-                ? memberSettledStatus.get(balance.member)!
+              const isSettled = memberSettledStatus?.has(settledKey)
+                ? memberSettledStatus.get(settledKey)!
                 : (!isPositive && !isNegative);
 
               return (
                 <div
-                  key={balance.member}
+                  key={settledKey}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -103,9 +118,9 @@ export function Settlement({ expenses, payerNames, memberSettledStatus }: Settle
                     border: `1px solid ${isSettled ? 'var(--gray-200)' : 'var(--gray-200)'}`,
                   }}
                 >
-                  <Avatar name={balance.member} size="sm" />
+                  <Avatar name={displayName} size="sm" />
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: 600, fontSize: '0.95rem' }}>{balance.member}</div>
+                    <div style={{ fontWeight: 600, fontSize: '0.95rem' }}>{displayName}</div>
                     <div style={{ fontSize: '0.75rem', color: 'var(--gray-600)' }}>
                       {t('paid')} {Math.round(balance.totalPaid).toLocaleString()} {t('currency')}
                     </div>

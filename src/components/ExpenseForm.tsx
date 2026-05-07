@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CreateExpenseRequest } from '../api/api';
+import { CreateExpenseRequest, TripMember } from '../api/api';
 import { Avatar } from './ui/Avatar';
 import { CategoryChipSelector, CATEGORIES, type Category } from './ui/CategoryTag';
 import { useLanguage } from '../i18n';
 
 interface ExpenseFormProps {
-  members: string[];
+  members: TripMember[];
   onSubmit: (expense: CreateExpenseRequest) => Promise<void>;
 }
 
@@ -51,7 +51,7 @@ export function ExpenseForm({ members, onSubmit }: ExpenseFormProps) {
     setLoading(true);
     try {
       await onSubmit({
-        payer,
+        payerUserId: payer,
         title: title.trim(),
         amount: amountNum,
         date: new Date().toISOString().split('T')[0],
@@ -119,16 +119,16 @@ export function ExpenseForm({ members, onSubmit }: ExpenseFormProps) {
       <div style={{ marginBottom: '1.5rem' }}>
         <div className="expense-form-section-label">🧑 {t('whoPaid')}</div>
         <div className="avatar-picker">
-          {members.map((name) => (
+          {members.map((m) => (
             <motion.button
-              key={name}
+              key={m.userId}
               type="button"
-              className={`avatar-picker-item ${payer === name ? 'selected' : ''}`}
-              onClick={() => setPayer(name)}
+              className={`avatar-picker-item ${payer === m.userId ? 'selected' : ''}`}
+              onClick={() => setPayer(m.userId)}
               whileTap={{ scale: 0.95 }}
             >
-              <Avatar name={name} size="lg" />
-              <span className="avatar-picker-name">{name.split(' ')[0]}</span>
+              <Avatar name={m.displayName} size="lg" />
+              <span className="avatar-picker-name">{m.displayName.split(' ')[0]}</span>
             </motion.button>
           ))}
         </div>

@@ -11,7 +11,6 @@ import {
   updateTrip,
   getImageUploadUrl,
   saveImage,
-  TripMember,
   CreateExpenseRequest,
   Trip,
 } from '../api/api';
@@ -73,12 +72,10 @@ export default function TripDetailPage() {
     staleTime: 2 * 60 * 1000, // 2 minutes
   });
 
-  const memberNames = useMemo(() => members.map((m: TripMember) => m.displayName), [members]);
-
-  // Create settlement status map from members data
+  // Create settlement status map keyed by userId
   const memberSettledStatus = useMemo(() => {
     const map = new Map<string, boolean>();
-    members.forEach((m) => map.set(m.displayName, m.isSettled));
+    members.forEach((m) => map.set(m.userId, m.isSettled));
     return map;
   }, [members]);
 
@@ -340,11 +337,11 @@ export default function TripDetailPage() {
         </button>
       </div>
 
-      <ExpenseForm members={memberNames} onSubmit={handleAddExpense} />
+      <ExpenseForm members={members} onSubmit={handleAddExpense} />
 
-      <ExpenseList tripId={tripId!} expenses={expenses} members={memberNames} onExpenseDeleted={handleExpenseDeleted} />
+      <ExpenseList tripId={tripId!} expenses={expenses} members={members} onExpenseDeleted={handleExpenseDeleted} />
 
-      <Settlement expenses={expenses} payerNames={memberNames} memberSettledStatus={memberSettledStatus} />
+      <Settlement expenses={expenses} members={members} memberSettledStatus={memberSettledStatus} />
 
       {tripId && (
         <TripPhotos tripId={tripId} images={images} onImagesChanged={handleImagesChanged} />
@@ -409,7 +406,7 @@ export default function TripDetailPage() {
       {showScanBillModal && (
         <ScanBillModal
           tripId={tripId!}
-          members={memberNames}
+          members={members}
           onClose={() => setShowScanBillModal(false)}
           onExpenseCreated={async (expense) => {
             await addExpenseMutation.mutateAsync(expense);

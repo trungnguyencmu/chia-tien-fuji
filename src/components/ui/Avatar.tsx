@@ -13,15 +13,18 @@ const COLORS = [
 ];
 
 function getColor(name: string): string {
+  const safe = name ?? '';
   let hash = 0;
-  for (let i = 0; i < name.length; i++) {
-    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  for (let i = 0; i < safe.length; i++) {
+    hash = safe.charCodeAt(i) + ((hash << 5) - hash);
   }
   return COLORS[Math.abs(hash) % COLORS.length];
 }
 
 function getInitials(name: string): string {
-  const parts = name.trim().split(/\s+/);
+  const trimmed = (name ?? '').trim();
+  if (!trimmed) return '?';
+  const parts = trimmed.split(/\s+/);
   if (parts.length === 1) {
     return parts[0].substring(0, 2).toUpperCase();
   }

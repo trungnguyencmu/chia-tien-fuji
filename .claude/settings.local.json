@@ -12,7 +12,9 @@
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "Bash(git rm:*)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(find /Users/lucas/Documents/Personal/share-money-api/apps -type f -name *.ts)",
+      "Bash(find /Users/lucas/Documents/Personal/share-money-api/infrastructure -type f -name *.ts -o -name *.json)"
     ],
     "deny": [],
     "ask": []

@@ -27,7 +27,7 @@ export interface TripMember {
 }
 
 export interface CreateExpenseRequest {
-  payer: string;
+  payerUserId: string;
   title: string;
   amount: number;
   date: string;
@@ -182,11 +182,13 @@ export async function searchUsers(query: string): Promise<UserSearchResult[]> {
 interface ExpenseResponse {
   tripId: string;
   expenseId: string;
+  payerUserId: string;
   payer: string;
   title: string;
   amount: number;
   date: string;
   createdAt: string;
+  billId?: string;
   billImageUrl?: string;
 }
 
@@ -194,7 +196,8 @@ function mapExpense(e: ExpenseResponse): Expense {
   return {
     id: e.expenseId,
     tripId: e.tripId,
-    payer: e.payer,
+    payerUserId: e.payerUserId,
+    payerName: e.payer,
     title: e.title,
     amount: e.amount,
     date: e.date,

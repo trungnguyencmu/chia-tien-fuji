@@ -1,12 +1,12 @@
 import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CreateExpenseRequest, ScannedBill, getBillUploadUrl, scanBill } from '../api/api';
+import { CreateExpenseRequest, ScannedBill, TripMember, getBillUploadUrl, scanBill } from '../api/api';
 import { Avatar } from './ui/Avatar';
 import { useLanguage } from '../i18n';
 
 interface ScanBillModalProps {
   tripId: string;
-  members: string[];
+  members: TripMember[];
   onClose: () => void;
   onExpenseCreated: (expense: CreateExpenseRequest) => Promise<void>;
 }
@@ -92,7 +92,7 @@ export function ScanBillModal({ tripId, members, onClose, onExpenseCreated }: Sc
     setSubmitting(true);
     try {
       await onExpenseCreated({
-        payer,
+        payerUserId: payer,
         title: title.trim(),
         amount: amountNum,
         date,
@@ -317,17 +317,17 @@ export function ScanBillModal({ tripId, members, onClose, onExpenseCreated }: Sc
                   {t('whoPaid')}
                 </label>
                 <div className="avatar-picker" style={{ flexWrap: 'wrap' }}>
-                  {members.map((name) => (
+                  {members.map((m) => (
                     <motion.button
-                      key={name}
+                      key={m.userId}
                       type="button"
-                      className={`avatar-picker-item ${payer === name ? 'selected' : ''}`}
-                      onClick={() => setPayer(name)}
+                      className={`avatar-picker-item ${payer === m.userId ? 'selected' : ''}`}
+                      onClick={() => setPayer(m.userId)}
                       whileTap={{ scale: 0.95 }}
                       disabled={submitting}
                     >
-                      <Avatar name={name} size="lg" />
-                      <span className="avatar-picker-name">{name.split(' ')[0]}</span>
+                      <Avatar name={m.displayName} size="lg" />
+                      <span className="avatar-picker-name">{m.displayName.split(' ')[0]}</span>
                     </motion.button>
                   ))}
                 </div>
