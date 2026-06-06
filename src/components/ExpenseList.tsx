@@ -5,9 +5,11 @@ import { Avatar } from './ui/Avatar';
 import { getEmojiForTitle } from './ui/CategoryTag';
 import { deleteExpense, deleteImage, fetchImages, TripMember } from '../api/api';
 import { useLanguage } from '../i18n';
+import { exportExpensesToExcel } from '../utils/export-excel';
 
 interface ExpenseListProps {
   tripId: string;
+  tripName?: string;
   expenses: Expense[];
   members: TripMember[];
   onExpenseDeleted: () => void;
@@ -50,11 +52,32 @@ function groupByDate(expenses: Expense[]): Map<string, Expense[]> {
   return groups;
 }
 
-export const ExpenseList = memo(function ExpenseList({ tripId, expenses, members, onExpenseDeleted }: ExpenseListProps) {
+export const ExpenseList = memo(function ExpenseList({ tripId, tripName, expenses, members, onExpenseDeleted }: ExpenseListProps) {
   const { t } = useLanguage();
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [lightboxExpense, setLightboxExpense] = useState<Expense | null>(null);
   const [deletingBill, setDeletingBill] = useState(false);
+
+  const handleExport = useCallback(() => {
+    if (expenses.length === 0) {
+      alert(t('noExpensesToExport'));
+      return;
+    }
+    try {
+      const memberSettledStatus = new Map<string, boolean>();
+      members.forEach((m) => memberSettledStatus.set(m.userId, !!m.isSettled));
+      exportExpensesToExcel({
+        tripName: tripName || 'expenses',
+        expenses,
+        members: members.map((m) => ({ userId: m.userId, displayName: m.displayName })),
+        currency: t('currency'),
+        memberSettledStatus,
+      });
+    } catch (err) {
+      console.error('Export failed:', err);
+      alert(err instanceof Error ? err.message : t('exportFailed'));
+    }
+  }, [expenses, members, tripName, t]);
 
   const handleDelete = useCallback(async (expenseId: string, expenseTripId: string, expenseTitle: string) => {
     // Safety check: ensure expense belongs to this trip
@@ -108,8 +131,8 @@ export const ExpenseList = memo(function ExpenseList({ tripId, expenses, members
   return (
     <div className="card">
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-        <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', gap: '0.75rem' }}>
+        <div style={{ minWidth: 0 }}>
           <h2 style={{ fontSize: '1.5rem', fontWeight: 700, margin: 0 }}>
             📋 {t('expenses')}
           </h2>
@@ -117,6 +140,16 @@ export const ExpenseList = memo(function ExpenseList({ tripId, expenses, members
             {expenses.length} {expenses.length === 1 ? t('items').slice(0, -1) : t('items')} • {t('totalExpenses')} {totalAmount.toLocaleString()} {t('currency')}
           </p>
         </div>
+        <button
+          type="button"
+          className="btn btn-secondary"
+          onClick={handleExport}
+          disabled={expenses.length === 0}
+          title={t('exportExcel')}
+          style={{ flexShrink: 0, fontSize: '0.875rem', padding: '0.5rem 0.75rem' }}
+        >
+          📊 {t('exportExcel')}
+        </button>
       </div>
 
       {/* Timeline */}

@@ -49,6 +49,9 @@ export type TranslationKey =
   | 'deleteExpense'
   | 'today'
   | 'yesterday'
+  | 'exportExcel'
+  | 'noExpensesToExport'
+  | 'exportFailed'
   // Settlement
   | 'settlement'
   | 'totalSpent'

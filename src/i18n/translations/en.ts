@@ -56,6 +56,9 @@ export const en: Translations = {
   deleteExpense: 'Delete expense',
   today: 'Today',
   yesterday: 'Yesterday',
+  exportExcel: 'Export Excel',
+  noExpensesToExport: 'No expenses to export',
+  exportFailed: 'Failed to export expenses',
 
   // Settlement
   settlement: 'Settlement',

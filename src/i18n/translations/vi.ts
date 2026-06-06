@@ -56,6 +56,9 @@ export const vi: Translations = {
   deleteExpense: 'Xóa chi tiêu',
   today: 'Hôm nay',
   yesterday: 'Hôm qua',
+  exportExcel: 'Xuất Excel',
+  noExpensesToExport: 'Không có chi tiêu để xuất',
+  exportFailed: 'Xuất chi tiêu thất bại',
 
   // Settlement
   settlement: 'Tính Toán',
