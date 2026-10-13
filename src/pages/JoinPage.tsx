@@ -2,6 +2,7 @@ import { useState, useEffect, type FormEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useGuest } from '../contexts/guest-context';
 import { useLanguage } from '../i18n';
+import { Icon, Spinner } from '../components/ui/Icon';
 
 export default function JoinPage() {
   const navigate = useNavigate();
@@ -51,7 +52,7 @@ export default function JoinPage() {
     <div className="auth-container">
       <div className="auth-card card">
         <div className="auth-header">
-          <div className="auth-icon">🎒</div>
+          <div className="auth-icon"><Icon name="users" size={28} /></div>
           <h1 className="auth-title">{t('joinTrip')}</h1>
           <p className="auth-subtitle">
             {t('enterInviteCode')}
@@ -59,9 +60,9 @@ export default function JoinPage() {
         </div>
 
         {error && (
-          <div className="alert alert-error">
-            <span>⚠️</span>
-            {error}
+          <div className="alert alert-error" role="alert">
+            <Icon name="alert-circle" />
+            <span className="alert-body">{error}</span>
           </div>
         )}
 
@@ -73,14 +74,15 @@ export default function JoinPage() {
             <input
               id="code"
               type="text"
-              className="form-input"
+              className="form-input code-input"
               value={code}
               onChange={(e) => setCode(e.target.value.toUpperCase())}
               placeholder="e.g. A3F1B2C4"
               required
               maxLength={8}
               autoComplete="off"
-              style={{ letterSpacing: '0.15em', fontWeight: '600' }}
+              autoCapitalize="characters"
+              spellCheck={false}
             />
           </div>
 
@@ -105,7 +107,8 @@ export default function JoinPage() {
             className="btn btn-primary auth-submit"
             disabled={loading}
           >
-            {loading ? t('joining') : '🚀 ' + t('join')}
+            {loading ? <Spinner /> : <Icon name="arrow-right" />}
+            {loading ? t('joining') : t('join')}
           </button>
         </form>
 

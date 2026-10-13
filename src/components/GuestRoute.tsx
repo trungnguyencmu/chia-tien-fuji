@@ -1,19 +1,13 @@
 import { Navigate, useParams } from 'react-router-dom';
 import { useGuest } from '../contexts/guest-context';
+import { PageLoader } from './ui/PageLoader';
 
 export function GuestRoute({ children }: { children: React.ReactNode }) {
   const { isGuest, isLoading, tripId } = useGuest();
   const { tripId: urlTripId } = useParams<{ tripId: string }>();
 
   if (isLoading) {
-    return (
-      <div style={{ textAlign: 'center', padding: '3rem' }}>
-        <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>⏳</div>
-        <div style={{ color: 'white', fontSize: '1.25rem', fontWeight: '600' }}>
-          Loading...
-        </div>
-      </div>
-    );
+    return <PageLoader />;
   }
 
   if (!isGuest) {

@@ -7,6 +7,7 @@ import { Layout } from './components/Layout';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { PublicRoute } from './components/PublicRoute';
 import { GuestRoute } from './components/GuestRoute';
+import { PageLoader } from './components/ui/PageLoader';
 
 // Lazy load pages to reduce initial bundle size
 const LandingPage = lazy(() => import('./pages/landing/LandingPage'));
@@ -17,18 +18,6 @@ const RegisterPage = lazy(() => import('./pages/RegisterPage'));
 const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'));
 const JoinPage = lazy(() => import('./pages/JoinPage'));
 const GuestTripPage = lazy(() => import('./pages/guest-trip/GuestTripPage'));
-
-// Loading fallback component
-function PageLoader() {
-  return (
-    <div style={{ textAlign: 'center', padding: '3rem' }}>
-      <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>⏳</div>
-      <div style={{ color: 'white', fontSize: '1.25rem', fontWeight: '600' }}>
-        Loading...
-      </div>
-    </div>
-  );
-}
 
 function App() {
   return (

@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { forgotPassword, resetPassword } from '../api/auth-api';
 import { useLanguage } from '../i18n';
+import { Icon } from '../components/ui/Icon';
 
 type Step = 'email' | 'reset';
 
@@ -66,7 +67,7 @@ export default function ForgotPasswordPage() {
     <div className="auth-container">
       <div className="auth-card card">
         <div className="auth-header">
-          <div className="auth-icon">🔑</div>
+          <div className="auth-icon"><Icon name="key" size={28} /></div>
           <h1 className="auth-title">
             {step === 'email' ? t('forgotPassword') : t('resetPassword')}
           </h1>
@@ -78,16 +79,16 @@ export default function ForgotPasswordPage() {
         </div>
 
         {error && (
-          <div className="alert alert-error">
-            <span>⚠️</span>
-            {error}
+          <div className="alert alert-error" role="alert">
+            <Icon name="alert-circle" />
+            <span className="alert-body">{error}</span>
           </div>
         )}
 
         {success && (
-          <div className="alert alert-success">
-            <span>✅</span>
-            {success}
+          <div className="alert alert-success" role="status">
+            <Icon name="check-circle" />
+            <span className="alert-body">{success}</span>
           </div>
         )}
 
@@ -157,9 +158,10 @@ export default function ForgotPasswordPage() {
                   type="button"
                   className="password-toggle"
                   onClick={() => setShowPassword(!showPassword)}
-                  tabIndex={-1}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  aria-pressed={showPassword}
                 >
-                  {showPassword ? '🙈' : '👁️'}
+                  <Icon name={showPassword ? 'eye-off' : 'eye'} size={20} />
                 </button>
               </div>
             </div>
@@ -176,7 +178,6 @@ export default function ForgotPasswordPage() {
               type="button"
               className="btn btn-secondary auth-submit"
               onClick={handleResend}
-              style={{ marginTop: '0.75rem' }}
             >
               {t('resendCode')}
             </button>
@@ -185,7 +186,8 @@ export default function ForgotPasswordPage() {
 
         <div className="auth-footer">
           <Link to="/login" className="auth-link">
-            ← {t('backToLogin')}
+            <Icon name="arrow-left" size={16} />
+            {t('backToLogin')}
           </Link>
         </div>
       </div>

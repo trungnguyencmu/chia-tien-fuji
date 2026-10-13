@@ -1,23 +1,24 @@
 import { motion, useInView } from 'framer-motion';
 import { useRef } from 'react';
 import { useLanguage } from '../../i18n';
+import { Icon, type IconName } from '../../components/ui/Icon';
 
-const steps = [
+const steps: { number: string; icon: IconName; titleKey: string; descriptionKey: string }[] = [
   {
     number: '01',
-    icon: '🗺️',
+    icon: 'map',
     titleKey: 'landingStep1Title',
     descriptionKey: 'landingStep1Desc',
   },
   {
     number: '02',
-    icon: '➕',
+    icon: 'plus',
     titleKey: 'landingStep2Title',
     descriptionKey: 'landingStep2Desc',
   },
   {
     number: '03',
-    icon: '✅',
+    icon: 'check',
     titleKey: 'landingStep3Title',
     descriptionKey: 'landingStep3Desc',
   },
@@ -57,7 +58,7 @@ export function HowItWorksSection() {
             transition={{ duration: 0.5, delay: 0.15 * (i + 1) }}
           >
             <div className="step-number">{step.number}</div>
-            <div className="step-icon">{step.icon}</div>
+            <div className="step-icon"><Icon name={step.icon} size={28} /></div>
             <h3 className="step-title">{t(step.titleKey as any)}</h3>
             <p className="step-description">{t(step.descriptionKey as any)}</p>
             {i < steps.length - 1 && <div className="step-connector" />}

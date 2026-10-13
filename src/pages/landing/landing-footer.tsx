@@ -1,4 +1,5 @@
 import { useLanguage } from '../../i18n';
+import { Icon } from '../../components/ui/Icon';
 
 export function LandingFooter() {
   const { t } = useLanguage();
@@ -7,8 +8,10 @@ export function LandingFooter() {
     <footer className="landing-footer">
       <div className="landing-footer-inner">
         <div className="landing-footer-brand">
-          <span className="landing-logo-icon">💸</span>
-          <span className="landing-logo-text">Share Money</span>
+          <span className="landing-logo">
+            <span className="landing-logo-icon"><Icon name="wallet" size={20} /></span>
+            <span className="landing-logo-text">Share Money</span>
+          </span>
           <p className="landing-footer-tagline">
             {t('landingFooterTagline')}
           </p>

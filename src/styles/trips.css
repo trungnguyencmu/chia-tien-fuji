@@ -1,0 +1,349 @@
+/* Trip list cards, create form, trip detail cover, members */
+
+/* ---------- Trip list ---------- */
+.trip-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1rem;
+}
+
+.trip-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+}
+
+.trip-card:hover,
+.trip-card:focus-within {
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-md);
+}
+
+.trip-card-cover {
+  position: relative;
+  aspect-ratio: 16 / 9; /* reserves space before the image loads */
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* No photo yet: a short tinted band instead of a full-height placeholder */
+.trip-card-cover.is-empty {
+  aspect-ratio: auto;
+  height: 96px;
+}
+
+.trip-card-upcoming .trip-card-cover {
+  background: var(--color-info-soft);
+  color: var(--color-info-text);
+}
+
+.trip-card-cover img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.trip-card-delete {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2; /* above the stretched card link */
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-fg-muted);
+  transition: background-color var(--dur) var(--ease), color var(--dur) var(--ease);
+}
+
+.trip-card-delete:hover {
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
+}
+
+.trip-card-body {
+  padding: 1rem 1.125rem 1.125rem;
+}
+
+.trip-card-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.625rem;
+}
+
+.trip-card-name {
+  font-family: var(--font-body);
+  letter-spacing: 0;
+  font-size: 1.0625rem;
+  font-weight: 600;
+  color: var(--color-fg);
+  line-height: 1.3;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* The trip name is the real link; its hit area stretches over the whole card */
+.trip-card-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.trip-card-link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.trip-card-link:focus-visible {
+  outline: none;
+}
+
+.trip-card:has(.trip-card-link:focus-visible) {
+  outline: 2px solid var(--color-ring);
+  outline-offset: 2px;
+}
+
+.trip-card-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.8125rem;
+  color: var(--color-fg-muted);
+}
+
+.trip-card-meta span {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.trip-card-note {
+  font-size: 0.75rem;
+  color: var(--color-info-text);
+  font-weight: 600;
+  margin-top: 0.5rem;
+}
+
+/* ---------- Create trip form ---------- */
+.date-range {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.date-range .form-input {
+  flex: 1;
+  min-width: 0;
+}
+
+.date-range-sep {
+  color: var(--color-fg-subtle);
+}
+
+.cover-preview {
+  position: relative;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  height: 140px;
+}
+
+.cover-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cover-preview .trip-card-delete {
+  z-index: 1;
+}
+
+.dashed-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  min-height: 44px;
+  padding: 0.5rem 1rem;
+  background: var(--color-bg);
+  border: 1px dashed var(--color-input-border);
+  border-radius: var(--radius-md);
+  color: var(--color-fg-muted);
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: background-color var(--dur) var(--ease), border-color var(--dur) var(--ease),
+    color var(--dur) var(--ease);
+}
+
+.dashed-btn:hover:not(:disabled) {
+  background: var(--color-primary-soft);
+  border-color: var(--color-primary);
+  color: var(--color-primary-hover);
+}
+
+/* ---------- Trip detail cover ---------- */
+.trip-detail-cover {
+  position: relative;
+  aspect-ratio: 21 / 9;
+  max-height: 260px;
+  width: 100%;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin-bottom: 1rem;
+  background: var(--color-muted);
+}
+
+.trip-detail-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Actions are always visible: hover-only controls are unreachable on touch */
+.trip-detail-cover-actions {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.trip-detail-cover-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  min-height: 36px;
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-fg);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  transition: background-color var(--dur) var(--ease), color var(--dur) var(--ease);
+}
+
+.trip-detail-cover-btn:hover:not(:disabled) {
+  background: var(--color-muted);
+}
+
+.trip-detail-cover-btn-danger:hover:not(:disabled) {
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
+}
+
+.trip-detail-cover-loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: rgb(15 23 42 / 0.6);
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.9375rem;
+}
+
+/* ---------- Members ---------- */
+.invite-box {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: var(--color-muted);
+  border-radius: var(--radius-md);
+}
+
+.invite-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.invite-code {
+  flex: 1;
+  min-width: 180px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  padding: 0 0.75rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 0.875rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.invite-row .icon-btn {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-strong);
+}
+
+.member-name-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  min-height: 36px;
+  padding: 0 0.25rem;
+  margin-left: -0.25rem;
+  background: none;
+  color: inherit;
+  font-size: inherit;
+  border-radius: var(--radius-sm);
+}
+
+.member-name-btn:hover {
+  background: var(--color-muted);
+}
+
+.member-name-btn .icon {
+  color: var(--color-fg-subtle);
+}
+
+.inline-edit {
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
+}
+
+.inline-edit .form-input {
+  min-width: 120px;
+}
+
+.row-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.25rem;
+  white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+  .trip-detail-cover {
+    aspect-ratio: 16 / 9;
+  }
+
+  .trip-detail-cover-btn span {
+    display: none; /* icon-only on phones; aria-label carries the name */
+  }
+}

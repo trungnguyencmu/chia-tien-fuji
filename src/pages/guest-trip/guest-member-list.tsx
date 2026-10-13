@@ -1,4 +1,5 @@
 import { TripMember } from '../../api/guest-api';
+import { Icon } from '../../components/ui/Icon';
 import { useLanguage } from '../../i18n';
 
 interface GuestMemberListProps {
@@ -16,11 +17,14 @@ export function GuestMemberList({ members }: GuestMemberListProps) {
   if (members.length === 0) {
     return (
       <div className="card">
-        <h2 style={{ marginBottom: '1rem', fontSize: '1.5rem', fontWeight: '700' }}>
-          👥 {t('members')}
+        <h2 className="card-title">
+          <Icon name="users" size={22} />
+          {t('members')}
         </h2>
         <div className="empty-state">
-          <div className="empty-state-icon">🤷</div>
+          <div className="empty-state-icon">
+            <Icon name="user" size={26} />
+          </div>
           <p>{t('noMembersFound')}</p>
         </div>
       </div>
@@ -29,16 +33,10 @@ export function GuestMemberList({ members }: GuestMemberListProps) {
 
   return (
     <div className="card">
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '1.5rem',
-        }}
-      >
-        <h2 style={{ fontSize: '1.5rem', fontWeight: '700', margin: 0 }}>
-          👥 {t('members')}
+      <div className="card-header">
+        <h2 className="card-title">
+          <Icon name="users" size={22} />
+          {t('members')}
         </h2>
         <div className="badge badge-neutral">{members.length} members</div>
       </div>
@@ -63,7 +61,7 @@ export function GuestMemberList({ members }: GuestMemberListProps) {
                     {m.role}
                   </span>
                 </td>
-                <td>{new Date(m.joinedAt).toLocaleDateString()}</td>
+                <td className="tabular">{new Date(m.joinedAt).toLocaleDateString()}</td>
               </tr>
             ))}
           </tbody>

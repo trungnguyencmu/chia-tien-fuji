@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   fetchTrips,
@@ -10,6 +10,8 @@ import {
   saveImage,
   Trip,
 } from '../api/api';
+import { Icon, Spinner } from '../components/ui/Icon';
+import { PageLoader } from '../components/ui/PageLoader';
 import { useLanguage } from '../i18n';
 
 export default function TripsPage() {
@@ -181,73 +183,53 @@ export default function TripsPage() {
   });
 
   if (loading) {
-    return (
-      <div style={{ textAlign: 'center', padding: '3rem' }}>
-        <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>⏳</div>
-        <div style={{ color: 'white', fontSize: '1.25rem', fontWeight: '600' }}>
-          {t('loading')}
-        </div>
-      </div>
-    );
+    return <PageLoader label={t('loading')} />;
   }
+
+  const filters = [
+    { key: 'all', label: t('allTrips') },
+    { key: 'active', label: t('statusInProgress') },
+    { key: 'upcoming', label: t('statusUpcoming') },
+    { key: 'settled', label: t('statusSettled') },
+  ] as const;
+
+  const closeCreateForm = () => {
+    setShowCreate(false);
+    setNewTripName('');
+    setNewStartDate('');
+    setNewEndDate('');
+    removeCover();
+  };
 
   return (
     <div>
       {/* Header */}
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: '1.5rem',
-      }}>
-        <h1 style={{
-          fontSize: '1.75rem',
-          fontWeight: '700',
-          color: 'white',
-          margin: 0,
-          textShadow: '0 2px 8px rgba(0,0,0,0.1)',
-        }}>
-          ✈️ {t('yourTrips')}
-        </h1>
+      <div className="page-header">
+        <h1 className="page-title">{t('yourTrips')}</h1>
         <button
+          type="button"
           className="btn btn-primary"
           onClick={() => setShowCreate(!showCreate)}
-          style={{ fontSize: '0.9rem' }}
+          aria-expanded={showCreate}
         >
-          ➕ {t('createNewTrip')}
+          <Icon name="plus" />
+          {t('createNewTrip')}
         </button>
       </div>
 
-      {/* Status filter buttons */}
-      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
-        <button
-          className={statusFilter === 'all' ? 'btn btn-primary' : 'btn btn-secondary'}
-          onClick={() => setStatusFilter('all')}
-          style={{ fontSize: '0.85rem' }}
-        >
-          {t('allTrips')}
-        </button>
-        <button
-          className={statusFilter === 'active' ? 'btn btn-primary' : 'btn btn-secondary'}
-          onClick={() => setStatusFilter('active')}
-          style={{ fontSize: '0.85rem' }}
-        >
-          {t('statusInProgress')}
-        </button>
-        <button
-          className={statusFilter === 'upcoming' ? 'btn btn-primary' : 'btn btn-secondary'}
-          onClick={() => setStatusFilter('upcoming')}
-          style={{ fontSize: '0.85rem' }}
-        >
-          {t('statusUpcoming')}
-        </button>
-        <button
-          className={statusFilter === 'settled' ? 'btn btn-primary' : 'btn btn-secondary'}
-          onClick={() => setStatusFilter('settled')}
-          style={{ fontSize: '0.85rem' }}
-        >
-          {t('statusSettled')}
-        </button>
+      {/* Status filter */}
+      <div className="chip-group" role="group" aria-label={t('allTrips')}>
+        {filters.map((filter) => (
+          <button
+            key={filter.key}
+            type="button"
+            className="chip"
+            aria-pressed={statusFilter === filter.key}
+            onClick={() => setStatusFilter(filter.key)}
+          >
+            {filter.label}
+          </button>
+        ))}
       </div>
 
       {/* Create trip form */}
@@ -255,57 +237,46 @@ export default function TripsPage() {
         {showCreate && (
           <motion.div
             className="card"
-            initial={{ opacity: 0, y: -16 }}
+            initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -16 }}
-            style={{ marginBottom: '1.5rem' }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.18 }}
           >
             <form onSubmit={handleCreate}>
-              <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '0.75rem' }}>
+              <div className="form-group">
+                <label className="form-label" htmlFor="new-trip-name">
+                  {t('tripName')}
+                </label>
                 <input
+                  id="new-trip-name"
                   type="text"
                   className="form-input"
                   value={newTripName}
                   onChange={(e) => setNewTripName(e.target.value)}
                   disabled={creating}
                   placeholder={t('newTripNamePlaceholder')}
-                  style={{ flex: 1 }}
                   autoFocus
                 />
-                <button
-                  type="submit"
-                  className="btn btn-primary"
-                  disabled={creating || !newTripName.trim()}
-                >
-                  {creating ? '⏳' : t('create')}
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={() => { setShowCreate(false); setNewTripName(''); setNewStartDate(''); setNewEndDate(''); removeCover(); }}
-                >
-                  {t('cancel')}
-                </button>
               </div>
 
               {/* Date inputs */}
-              <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', marginBottom: '0.75rem' }}>
+              <div className="date-range">
                 <input
                   type="date"
                   className="form-input"
                   value={newStartDate}
                   onChange={(e) => setNewStartDate(e.target.value)}
                   disabled={creating}
-                  style={{ minWidth: '130px' }}
+                  aria-label={t('startDate')}
                 />
-                <span style={{ color: 'var(--gray-500)' }}>-</span>
+                <span className="date-range-sep" aria-hidden="true">–</span>
                 <input
                   type="date"
                   className="form-input"
                   value={newEndDate}
                   onChange={(e) => setNewEndDate(e.target.value)}
                   disabled={creating}
-                  style={{ minWidth: '130px' }}
+                  aria-label={t('endDate')}
                 />
               </div>
 
@@ -315,198 +286,147 @@ export default function TripsPage() {
                 type="file"
                 accept="image/jpeg,image/png,image/webp,image/gif,image/heic"
                 onChange={handleCoverSelect}
-                style={{ display: 'none' }}
+                className="file-input-hidden"
               />
 
               {coverPreview ? (
-                <div style={{
-                  position: 'relative',
-                  borderRadius: '12px',
-                  overflow: 'hidden',
-                  height: '120px',
-                }}>
-                  <img
-                    src={coverPreview}
-                    alt="Cover preview"
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'cover',
-                    }}
-                  />
+                <div className="cover-preview">
+                  <img src={coverPreview} alt="Cover preview" />
                   <button
                     type="button"
+                    className="trip-card-delete"
                     onClick={removeCover}
-                    style={{
-                      position: 'absolute',
-                      top: '8px',
-                      right: '8px',
-                      background: 'rgba(0,0,0,0.6)',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '50%',
-                      width: '28px',
-                      height: '28px',
-                      cursor: 'pointer',
-                      fontSize: '0.85rem',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
+                    aria-label={t('removeCoverPhoto')}
+                    title={t('removeCoverPhoto')}
                   >
-                    ✕
+                    <Icon name="x" size={18} />
                   </button>
                 </div>
               ) : (
                 <button
                   type="button"
+                  className="dashed-btn"
                   onClick={() => coverInputRef.current?.click()}
-                  style={{
-                    marginTop: '0.75rem',
-                    padding: '0.625rem 1rem',
-                    background: 'var(--gray-100)',
-                    border: '2px dashed var(--gray-300)',
-                    borderRadius: '12px',
-                    color: 'var(--gray-500)',
-                    cursor: 'pointer',
-                    fontSize: '0.85rem',
-                    width: '100%',
-                    transition: 'all 0.2s',
-                  }}
                 >
-                  📷 {t('addCoverPhoto')}
+                  <Icon name="camera" />
+                  {t('addCoverPhoto')}
                 </button>
               )}
+
+              <div className="modal-actions" style={{ marginTop: '1.25rem' }}>
+                <button type="button" className="btn btn-secondary" onClick={closeCreateForm}>
+                  {t('cancel')}
+                </button>
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  disabled={creating || !newTripName.trim()}
+                >
+                  {creating ? <Spinner /> : <Icon name="check" />}
+                  {t('create')}
+                </button>
+              </div>
             </form>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Empty state */}
+      {/* Empty state: filter has no matches */}
       {filteredTrips.length === 0 && statusFilter !== 'all' && (
-        <div className="card" style={{ textAlign: 'center', padding: '2rem' }}>
-          <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🔍</div>
-          <p style={{ color: 'var(--gray-600)' }}>
-            {statusFilter === 'upcoming' && t('noTripsYet')}
-            {statusFilter === 'active' && t('noTripsYet')}
-            {statusFilter === 'settled' && t('noTripsYet')}
-          </p>
+        <div className="card">
+          <div className="empty-state">
+            <div className="empty-state-icon">
+              <Icon name="search" size={26} />
+            </div>
+            <p>{t('noTripsYet')}</p>
+            <button type="button" className="btn btn-secondary btn-sm" onClick={() => setStatusFilter('all')}>
+              {t('allTrips')}
+            </button>
+          </div>
         </div>
       )}
 
-      {/* Empty state */}
+      {/* Empty state: no trips at all */}
       {filteredTrips.length === 0 && statusFilter === 'all' && (
-        <div className="card" style={{ textAlign: 'center', padding: '3rem' }}>
-          <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>✈️</div>
-          <h2 style={{ fontSize: '1.5rem', fontWeight: '700', marginBottom: '1rem', color: 'var(--gray-900)' }}>
-            {t('noTripsYet')}
-          </h2>
-          <p style={{ color: 'var(--gray-600)', marginBottom: '2rem', fontSize: '1.1rem' }}>
-            {t('getStartedCreateTrip')}
-          </p>
-          <button
-            className="btn btn-primary"
-            onClick={() => setShowCreate(true)}
-            style={{ fontSize: '1rem', padding: '1rem 2rem' }}
-          >
-            ➕ {t('createNewTrip')}
-          </button>
+        <div className="card">
+          <div className="empty-state">
+            <div className="empty-state-icon is-success">
+              <Icon name="plane" size={26} />
+            </div>
+            <h2>{t('noTripsYet')}</h2>
+            <p>{t('getStartedCreateTrip')}</p>
+            {!showCreate && (
+              <button type="button" className="btn btn-primary" onClick={() => setShowCreate(true)}>
+                <Icon name="plus" />
+                {t('createNewTrip')}
+              </button>
+            )}
+          </div>
         </div>
       )}
 
       {/* Trip cards grid */}
       {filteredTrips.length > 0 && (
         <div className="trip-card-grid">
-          {filteredTrips.map((trip, i) => (
-            <motion.div
-              key={trip.tripId}
-              className={`trip-card${trip.status === 'upcoming' ? ' trip-card-upcoming' : ''}`}
-              onClick={() => navigate(`/app/trips/${trip.tripId}`)}
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.05 }}
-              whileTap={{ scale: 0.98 }}
-              style={trip.imageUrl ? { padding: 0 } : undefined}
-            >
-              {trip.imageUrl ? (
-                <>
-                  {/* Cover image */}
-                  <div className="trip-card-cover">
-                    <img src={trip.imageUrl} alt={trip.tripName} />
-                    <button
-                      className="trip-card-delete"
-                      onClick={(e) => handleDelete(trip.tripId, trip.tripName, e)}
-                      title={t('deleteTrip')}
-                      style={{ opacity: 0 }}
-                    >
-                      🗑️
-                    </button>
+          {filteredTrips.map((trip, i) => {
+            const statusMessage = getStatusMessage(trip);
+            const badge = trip.status === 'upcoming' ? 'upcoming' : trip.status === 'active' ? 'success' : 'neutral';
+            return (
+              <motion.article
+                key={trip.tripId}
+                className={`trip-card${trip.status === 'upcoming' ? ' trip-card-upcoming' : ''}`}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: Math.min(i, 8) * 0.04, duration: 0.2 }}
+              >
+                <div className={`trip-card-cover${trip.imageUrl ? '' : ' is-empty'}`}>
+                  {trip.imageUrl ? (
+                    <img src={trip.imageUrl} alt="" loading="lazy" />
+                  ) : (
+                    <Icon name="plane" size={36} />
+                  )}
+                  <button
+                    type="button"
+                    className="trip-card-delete"
+                    onClick={(e) => handleDelete(trip.tripId, trip.tripName, e)}
+                    title={t('deleteTrip')}
+                    aria-label={`${t('deleteTrip')}: ${trip.tripName}`}
+                  >
+                    <Icon name="trash" size={18} />
+                  </button>
+                </div>
+                <div className="trip-card-body">
+                  <div className="trip-card-heading">
+                    <h2 className="trip-card-name">
+                      <Link to={`/app/trips/${trip.tripId}`} className="trip-card-link">
+                        {trip.tripName}
+                      </Link>
+                    </h2>
+                    <span className={`badge badge-${badge}`}>{getStatusLabel(trip.status)}</span>
                   </div>
-                  <div style={{ padding: '0.75rem 1.25rem 1.25rem' }}>
-                    <h3 className="trip-card-name" style={{ marginBottom: '0.5rem' }}>
-                      {trip.tripName}
-                      <span
-                        className={`badge badge-${trip.status === 'upcoming' ? 'upcoming' : trip.status === 'active' ? 'success' : 'neutral'}`}
-                        style={{ marginLeft: '0.5rem', fontSize: '0.7rem', verticalAlign: 'middle' }}
-                      >
-                        {getStatusLabel(trip.status)}
-                      </span>
-                    </h3>
-                    <div className="trip-card-meta">
-                      <span>👥 {t('tripMembers', { count: trip.memberCount ?? 0 })}</span>
-                      {trip.startDate && trip.endDate && (
-                        <span>📅 {formatDateRange(trip.startDate, trip.endDate)}</span>
-                      )}
-                      {!trip.startDate && (
-                        <span>📅 {t('createdOn', { date: formatDate(trip.createdAt) })}</span>
-                      )}
-                    </div>
-                    {getStatusMessage(trip) && (
-                      <div style={{ fontSize: '0.75rem', color: 'var(--gray-500)', marginTop: '0.25rem' }}>
-                        {getStatusMessage(trip)}
-                      </div>
-                    )}
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div className="trip-card-header">
-                    <span className="trip-card-emoji">✈️</span>
-                    <button
-                      className="trip-card-delete"
-                      onClick={(e) => handleDelete(trip.tripId, trip.tripName, e)}
-                      title={t('deleteTrip')}
-                    >
-                      🗑️
-                    </button>
-                  </div>
-                  <h3 className="trip-card-name">
-                    {trip.tripName}
-                    <span
-                      className={`badge badge-${trip.status === 'upcoming' ? 'info' : trip.status === 'active' ? 'success' : 'neutral'}`}
-                      style={{ marginLeft: '0.5rem', fontSize: '0.7rem', verticalAlign: 'middle' }}
-                    >
-                      {getStatusLabel(trip.status)}
-                    </span>
-                  </h3>
                   <div className="trip-card-meta">
-                    <span>👥 {t('tripMembers', { count: trip.memberCount ?? 0 })}</span>
+                    <span>
+                      <Icon name="users" size={14} />
+                      {t('tripMembers', { count: trip.memberCount ?? 0 })}
+                    </span>
                     {trip.startDate && trip.endDate && (
-                      <span>📅 {formatDateRange(trip.startDate, trip.endDate)}</span>
+                      <span>
+                        <Icon name="calendar" size={14} />
+                        {formatDateRange(trip.startDate, trip.endDate)}
+                      </span>
                     )}
                     {!trip.startDate && (
-                      <span>📅 {t('createdOn', { date: formatDate(trip.createdAt) })}</span>
+                      <span>
+                        <Icon name="calendar" size={14} />
+                        {t('createdOn', { date: formatDate(trip.createdAt) })}
+                      </span>
                     )}
                   </div>
-                  {getStatusMessage(trip) && (
-                    <div style={{ fontSize: '0.75rem', color: 'var(--gray-500)', marginTop: '0.25rem' }}>
-                      {getStatusMessage(trip)}
-                    </div>
-                  )}
-                </>
-              )}
-            </motion.div>
-          ))}
+                  {statusMessage && <div className="trip-card-note">{statusMessage}</div>}
+                </div>
+              </motion.article>
+            );
+          })}
         </div>
       )}
     </div>

@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CreateExpenseRequest, ScannedBill, TripMember, getBillUploadUrl, scanBill } from '../api/api';
 import { Avatar } from './ui/Avatar';
+import { Icon, Spinner } from './ui/Icon';
 import { useLanguage } from '../i18n';
 
 interface ScanBillModalProps {
@@ -116,23 +117,22 @@ export function ScanBillModal({ tripId, members, onClose, onExpenseCreated }: Sc
         onClick={onClose}
       >
         <motion.div
-          className="modal-content card"
-          initial={{ opacity: 0, scale: 0.95, y: 20 }}
+          className="modal-content modal-wide card"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="scan-bill-title"
+          initial={{ opacity: 0, scale: 0.97, y: 12 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 20 }}
+          exit={{ opacity: 0, scale: 0.97, y: 12 }}
           onClick={(e) => e.stopPropagation()}
-          style={{ maxWidth: '520px' }}
         >
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-            <h2 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700 }}>
-              📸 {t('scanBill')}
+          <div className="card-header">
+            <h2 className="card-title" id="scan-bill-title">
+              <Icon name="scan" size={20} />
+              {t('scanBill')}
             </h2>
-            <button
-              onClick={onClose}
-              className="btn btn-secondary"
-              style={{ padding: '0.5rem', borderRadius: '8px' }}
-            >
-              ✕
+            <button type="button" onClick={onClose} className="icon-btn" aria-label={t('cancel')}>
+              <Icon name="x" size={20} />
             </button>
           </div>
 
@@ -140,77 +140,40 @@ export function ScanBillModal({ tripId, members, onClose, onExpenseCreated }: Sc
             <>
               {/* Upload zone */}
               {loading ? (
-                <div
-                  style={{
-                    border: '2px dashed var(--gray-300)',
-                    borderRadius: '12px',
-                    padding: '3rem 2rem',
-                    textAlign: 'center',
-                    background: 'var(--gray-50)',
-                  }}
-                >
-                  <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>⏳</div>
-                  <p style={{ color: 'var(--gray-600)', margin: 0 }}>{t('scanning')}</p>
+                <div className="upload-option is-static" role="status">
+                  <Spinner size={32} />
+                  {t('scanning')}
                 </div>
               ) : previewUrl ? (
-                <div
+                <button
+                  type="button"
+                  className="upload-option"
+                  style={{ width: '100%' }}
                   onClick={() => galleryInputRef.current?.click()}
-                  style={{
-                    border: '2px dashed var(--gray-300)',
-                    borderRadius: '12px',
-                    padding: '1.5rem',
-                    textAlign: 'center',
-                    cursor: 'pointer',
-                  }}
                 >
-                  <img
-                    src={previewUrl}
-                    alt="Receipt preview"
-                    style={{
-                      maxWidth: '100%',
-                      maxHeight: '200px',
-                      borderRadius: '8px',
-                      marginBottom: '1rem',
-                    }}
-                  />
-                  <p style={{ color: 'var(--gray-500)', fontSize: '0.875rem', margin: 0 }}>
-                    {t('tapToChange')}
-                  </p>
-                </div>
+                  <img src={previewUrl} alt="Receipt preview" />
+                  <span className="upload-option-hint">{t('tapToChange')}</span>
+                </button>
               ) : (
-                <div style={{ display: 'flex', gap: '1rem' }}>
+                <div className="upload-options">
                   {/* Camera option */}
-                  <div
+                  <button
+                    type="button"
+                    className="upload-option"
                     onClick={() => cameraInputRef.current?.click()}
-                    style={{
-                      flex: 1,
-                      border: '2px dashed var(--gray-300)',
-                      borderRadius: '12px',
-                      padding: '2rem 1rem',
-                      textAlign: 'center',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s',
-                    }}
                   >
-                    <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>📷</div>
-                    <p style={{ fontWeight: 600, fontSize: '0.9rem', margin: 0 }}>{t('takePhoto')}</p>
-                  </div>
+                    <Icon name="camera" size={32} />
+                    {t('takePhoto')}
+                  </button>
                   {/* Gallery option */}
-                  <div
+                  <button
+                    type="button"
+                    className="upload-option"
                     onClick={() => galleryInputRef.current?.click()}
-                    style={{
-                      flex: 1,
-                      border: '2px dashed var(--gray-300)',
-                      borderRadius: '12px',
-                      padding: '2rem 1rem',
-                      textAlign: 'center',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s',
-                    }}
                   >
-                    <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>🖼️</div>
-                    <p style={{ fontWeight: 600, fontSize: '0.9rem', margin: 0 }}>{t('chooseFromGallery')}</p>
-                  </div>
+                    <Icon name="image" size={32} />
+                    {t('chooseFromGallery')}
+                  </button>
                 </div>
               )}
               <input
@@ -219,23 +182,24 @@ export function ScanBillModal({ tripId, members, onClose, onExpenseCreated }: Sc
                 accept="image/jpeg,image/png,image/webp,image/heic"
                 capture="environment"
                 onChange={handleFileSelect}
-                style={{ display: 'none' }}
+                className="file-input-hidden"
               />
               <input
                 ref={galleryInputRef}
                 type="file"
                 accept="image/jpeg,image/png,image/webp,image/heic"
                 onChange={handleFileSelect}
-                style={{ display: 'none' }}
+                className="file-input-hidden"
               />
 
               {error && (
-                <div className="alert alert-error" style={{ marginTop: '1rem' }}>
-                  ⚠️ {error}
+                <div className="alert alert-error" role="alert" style={{ marginTop: '1rem', marginBottom: 0 }}>
+                  <Icon name="alert-circle" />
+                  <span className="alert-body">{error}</span>
                 </div>
               )}
 
-              <div style={{ marginTop: '1.5rem', textAlign: 'center' }}>
+              <div className="modal-actions" style={{ marginTop: '1.5rem' }}>
                 <button
                   type="button"
                   className="btn btn-secondary"
@@ -250,44 +214,34 @@ export function ScanBillModal({ tripId, members, onClose, onExpenseCreated }: Sc
           {step === 'review' && scannedBill && (
             <form onSubmit={handleSubmit}>
               {/* Scanned preview */}
-              <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-                {previewUrl && (
-                  <img
-                    src={previewUrl}
-                    alt="Receipt"
-                    style={{
-                      maxWidth: '120px',
-                      maxHeight: '120px',
-                      borderRadius: '8px',
-                      objectFit: 'cover',
-                    }}
-                  />
-                )}
-              </div>
+              {previewUrl && (
+                <img src={previewUrl} alt="Receipt" className="receipt-thumb" />
+              )}
 
               {/* Amount */}
-              <div style={{ marginBottom: '1rem' }}>
-                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.875rem' }}>
+              <div className="form-group">
+                <label className="form-label" htmlFor="scan-bill-amount">
                   {t('amount')} ({scannedBill.currency})
                 </label>
                 <input
+                  id="scan-bill-amount"
                   type="text"
                   inputMode="numeric"
-                  className="form-input"
+                  className="form-input amount-input-lg"
                   value={displayAmount}
                   onChange={handleAmountChange}
                   disabled={submitting}
                   placeholder={t('enterAmount')}
-                  style={{ fontSize: '1.25rem', textAlign: 'center' }}
                 />
               </div>
 
               {/* Date */}
-              <div style={{ marginBottom: '1rem' }}>
-                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.875rem' }}>
+              <div className="form-group">
+                <label className="form-label" htmlFor="scan-bill-date">
                   {t('date')}
                 </label>
                 <input
+                  id="scan-bill-date"
                   type="date"
                   className="form-input"
                   value={date}
@@ -297,11 +251,12 @@ export function ScanBillModal({ tripId, members, onClose, onExpenseCreated }: Sc
               </div>
 
               {/* Title */}
-              <div style={{ marginBottom: '1rem' }}>
-                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.875rem' }}>
+              <div className="form-group">
+                <label className="form-label" htmlFor="scan-bill-title-input">
                   {t('whatFor')}
                 </label>
                 <input
+                  id="scan-bill-title-input"
                   type="text"
                   className="form-input"
                   value={title}
@@ -312,18 +267,17 @@ export function ScanBillModal({ tripId, members, onClose, onExpenseCreated }: Sc
               </div>
 
               {/* Payer */}
-              <div style={{ marginBottom: '1.5rem' }}>
-                <label style={{ display: 'block', marginBottom: '0.75rem', fontWeight: 600, fontSize: '0.875rem' }}>
-                  {t('whoPaid')}
-                </label>
-                <div className="avatar-picker" style={{ flexWrap: 'wrap' }}>
+              <div className="section-block">
+                <div className="form-label">{t('whoPaid')}</div>
+                <div className="avatar-picker">
                   {members.map((m) => (
                     <motion.button
                       key={m.userId}
                       type="button"
                       className={`avatar-picker-item ${payer === m.userId ? 'selected' : ''}`}
                       onClick={() => setPayer(m.userId)}
-                      whileTap={{ scale: 0.95 }}
+                      aria-pressed={payer === m.userId}
+                      whileTap={{ scale: 0.97 }}
                       disabled={submitting}
                     >
                       <Avatar name={m.displayName} size="lg" />
@@ -334,26 +288,29 @@ export function ScanBillModal({ tripId, members, onClose, onExpenseCreated }: Sc
               </div>
 
               {error && (
-                <div className="alert alert-error" style={{ marginBottom: '1rem' }}>
-                  ⚠️ {error}
+                <div className="alert alert-error" role="alert">
+                  <Icon name="alert-circle" />
+                  <span className="alert-body">{error}</span>
                 </div>
               )}
 
-              <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
+              <div className="modal-actions">
                 <button
                   type="button"
                   className="btn btn-secondary"
                   onClick={() => setStep('upload')}
                   disabled={submitting}
                 >
-                  ← {t('rescan')}
+                  <Icon name="arrow-left" />
+                  {t('rescan')}
                 </button>
                 <button
                   type="submit"
                   className="btn btn-primary"
                   disabled={submitting || !payer || !amount || !title.trim() || !date}
                 >
-                  {submitting ? '⏳' : '💸'} {t('createExpense')}
+                  {submitting ? <Spinner /> : <Icon name="plus" />}
+                  {t('createExpense')}
                 </button>
               </div>
             </form>

@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { Expense, calculateBalances, calculateTransactions, BalanceMember } from '../utils/calculation';
 import { Avatar } from './ui/Avatar';
+import { Icon } from './ui/Icon';
 import { useLanguage } from '../i18n';
 
 interface SettlementProps {
@@ -29,38 +30,40 @@ export function Settlement({ expenses, members, memberSettledStatus }: Settlemen
 
   return (
     <div className="card">
-      <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1.5rem' }}>
-        💰 {t('settlement')}
+      <h2 className="card-title">
+        <Icon name="wallet" size={22} />
+        {t('settlement')}
       </h2>
 
       {/* Summary */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
-        <div className="stat-card" style={{ borderLeftColor: '#4f46e5' }}>
+      <div className="grid grid-2 section-block">
+        <div className="stat-card">
           <div className="stat-label">{t('totalSpent')}</div>
-          <div className="stat-value" style={{ fontSize: '1.25rem' }}>
+          <div className="stat-value">
             {total.toLocaleString()} {t('currency')}
           </div>
         </div>
-        <div className="stat-card" style={{ borderLeftColor: '#10b981' }}>
+        <div className="stat-card">
           <div className="stat-label">{t('yourShare')}</div>
-          <div className="stat-value" style={{ fontSize: '1.25rem' }}>
+          <div className="stat-value">
             {sharePerPerson.toLocaleString()} {t('currency')}
           </div>
         </div>
       </div>
 
       {/* Who Owes Who - The Most Important Part */}
-      <div style={{ marginBottom: '1.5rem' }}>
-        <h3 style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--gray-700)', marginBottom: '1rem' }}>
-          🔄 {t('whoOwesWho')}
+      <div className="section-block">
+        <h3 className="section-heading">
+          <Icon name="swap" />
+          {t('whoOwesWho')}
         </h3>
 
         {transactions.length === 0 ? (
-          <div className="empty-state" style={{ padding: '2rem' }}>
-            <div className="empty-state-icon">✅</div>
-            <p style={{ fontSize: '1.1rem', fontWeight: 600, color: '#10b981' }}>
-              {t('allSettledUp')}
-            </p>
+          <div className="empty-state">
+            <div className="empty-state-icon is-success">
+              <Icon name="check" size={26} />
+            </div>
+            <p className="settled-message">{t('allSettledUp')}</p>
           </div>
         ) : (
           <div>
@@ -73,7 +76,9 @@ export function Settlement({ expenses, members, memberSettledStatus }: Settlemen
               return (
                 <div key={key} className="settlement-card">
                   <Avatar name={fromName} size="md" />
-                  <div className="settlement-arrow">→</div>
+                  <div className="settlement-arrow">
+                    <Icon name="arrow-right" />
+                  </div>
                   <div className="settlement-names">
                     <div className="settlement-from">{fromName}</div>
                     <div className="settlement-to">{t('owes')} {toName}</div>
@@ -91,10 +96,11 @@ export function Settlement({ expenses, members, memberSettledStatus }: Settlemen
       {/* Individual Balances */}
       {balances.length > 0 && (
         <div>
-          <h3 style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--gray-700)', marginBottom: '0.75rem' }}>
-            💼 {t('balances')}
+          <h3 className="section-heading">
+            <Icon name="users" />
+            {t('balances')}
           </h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+          <div className="balance-list">
             {balances.map((balance) => {
               const isPositive = balance.balance > 0.01;
               const isNegative = balance.balance < -0.01;
@@ -106,38 +112,28 @@ export function Settlement({ expenses, members, memberSettledStatus }: Settlemen
                 : (!isPositive && !isNegative);
 
               return (
-                <div
-                  key={settledKey}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.75rem',
-                    padding: '0.75rem 1rem',
-                    background: isSettled ? 'var(--gray-50)' : 'white',
-                    borderRadius: 'var(--border-radius-sm)',
-                    border: `1px solid ${isSettled ? 'var(--gray-200)' : 'var(--gray-200)'}`,
-                  }}
-                >
+                <div key={settledKey} className={`balance-row${isSettled ? ' is-settled' : ''}`}>
                   <Avatar name={displayName} size="sm" />
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: 600, fontSize: '0.95rem' }}>{displayName}</div>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--gray-600)' }}>
+                  <div className="balance-info">
+                    <div className="balance-name">{displayName}</div>
+                    <div className="balance-paid">
                       {t('paid')} {Math.round(balance.totalPaid).toLocaleString()} {t('currency')}
                     </div>
                   </div>
-                  <div style={{ textAlign: 'right' }}>
-                    {isSettled ? (
-                      <span className="badge badge-neutral">{t('settled')}</span>
-                    ) : isPositive ? (
-                      <span className="badge badge-success">
-                        +{Math.round(balance.balance).toLocaleString()} {t('currency')}
-                      </span>
-                    ) : (
-                      <span className="badge badge-danger">
-                        {Math.round(balance.balance).toLocaleString()} {t('currency')}
-                      </span>
-                    )}
-                  </div>
+                  {isSettled ? (
+                    <span className="badge badge-neutral">
+                      <Icon name="check" size={12} />
+                      {t('settled')}
+                    </span>
+                  ) : isPositive ? (
+                    <span className="badge badge-success">
+                      +{Math.round(balance.balance).toLocaleString()} {t('currency')}
+                    </span>
+                  ) : (
+                    <span className="badge badge-danger">
+                      {Math.round(balance.balance).toLocaleString()} {t('currency')}
+                    </span>
+                  )}
                 </div>
               );
             })}

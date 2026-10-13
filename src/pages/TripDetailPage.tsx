@@ -21,6 +21,8 @@ import { TripMembers } from '../components/TripMembers';
 import { TripPhotos } from '../components/TripPhotos';
 import { TripEditModal } from '../components/TripEditModal';
 import { ScanBillModal } from '../components/ScanBillModal';
+import { Icon, Spinner } from '../components/ui/Icon';
+import { PageLoader } from '../components/ui/PageLoader';
 import { useLanguage } from '../i18n';
 
 export default function TripDetailPage() {
@@ -179,14 +181,7 @@ export default function TripDetailPage() {
   }, [queryClient, tripId]);
 
   if (loading) {
-    return (
-      <div style={{ textAlign: 'center', padding: '3rem' }}>
-        <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>⏳</div>
-        <div style={{ color: 'white', fontSize: '1.25rem', fontWeight: '600' }}>
-          {t('loadingExpenses')}
-        </div>
-      </div>
-    );
+    return <PageLoader label={t('loadingExpenses')} />;
   }
 
   return (
@@ -197,145 +192,98 @@ export default function TripDetailPage() {
         type="file"
         accept="image/jpeg,image/png,image/webp,image/gif,image/heic"
         onChange={handleCoverUpload}
-        style={{ display: 'none' }}
+        className="file-input-hidden"
       />
+
+      <button type="button" className="btn btn-ghost btn-sm back-link" onClick={() => navigate('/app')}>
+        <Icon name="arrow-left" size={16} />
+        {t('backToTrips')}
+      </button>
 
       {/* Cover image banner */}
       {trip?.imageUrl && (
         <div className="trip-detail-cover">
-          <img src={trip.imageUrl} alt={trip.tripName} />
-          <div className="trip-detail-cover-overlay" />
+          <img src={trip.imageUrl} alt="" />
           <div className="trip-detail-cover-actions">
             <button
+              type="button"
               onClick={() => coverInputRef.current?.click()}
               disabled={coverUploading}
               className="trip-detail-cover-btn"
+              aria-label={t('changeCoverPhoto')}
             >
-              📷 {t('changeCoverPhoto')}
+              <Icon name="camera" size={16} />
+              <span>{t('changeCoverPhoto')}</span>
             </button>
             <button
+              type="button"
               onClick={handleRemoveCover}
               disabled={coverUploading}
               className="trip-detail-cover-btn trip-detail-cover-btn-danger"
+              aria-label={t('removeCoverPhoto')}
             >
-              ✕ {t('removeCoverPhoto')}
+              <Icon name="x" size={16} />
+              <span>{t('removeCoverPhoto')}</span>
             </button>
           </div>
           {coverUploading && (
-            <div className="trip-detail-cover-loading">
-              ⏳ {t('uploadingCover')}
+            <div className="trip-detail-cover-loading" role="status">
+              <Spinner />
+              {t('uploadingCover')}
             </div>
           )}
         </div>
       )}
 
-      {/* Back button + Trip name */}
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '0.75rem',
-        marginBottom: '1.5rem',
-      }}>
-        <button
-          onClick={() => navigate('/app')}
-          style={{
-            padding: '0.625rem 1rem',
-            borderRadius: '12px',
-            background: 'rgba(255,255,255,0.2)',
-            color: 'white',
-            border: '1px solid rgba(255,255,255,0.3)',
-            cursor: 'pointer',
-            fontSize: '1rem',
-            fontWeight: '600',
-            transition: 'all 0.2s',
-            backdropFilter: 'blur(4px)',
-          }}
-          onMouseOver={(e) => {
-            e.currentTarget.style.background = 'rgba(255,255,255,0.35)';
-          }}
-          onMouseOut={(e) => {
-            e.currentTarget.style.background = 'rgba(255,255,255,0.2)';
-          }}
-        >
-          ← {t('backToTrips')}
-        </button>
-        <h1 style={{
-          fontSize: '1.5rem',
-          fontWeight: '700',
-          color: 'white',
-          margin: 0,
-          textShadow: '0 2px 8px rgba(0,0,0,0.1)',
-        }}>
-          ✈️ {trip?.tripName}
-        </h1>
-        {/* Add cover button when no cover exists */}
-        {trip && !trip.imageUrl && (
-          <button
-            onClick={() => coverInputRef.current?.click()}
-            disabled={coverUploading}
-            style={{
-              marginLeft: 'auto',
-              padding: '0.5rem 0.75rem',
-              borderRadius: '10px',
-              background: 'rgba(255,255,255,0.2)',
-              color: 'white',
-              border: '1px solid rgba(255,255,255,0.3)',
-              cursor: coverUploading ? 'not-allowed' : 'pointer',
-              fontSize: '0.8rem',
-              fontWeight: '600',
-              transition: 'all 0.2s',
-              backdropFilter: 'blur(4px)',
-              opacity: coverUploading ? 0.6 : 1,
-            }}
-          >
-            {coverUploading ? '⏳' : '📷'} {coverUploading ? t('uploadingCover') : t('addCoverPhoto')}
-          </button>
-        )}
-        {/* Edit trip button */}
-        {trip && (
-          <button
-            onClick={() => setShowEditModal(true)}
-            style={{
-              marginLeft: '0.5rem',
-              padding: '0.5rem 0.75rem',
-              borderRadius: '10px',
-              background: 'rgba(255,255,255,0.2)',
-              color: 'white',
-              border: '1px solid rgba(255,255,255,0.3)',
-              cursor: 'pointer',
-              fontSize: '0.8rem',
-              fontWeight: '600',
-              transition: 'all 0.2s',
-              backdropFilter: 'blur(4px)',
-            }}
-          >
-            ✏️ {t('editTrip')}
-          </button>
-        )}
+      {/* Trip name + actions */}
+      <div className="page-header">
+        <h1 className="page-title">{trip?.tripName}</h1>
+        <div className="page-actions">
+          {/* Add cover button when no cover exists */}
+          {trip && !trip.imageUrl && (
+            <button
+              type="button"
+              className="btn btn-secondary btn-sm"
+              onClick={() => coverInputRef.current?.click()}
+              disabled={coverUploading}
+            >
+              {coverUploading ? <Spinner size={16} /> : <Icon name="camera" size={16} />}
+              {coverUploading ? t('uploadingCover') : t('addCoverPhoto')}
+            </button>
+          )}
+          {/* Edit trip button */}
+          {trip && (
+            <button type="button" className="btn btn-secondary btn-sm" onClick={() => setShowEditModal(true)}>
+              <Icon name="pencil" size={16} />
+              {t('editTrip')}
+            </button>
+          )}
+        </div>
       </div>
 
       {error && (
-        <div className="alert alert-error">
-          <span style={{ fontSize: '1.5rem' }}>⚠️</span>
-          <div style={{ flex: 1 }}>
+        <div className="alert alert-error" role="alert">
+          <Icon name="alert-circle" />
+          <div className="alert-body">
             <strong>{t('error')}:</strong> {error}
           </div>
-          <button onClick={handleRetry} className="btn btn-primary">
+          <button type="button" onClick={handleRetry} className="btn btn-secondary btn-sm">
+            <Icon name="refresh" size={16} />
             {t('retry')}
           </button>
         </div>
       )}
 
-      {/* Add expense buttons */}
-      <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1rem' }}>
-        <button
-          className="btn btn-secondary"
-          onClick={() => setShowScanBillModal(true)}
-          style={{ flex: 1 }}
-        >
-          📸 {t('scanBill')}
-        </button>
-      </div>
+      {/* Scan a receipt instead of typing the expense */}
+      <button
+        type="button"
+        className="btn btn-secondary btn-block"
+        onClick={() => setShowScanBillModal(true)}
+        style={{ marginBottom: '1rem' }}
+      >
+        <Icon name="scan" />
+        {t('scanBill')}
+      </button>
 
       <ExpenseForm members={members} onSubmit={handleAddExpense} />
 
@@ -352,15 +300,14 @@ export default function TripDetailPage() {
       )}
 
       {/* Danger Zone */}
-      <div className="card" style={{ background: '#fef2f2', border: '2px solid #fca5a5' }}>
-        <h2 style={{ marginBottom: '1rem', fontSize: '1.25rem', fontWeight: '700', color: '#991b1b' }}>
-          🗑️ {t('dangerZone')}
+      <div className="card card-danger">
+        <h2 className="card-title">
+          <Icon name="alert-circle" size={22} />
+          {t('dangerZone')}
         </h2>
         <form onSubmit={handleDeleteAllExpenses}>
-          <p style={{ color: '#991b1b', fontSize: '0.875rem', marginBottom: '0.75rem' }}>
-            {t('permanentlyDeleteAll')}
-          </p>
-          <div style={{ display: 'flex', gap: '0.75rem' }}>
+          <p>{t('permanentlyDeleteAll')}</p>
+          <div className="danger-form">
             <input
               type="text"
               className="form-input"
@@ -368,24 +315,16 @@ export default function TripDetailPage() {
               onChange={(e) => setDeletePassword(e.target.value)}
               disabled={deleteLoading}
               placeholder={t('enterPassword')}
-              style={{ flex: 1 }}
+              aria-label={t('enterPassword')}
+              autoComplete="off"
             />
             <button
               type="submit"
+              className="btn btn-danger"
               disabled={deleteLoading || !deletePassword}
-              style={{
-                padding: '0.75rem 1.5rem',
-                background: '#dc2626',
-                color: 'white',
-                borderRadius: '8px',
-                fontWeight: '600',
-                fontSize: '0.875rem',
-                border: 'none',
-                cursor: deleteLoading ? 'not-allowed' : 'pointer',
-                opacity: deleteLoading ? 0.6 : 1,
-              }}
             >
-              {deleteLoading ? '⏳ ' + t('deleting') : '🗑️ ' + t('deleteAll')}
+              {deleteLoading ? <Spinner /> : <Icon name="trash" />}
+              {deleteLoading ? t('deleting') : t('deleteAll')}
             </button>
           </div>
         </form>

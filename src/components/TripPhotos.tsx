@@ -6,6 +6,7 @@ import {
   saveImage,
   deleteImage,
 } from '../api/api';
+import { Icon } from './ui/Icon';
 import { useLanguage } from '../i18n';
 
 interface TripPhotosProps {
@@ -111,28 +112,34 @@ export function TripPhotos({ tripId, images, onImagesChanged }: TripPhotosProps)
 
   return (
     <div className="card">
-      <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1.25rem' }}>
-        📸 {t('tripPhotos')}
+      <h2 className="card-title">
+        <Icon name="image" size={22} />
+        {t('tripPhotos')}
       </h2>
 
       {/* Upload zone */}
-      <div
+      <button
+        type="button"
         className={`photo-upload-zone ${dragOver ? 'drag-over' : ''}`}
         onClick={() => fileInputRef.current?.click()}
         onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
         onDragLeave={() => setDragOver(false)}
         onDrop={handleDrop}
+        disabled={uploading}
       >
-        <div className="photo-upload-zone-icon">📷</div>
-        <div className="photo-upload-zone-text">{t('dragOrTap')}</div>
-        <div className="photo-upload-zone-hint">JPG, PNG, HEIC</div>
-      </div>
+        <span className="photo-upload-zone-icon">
+          <Icon name="camera" size={28} />
+        </span>
+        <span className="photo-upload-zone-text">{t('dragOrTap')}</span>
+        <span className="photo-upload-zone-hint">JPG, PNG, HEIC</span>
+      </button>
       <input
         ref={fileInputRef}
         type="file"
         accept="image/*"
         onChange={handleFileSelect}
-        style={{ display: 'none' }}
+        className="file-input-hidden"
+        tabIndex={-1}
       />
 
       {/* Error */}
@@ -140,13 +147,14 @@ export function TripPhotos({ tripId, images, onImagesChanged }: TripPhotosProps)
         {error && (
           <motion.div
             className="alert alert-error"
+            role="alert"
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             style={{ marginTop: '0.75rem' }}
           >
-            <span>⚠️</span>
-            <span>{error}</span>
+            <Icon name="alert-circle" />
+            <span className="alert-body">{error}</span>
           </motion.div>
         )}
       </AnimatePresence>
@@ -156,7 +164,7 @@ export function TripPhotos({ tripId, images, onImagesChanged }: TripPhotosProps)
         <div className="photo-grid">
           {/* Upload progress placeholder */}
           {uploading && (
-            <div className="photo-upload-progress">
+            <div className="photo-upload-progress" role="status">
               <div className="photo-upload-progress-text">
                 {t('uploading')}
               </div>
@@ -170,11 +178,12 @@ export function TripPhotos({ tripId, images, onImagesChanged }: TripPhotosProps)
           )}
 
           {images.map((image) => (
-            <motion.div
+            <motion.button
               key={image.imageId}
+              type="button"
               className="photo-grid-item"
               onClick={() => setLightboxImage(image)}
-              initial={{ opacity: 0, scale: 0.9 }}
+              initial={{ opacity: 0, scale: 0.96 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.2 }}
             >
@@ -183,22 +192,22 @@ export function TripPhotos({ tripId, images, onImagesChanged }: TripPhotosProps)
                 alt={image.fileName}
                 loading="lazy"
               />
-              <div className="photo-grid-item-overlay">
-                {image.uploaderDisplayName} • {formatDate(image.createdAt)}
-              </div>
-            </motion.div>
+              <span className="photo-grid-item-overlay">
+                {image.uploaderDisplayName} · {formatDate(image.createdAt)}
+              </span>
+            </motion.button>
           ))}
         </div>
       )}
 
       {/* Empty state */}
       {images.length === 0 && !uploading && (
-        <div className="empty-state" style={{ padding: '2rem' }}>
-          <div className="empty-state-icon">🏞️</div>
+        <div className="empty-state">
+          <div className="empty-state-icon">
+            <Icon name="image" size={26} />
+          </div>
           <h3>{t('noPhotosYet')}</h3>
-          <p style={{ color: 'var(--gray-600)', fontSize: '0.9rem' }}>
-            {t('addFirstPhoto')}
-          </p>
+          <p>{t('addFirstPhoto')}</p>
         </div>
       )}
 
@@ -207,38 +216,44 @@ export function TripPhotos({ tripId, images, onImagesChanged }: TripPhotosProps)
         {lightboxImage && (
           <motion.div
             className="photo-lightbox"
+            role="dialog"
+            aria-modal="true"
+            aria-label={lightboxImage.fileName}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setLightboxImage(null)}
           >
             <button
+              type="button"
               className="photo-lightbox-close"
               onClick={(e) => { e.stopPropagation(); setLightboxImage(null); }}
+              aria-label={t('cancel')}
             >
-              ✕
+              <Icon name="x" size={22} />
             </button>
             <motion.img
               src={lightboxImage.url}
               alt={lightboxImage.fileName}
-              initial={{ scale: 0.9 }}
+              initial={{ scale: 0.96 }}
               animate={{ scale: 1 }}
-              exit={{ scale: 0.9 }}
+              exit={{ scale: 0.96 }}
               onClick={(e) => e.stopPropagation()}
             />
             <div className="photo-lightbox-info">
-              {lightboxImage.uploaderDisplayName} • {formatDate(lightboxImage.createdAt)}
+              {lightboxImage.uploaderDisplayName} · {formatDate(lightboxImage.createdAt)}
             </div>
             <div className="photo-lightbox-actions">
               <button
-                className="btn btn-danger"
-                style={{ fontSize: '0.85rem', padding: '0.5rem 1rem' }}
+                type="button"
+                className="btn btn-danger btn-sm"
                 onClick={(e) => {
                   e.stopPropagation();
                   handleDelete(lightboxImage.imageId);
                 }}
               >
-                🗑️ {t('deletePhoto')}
+                <Icon name="trash" size={16} />
+                {t('deletePhoto')}
               </button>
             </div>
           </motion.div>

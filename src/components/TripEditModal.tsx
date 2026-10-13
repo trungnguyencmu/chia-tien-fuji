@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Trip, updateTrip } from '../api/api';
+import { Icon, Spinner } from './ui/Icon';
 import { useLanguage } from '../i18n';
 
 interface TripEditModalProps {
@@ -52,30 +53,31 @@ export function TripEditModal({ trip, onClose, onTripUpdated }: TripEditModalPro
       >
         <motion.div
           className="modal-content card"
-          initial={{ opacity: 0, scale: 0.95, y: 20 }}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="trip-edit-title"
+          initial={{ opacity: 0, scale: 0.97, y: 12 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 20 }}
+          exit={{ opacity: 0, scale: 0.97, y: 12 }}
           onClick={(e) => e.stopPropagation()}
         >
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-            <h2 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700 }}>
-              ✏️ {t('editTrip')}
+          <div className="card-header">
+            <h2 className="card-title" id="trip-edit-title">
+              <Icon name="pencil" size={20} />
+              {t('editTrip')}
             </h2>
-            <button
-              onClick={onClose}
-              className="btn btn-secondary"
-              style={{ padding: '0.5rem', borderRadius: '8px' }}
-            >
-              ✕
+            <button type="button" onClick={onClose} className="icon-btn" aria-label={t('cancel')}>
+              <Icon name="x" size={20} />
             </button>
           </div>
 
           <form onSubmit={handleSubmit}>
-            <div style={{ marginBottom: '1rem' }}>
-              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.875rem' }}>
+            <div className="form-group">
+              <label className="form-label" htmlFor="trip-edit-name">
                 {t('tripName')}
               </label>
               <input
+                id="trip-edit-name"
                 type="text"
                 className="form-input"
                 value={tripName}
@@ -86,12 +88,13 @@ export function TripEditModal({ trip, onClose, onTripUpdated }: TripEditModalPro
               />
             </div>
 
-            <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
-              <div style={{ flex: 1 }}>
-                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.875rem' }}>
+            <div className="form-row form-group">
+              <div>
+                <label className="form-label" htmlFor="trip-edit-start">
                   {t('startDate')}
                 </label>
                 <input
+                  id="trip-edit-start"
                   type="date"
                   className="form-input"
                   value={startDate}
@@ -99,11 +102,12 @@ export function TripEditModal({ trip, onClose, onTripUpdated }: TripEditModalPro
                   disabled={loading}
                 />
               </div>
-              <div style={{ flex: 1 }}>
-                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.875rem' }}>
+              <div>
+                <label className="form-label" htmlFor="trip-edit-end">
                   {t('endDate')}
                 </label>
                 <input
+                  id="trip-edit-end"
                   type="date"
                   className="form-input"
                   value={endDate}
@@ -114,12 +118,13 @@ export function TripEditModal({ trip, onClose, onTripUpdated }: TripEditModalPro
             </div>
 
             {error && (
-              <div className="alert alert-error" style={{ marginBottom: '1rem' }}>
-                ⚠️ {error}
+              <div className="alert alert-error" role="alert">
+                <Icon name="alert-circle" />
+                <span className="alert-body">{error}</span>
               </div>
             )}
 
-            <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
+            <div className="modal-actions">
               <button
                 type="button"
                 className="btn btn-secondary"
@@ -133,7 +138,8 @@ export function TripEditModal({ trip, onClose, onTripUpdated }: TripEditModalPro
                 className="btn btn-primary"
                 disabled={loading || !tripName.trim()}
               >
-                {loading ? '⏳' : '💾'} {t('save')}
+                {loading ? <Spinner /> : <Icon name="check" />}
+                {t('save')}
               </button>
             </div>
           </form>

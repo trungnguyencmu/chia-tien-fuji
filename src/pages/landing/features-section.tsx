@@ -2,31 +2,28 @@ import { motion } from 'framer-motion';
 import { useInView } from 'framer-motion';
 import { useRef } from 'react';
 import { useLanguage } from '../../i18n';
+import { Icon, type IconName } from '../../components/ui/Icon';
 
-const features = [
+const features: { icon: IconName; titleKey: string; descriptionKey: string }[] = [
   {
-    icon: '💸',
+    icon: 'wallet',
     titleKey: 'landingFeature1Title',
     descriptionKey: 'landingFeature1Desc',
-    color: '#74b9ff',
   },
   {
-    icon: '🤝',
+    icon: 'users',
     titleKey: 'landingFeature2Title',
     descriptionKey: 'landingFeature2Desc',
-    color: '#c7b4f3',
   },
   {
-    icon: '📱',
+    icon: 'smartphone',
     titleKey: 'landingFeature3Title',
     descriptionKey: 'landingFeature3Desc',
-    color: '#b4d4ff',
   },
   {
-    icon: '📊',
+    icon: 'bar-chart',
     titleKey: 'landingFeature4Title',
     descriptionKey: 'landingFeature4Desc',
-    color: '#a8e6cf',
   },
 ];
 
@@ -59,11 +56,8 @@ export function FeaturesSection() {
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.5, delay: 0.1 * (i + 1) }}
           >
-            <div
-              className="feature-icon"
-              style={{ background: `${feature.color}20` }}
-            >
-              {feature.icon}
+            <div className="feature-icon">
+              <Icon name={feature.icon} size={26} />
             </div>
             <h3 className="feature-title">{t(feature.titleKey as any)}</h3>
             <p className="feature-description">{t(feature.descriptionKey as any)}</p>

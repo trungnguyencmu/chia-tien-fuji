@@ -1,6 +1,7 @@
 import { motion, useInView } from 'framer-motion';
 import { useRef } from 'react';
 import { useLanguage } from '../../i18n';
+import { Icon, type IconName } from '../../components/ui/Icon';
 
 export function AppPreviewSection() {
   const { t } = useLanguage();
@@ -46,7 +47,7 @@ export function AppPreviewSection() {
             {/* Trip header */}
             <div className="preview-trip-header">
               <div>
-                <h3 className="preview-trip-name">🏖️ {t('landingAppTripName')}</h3>
+                <h3 className="preview-trip-name">{t('landingAppTripName')}</h3>
                 <p className="preview-trip-meta">
                   4 {t('landingAppParticipants')} &middot; Mar 15 - 18
                 </p>
@@ -75,41 +76,41 @@ export function AppPreviewSection() {
                   <span className="preview-input-label">{t('landingAppPaidBy')}</span>
                   <span className="preview-input-value">Mai</span>
                 </div>
-                <button className="preview-add-btn">+ {t('landingAppAddExpense')}</button>
+                <span className="preview-add-btn">+ {t('landingAppAddExpense')}</span>
               </div>
             </div>
 
             {/* Expense list */}
             <div className="preview-expenses">
               <div className="preview-expenses-title">{t('landingAppRecentExpenses')}</div>
-              {[
+              {([
                 {
-                  icon: '🍜',
+                  icon: 'utensils',
                   nameKey: 'landingAppSeafoodDinner',
                   by: 'Mai',
                   amount: '$85.00',
                 },
                 {
-                  icon: '🏨',
+                  icon: 'bed',
                   nameKey: 'landingAppHotel',
                   by: 'An',
                   amount: '$450.00',
                 },
                 {
-                  icon: '🚕',
+                  icon: 'car',
                   nameKey: 'landingAppAirportTransfer',
                   by: 'Khanh',
                   amount: '$32.00',
                 },
                 {
-                  icon: '🎢',
+                  icon: 'ticket',
                   nameKey: 'landingAppVinWonders',
                   by: 'Trang',
                   amount: '$96.00',
                 },
-              ].map((exp) => (
+              ] as { icon: IconName; nameKey: string; by: string; amount: string }[]).map((exp) => (
                 <div key={exp.nameKey} className="preview-expense-row">
-                  <span className="preview-expense-icon">{exp.icon}</span>
+                  <span className="preview-expense-icon"><Icon name={exp.icon} /></span>
                   <div className="preview-expense-info">
                     <div className="preview-expense-name">{t(exp.nameKey as any)}</div>
                     <div className="preview-expense-by">{t('landingAppPaidByPattern')} {exp.by}</div>
@@ -124,13 +125,13 @@ export function AppPreviewSection() {
               <div className="preview-settlement-title">{t('landingAppWhoOwesWhom')}</div>
               <div className="preview-settlement-item">
                 <span>Trang</span>
-                <span className="preview-arrow">→</span>
+                <span className="preview-arrow"><Icon name="arrow-right" size={16} /></span>
                 <span>Mai</span>
                 <span className="preview-settlement-amount">$45.00</span>
               </div>
               <div className="preview-settlement-item">
                 <span>Khanh</span>
-                <span className="preview-arrow">→</span>
+                <span className="preview-arrow"><Icon name="arrow-right" size={16} /></span>
                 <span>An</span>
                 <span className="preview-settlement-amount">$78.50</span>
               </div>

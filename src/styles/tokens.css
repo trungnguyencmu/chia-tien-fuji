@@ -1,0 +1,85 @@
+/* Design tokens — flat, emerald-on-slate system for an expense splitter.
+   Components must reference these instead of raw hex values. */
+
+:root {
+  /* Brand */
+  --color-primary: #047857; /* white text on this is 5.5:1 */
+  --color-primary-hover: #065f46;
+  --color-primary-soft: #ecfdf5;
+  --color-primary-border: #a7f3d0;
+  --color-on-primary: #ffffff;
+  --color-ring: #059669;
+
+  /* Surfaces and text */
+  --color-bg: #f8fafc;
+  --color-surface: #ffffff;
+  --color-muted: #f1f5f9;
+  --color-fg: #0f172a;
+  --color-fg-muted: #475569;
+  --color-fg-subtle: #64748b;
+  --color-border: #e2e8f0;
+  --color-border-strong: #cbd5e1;
+  --color-input-border: #8492a6; /* 3:1 against white for control boundaries */
+
+  /* Semantic: owed / error */
+  --color-danger: #dc2626;
+  --color-danger-hover: #b91c1c;
+  --color-danger-soft: #fef2f2;
+  --color-danger-border: #fecaca;
+  --color-danger-text: #991b1b;
+
+  /* Semantic: pending payment */
+  --color-warning-soft: #fffbeb;
+  --color-warning-border: #fde68a;
+  --color-warning-text: #92400e;
+
+  /* Semantic: informational / upcoming */
+  --color-info-soft: #eff6ff;
+  --color-info-border: #bfdbfe;
+  --color-info-text: #1e40af;
+
+  /* Typography */
+  --font-heading: 'Calistoga', Georgia, 'Times New Roman', serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+
+  /* Shape */
+  --radius-sm: 8px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+
+  /* Elevation — used sparingly: hover, dropdowns, modals */
+  --shadow-sm: 0 1px 2px rgb(15 23 42 / 0.06);
+  --shadow-md: 0 4px 12px rgb(15 23 42 / 0.08);
+  --shadow-lg: 0 16px 40px rgb(15 23 42 / 0.18);
+
+  /* Motion */
+  --dur-fast: 120ms;
+  --dur: 180ms;
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+
+  /* Layers */
+  --z-sticky: 10;
+  --z-dropdown: 50;
+  --z-nav: 100;
+  --z-modal: 1000;
+
+  /* Legacy aliases still referenced by inline styles in components */
+  --primary: var(--color-primary);
+  --primary-dark: var(--color-primary-hover);
+  --primary-light: var(--color-primary-soft);
+  --success-dark: var(--color-primary);
+  --danger-dark: var(--color-danger);
+  --gray-50: var(--color-bg);
+  --gray-100: var(--color-muted);
+  --gray-200: var(--color-border);
+  --gray-300: var(--color-border-strong);
+  --gray-500: var(--color-fg-subtle);
+  --gray-600: var(--color-fg-muted);
+  --gray-700: #334155;
+  --gray-800: #1e293b;
+  --gray-900: var(--color-fg);
+  --border-radius: var(--radius-lg);
+  --border-radius-sm: var(--radius-md);
+  --border-radius-lg: var(--radius-lg);
+}

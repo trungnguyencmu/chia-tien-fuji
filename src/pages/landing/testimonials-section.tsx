@@ -1,13 +1,14 @@
 import { motion, useInView } from 'framer-motion';
 import { useRef } from 'react';
 import { useLanguage } from '../../i18n';
+import { Icon } from '../../components/ui/Icon';
 
 const testimonials = [
   {
     name: 'Sarah K.',
     role: 'Backpacker',
     avatar: 'S',
-    color: '#74b9ff',
+    color: '#1d4ed8',
     stars: 5,
     textKey: 'landingTestimonial1Text',
   },
@@ -15,7 +16,7 @@ const testimonials = [
     name: 'James L.',
     role: 'Weekend Warrior',
     avatar: 'J',
-    color: '#c7b4f3',
+    color: '#7e22ce',
     stars: 5,
     textKey: 'landingTestimonial2Text',
   },
@@ -23,7 +24,7 @@ const testimonials = [
     name: 'Mai P.',
     role: 'Group Organizer',
     avatar: 'M',
-    color: '#b4d4ff',
+    color: '#0f766e',
     stars: 5,
     textKey: 'landingTestimonial3Text',
   },
@@ -62,8 +63,10 @@ export function TestimonialsSection() {
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.5, delay: 0.1 * (i + 1) }}
           >
-            <div className="testimonial-stars">
-              {'★'.repeat(tm.stars)}
+            <div className="testimonial-stars" role="img" aria-label={`${tm.stars} / 5`}>
+              {Array.from({ length: tm.stars }, (_, s) => (
+                <Icon key={s} name="star" size={16} />
+              ))}
             </div>
             <p className="testimonial-text">"{t(tm.textKey as any)}"</p>
             <div className="testimonial-author">

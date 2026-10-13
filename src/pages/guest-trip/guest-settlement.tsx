@@ -1,4 +1,5 @@
 import { GuestSettlement as GuestSettlementData } from '../../api/guest-api';
+import { Icon } from '../../components/ui/Icon';
 import { useLanguage } from '../../i18n';
 
 interface GuestSettlementProps {
@@ -10,11 +11,14 @@ export function GuestSettlement({ settlement }: GuestSettlementProps) {
   if (!settlement || settlement.totalExpenses === 0) {
     return (
       <div className="card">
-        <h2 style={{ marginBottom: '1rem', fontSize: '1.5rem', fontWeight: '700' }}>
-          💰 {t('settlement')}
+        <h2 className="card-title">
+          <Icon name="wallet" size={22} />
+          {t('settlement')}
         </h2>
         <div className="empty-state">
-          <div className="empty-state-icon">📊</div>
+          <div className="empty-state-icon">
+            <Icon name="bar-chart" size={26} />
+          </div>
           <p>{t('addExpensesToSeeWhoOwes')}</p>
         </div>
       </div>
@@ -26,34 +30,61 @@ export function GuestSettlement({ settlement }: GuestSettlementProps) {
 
   return (
     <div className="card">
-      <h2 style={{ marginBottom: '1.5rem', fontSize: '1.5rem', fontWeight: '700' }}>
-        💰 {t('settlement')}
+      <h2 className="card-title">
+        <Icon name="wallet" size={22} />
+        {t('settlement')}
       </h2>
 
-      <div style={{ marginBottom: '2rem' }}>
-        <h3 style={{ fontSize: '1.125rem', fontWeight: '600', marginBottom: '1rem' }}>
-          {t('totalExpenses')}
-        </h3>
-        <div className="grid grid-2" style={{ gap: '1rem' }}>
-          <div className="stat-card" style={{ borderLeftColor: '#4f46e5' }}>
-            <div className="stat-label">{t('totalExpenses')}</div>
-            <div className="stat-value">{totalExpenses.toLocaleString()} {t('currency')}</div>
-          </div>
-          <div className="stat-card" style={{ borderLeftColor: '#10b981' }}>
-            <div className="stat-label">{t('members')}</div>
-            <div className="stat-value">{participantCount}</div>
-          </div>
-          <div className="stat-card" style={{ borderLeftColor: '#f59e0b', gridColumn: 'span 2' }}>
-            <div className="stat-label">{t('sharePerPerson')}</div>
-            <div className="stat-value">
-              {Math.round(sharePerPerson).toLocaleString()} {t('currency')}
-            </div>
+      <div className="grid grid-2 section-block">
+        <div className="stat-card">
+          <div className="stat-label">{t('totalExpenses')}</div>
+          <div className="stat-value">{totalExpenses.toLocaleString()} {t('currency')}</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-label">{t('members')}</div>
+          <div className="stat-value">{participantCount}</div>
+        </div>
+        <div className="stat-card span-2">
+          <div className="stat-label">{t('sharePerPerson')}</div>
+          <div className="stat-value">
+            {Math.round(sharePerPerson).toLocaleString()} {t('currency')}
           </div>
         </div>
       </div>
 
-      <div style={{ marginBottom: '2rem' }}>
-        <h3 style={{ fontSize: '1.125rem', fontWeight: '600', marginBottom: '1rem' }}>
+      {/* Who owes who comes first: it is the answer people open this tab for */}
+      <div className="section-block">
+        <h3 className="section-heading">
+          <Icon name="swap" />
+          {t('whoOwesWho')}
+        </h3>
+        {transactions.length === 0 ? (
+          <div className="empty-state">
+            <div className="empty-state-icon is-success">
+              <Icon name="check" size={26} />
+            </div>
+            <p className="settled-message">{t('everyoneIsSettledGuest')}</p>
+          </div>
+        ) : (
+          <ul className="transaction-list">
+            {transactions.map((tx, i) => (
+              <li key={i} className="transaction-item">
+                <Icon name="arrow-right" />
+                <span className="transaction-text">
+                  <strong>{tx.from}</strong> {t('owes')} <strong>{tx.to}</strong>
+                </span>
+                <span className="settlement-amount">
+                  {Math.round(tx.amount).toLocaleString()} {t('currency')}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      <div>
+        <h3 className="section-heading">
+          <Icon name="users" />
           {t('memberBalances')}
         </h3>
         <div className="table-container">
@@ -72,13 +103,13 @@ export function GuestSettlement({ settlement }: GuestSettlementProps) {
                   <td>
                     <strong>{b.member}</strong>
                   </td>
-                  <td className="text-right">
+                  <td className="numeric">
                     {Math.round(b.totalPaid).toLocaleString()}
                   </td>
-                  <td className="text-right">
+                  <td className="numeric">
                     {Math.round(b.share).toLocaleString()}
                   </td>
-                  <td className="text-right">
+                  <td className="numeric">
                     <span
                       className={
                         b.balance > 0.01
@@ -97,28 +128,6 @@ export function GuestSettlement({ settlement }: GuestSettlementProps) {
             </tbody>
           </table>
         </div>
-      </div>
-
-      <div>
-        <h3 style={{ fontSize: '1.125rem', fontWeight: '600', marginBottom: '1rem' }}>
-          🔄 {t('whoOwesWho')}
-        </h3>
-        {transactions.length === 0 ? (
-          <div className="empty-state" style={{ padding: '2rem 1rem' }}>
-            <div className="empty-state-icon">✅</div>
-            <p style={{ fontSize: '1.125rem', fontWeight: '600', color: '#10b981' }}>
-              {t('everyoneIsSettledGuest')}
-            </p>
-          </div>
-        ) : (
-          <ul className="transaction-list">
-            {transactions.map((tx, i) => (
-              <li key={i} className="transaction-item">
-                💸 {tx.from} {t('owes')} {tx.to} {Math.round(tx.amount).toLocaleString()} {t('currency')}
-              </li>
-            ))}
-          </ul>
-        )}
       </div>
     </div>
   );

@@ -6,6 +6,7 @@ import {
   resendConfirmationCode,
 } from '../api/auth-api';
 import { useLanguage } from '../i18n';
+import { Icon } from '../components/ui/Icon';
 
 type Step = 'register' | 'confirm';
 
@@ -82,7 +83,7 @@ export default function RegisterPage() {
     <div className="auth-container">
       <div className="auth-card card">
         <div className="auth-header">
-          <div className="auth-icon">✨</div>
+          <div className="auth-icon"><Icon name="user-plus" size={28} /></div>
           <h1 className="auth-title">
             {step === 'register' ? t('createAccount') : t('verifyEmail')}
           </h1>
@@ -94,16 +95,16 @@ export default function RegisterPage() {
         </div>
 
         {error && (
-          <div className="alert alert-error">
-            <span>⚠️</span>
-            {error}
+          <div className="alert alert-error" role="alert">
+            <Icon name="alert-circle" />
+            <span className="alert-body">{error}</span>
           </div>
         )}
 
         {success && (
-          <div className="alert alert-success">
-            <span>✅</span>
-            {success}
+          <div className="alert alert-success" role="status">
+            <Icon name="check-circle" />
+            <span className="alert-body">{success}</span>
           </div>
         )}
 
@@ -160,9 +161,10 @@ export default function RegisterPage() {
                   type="button"
                   className="password-toggle"
                   onClick={() => setShowPassword(!showPassword)}
-                  tabIndex={-1}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  aria-pressed={showPassword}
                 >
-                  {showPassword ? '🙈' : '👁️'}
+                  <Icon name={showPassword ? 'eye-off' : 'eye'} size={20} />
                 </button>
               </div>
             </div>
@@ -188,6 +190,7 @@ export default function RegisterPage() {
                 value={confirmationCode}
                 onChange={(e) => setConfirmationCode(e.target.value)}
                 placeholder={t('enter6DigitCode')}
+                inputMode="numeric"
                 required
                 autoComplete="one-time-code"
               />
@@ -205,7 +208,6 @@ export default function RegisterPage() {
               type="button"
               className="btn btn-secondary auth-submit"
               onClick={handleResendCode}
-              style={{ marginTop: '0.75rem' }}
             >
               {t('resendCode')}
             </button>

@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Trip, TripMember, UserSearchResult, fetchTripMembers, addTripMember, removeTripMember, regenerateInviteCode, updateMyDisplayName, searchUsers, updateMemberSettled } from '../api/api';
 import { useAuth } from '../contexts/auth-context';
+import { Avatar } from './ui/Avatar';
+import { Icon, Spinner } from './ui/Icon';
 import { useLanguage } from '../i18n';
 
 interface TripMembersProps {
@@ -193,93 +195,65 @@ export function TripMembers({ trip, onMembersChanged }: TripMembersProps) {
   if (loading) {
     return (
       <div className="card">
-        <div style={{ textAlign: 'center', padding: '1rem' }}>{t('loadingMembers')}</div>
+        <div className="page-loader" role="status" style={{ padding: '1.5rem' }}>
+          <Spinner size={24} />
+          {t('loadingMembers')}
+        </div>
       </div>
     );
   }
 
+  const inviteUrl = `${window.location.origin}/join/${trip.inviteCode}`;
+
   return (
     <div className="card">
-      <h2 style={{ marginBottom: '1.5rem', fontSize: '1.5rem', fontWeight: '700' }}>
-        👥 {t('membersCount', { count: members.length })}
+      <h2 className="card-title">
+        <Icon name="users" size={22} />
+        {t('membersCount', { count: members.length })}
       </h2>
 
       {/* Invite Code Section */}
       {trip.inviteCode && (
-        <div style={{ marginBottom: '1.5rem', padding: '1rem', background: 'var(--gray-50)', borderRadius: '8px' }}>
-          <div style={{ fontSize: '0.75rem', color: 'var(--gray-600)', fontWeight: '600', marginBottom: '0.25rem' }}>
-            {t('inviteLink')}
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-            <code style={{
-              fontSize: '0.9rem',
-              fontWeight: '600',
-              letterSpacing: '0.05em',
-              background: 'white',
-              padding: '0.5rem 0.75rem',
-              borderRadius: '6px',
-              border: '1px solid var(--gray-200)',
-              flex: 1,
-              minWidth: '200px',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap'
-            }}>
-              {`${window.location.origin}/join/${trip.inviteCode}`}
-            </code>
+        <div className="invite-box">
+          <div className="form-label">{t('inviteLink')}</div>
+          <div className="invite-row">
+            <code className="invite-code">{inviteUrl}</code>
             <button
+              type="button"
+              className="btn btn-primary"
               onClick={async () => {
-                const url = `${window.location.origin}/join/${trip.inviteCode}`;
                 try {
-                  await navigator.clipboard.writeText(url);
+                  await navigator.clipboard.writeText(inviteUrl);
                   alert(t('copied'));
                 } catch {
-                  prompt('Copy this invite link:', url);
+                  prompt('Copy this invite link:', inviteUrl);
                 }
-              }}
-              style={{
-                padding: '0.5rem 0.75rem',
-                borderRadius: '6px',
-                background: '#4f46e5',
-                color: 'white',
-                border: 'none',
-                fontSize: '0.75rem',
-                fontWeight: '600',
-                cursor: 'pointer',
               }}
               title={t('copyInviteLink')}
             >
-              📋 {t('copy')}
+              <Icon name="copy" size={16} />
+              {t('copy')}
             </button>
             <button
+              type="button"
+              className="icon-btn"
               onClick={handleRegenerateCode}
               disabled={regenerating}
-              style={{
-                padding: '0.5rem 0.75rem',
-                borderRadius: '6px',
-                background: 'rgba(199, 180, 243, 0.2)',
-                border: '1px solid rgba(199, 180, 243, 0.3)',
-                fontSize: '0.75rem',
-                fontWeight: '600',
-                cursor: regenerating ? 'not-allowed' : 'pointer',
-                opacity: regenerating ? 0.5 : 1,
-              }}
               title={t('regenerateInviteCode')}
+              aria-label={t('regenerateInviteCode')}
             >
-              {regenerating ? '⏳' : '🔄'}
+              {regenerating ? <Spinner /> : <Icon name="refresh" />}
             </button>
           </div>
-          <div style={{ fontSize: '0.75rem', color: 'var(--gray-500)', marginTop: '0.5rem' }}>
-            {t('shareLinkToInvite')}
-          </div>
+          <div className="form-hint">{t('shareLinkToInvite')}</div>
         </div>
       )}
 
       {/* Add Member Form (owner only) */}
       {isOwner && (
-        <form onSubmit={handleAddMember} style={{ marginBottom: '1.5rem' }}>
-          <div style={{ display: 'flex', gap: '0.75rem' }}>
-            <div ref={dropdownRef} style={{ flex: 1, position: 'relative' }}>
+        <form onSubmit={handleAddMember} className="section-block">
+          <div className="form-row">
+            <div ref={dropdownRef} className="input-with-affix">
               <input
                 type="text"
                 className="form-input"
@@ -288,18 +262,12 @@ export function TripMembers({ trip, onMembersChanged }: TripMembersProps) {
                 onFocus={() => searchResults.length > 0 && setShowDropdown(true)}
                 disabled={adding}
                 placeholder={t('searchByNameOrEmail')}
-                style={{ width: '100%' }}
+                aria-label={t('searchByNameOrEmail')}
                 autoComplete="off"
               />
               {searching && (
-                <div style={{
-                  position: 'absolute',
-                  right: '0.75rem',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  fontSize: '0.85rem',
-                }}>
-                  ⏳
+                <div className="input-affix">
+                  <Spinner size={16} />
                 </div>
               )}
               {showDropdown && searchResults.length > 0 && (
@@ -311,16 +279,10 @@ export function TripMembers({ trip, onMembersChanged }: TripMembersProps) {
                       className="search-dropdown-item"
                       onClick={() => handleSelectUser(user)}
                     >
-                      <div className="search-dropdown-avatar">
-                        {user.displayName.charAt(0).toUpperCase()}
-                      </div>
+                      <Avatar name={user.displayName} size="sm" />
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontWeight: '600', fontSize: '0.875rem', color: 'var(--gray-900)' }}>
-                          {user.displayName}
-                        </div>
-                        <div style={{ fontSize: '0.75rem', color: 'var(--gray-500)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                          {user.email}
-                        </div>
+                        <div className="search-dropdown-name">{user.displayName}</div>
+                        <div className="search-dropdown-email truncate">{user.email}</div>
                       </div>
                     </button>
                   ))}
@@ -328,19 +290,19 @@ export function TripMembers({ trip, onMembersChanged }: TripMembersProps) {
               )}
               {showDropdown && !searching && searchResults.length === 0 && searchQuery.trim().length >= 2 && (
                 <div className="search-dropdown">
-                  <div style={{ padding: '0.75rem 1rem', color: 'var(--gray-500)', fontSize: '0.85rem', textAlign: 'center' }}>
-                    {t('noUsersFound')}
-                  </div>
+                  <div className="search-dropdown-empty">{t('noUsersFound')}</div>
                 </div>
               )}
             </div>
             <button type="submit" className="btn btn-primary" disabled={adding || !newEmail.trim()}>
-              {adding ? '⏳' : '➕'} {t('invite')}
+              {adding ? <Spinner /> : <Icon name="user-plus" />}
+              {t('invite')}
             </button>
           </div>
           {addError && (
-            <div className="alert alert-error" style={{ marginTop: '0.75rem' }}>
-              ⚠️ {addError}
+            <div className="alert alert-error" role="alert" style={{ marginTop: '0.75rem', marginBottom: 0 }}>
+              <Icon name="alert-circle" />
+              <span className="alert-body">{addError}</span>
             </div>
           )}
         </form>
@@ -348,15 +310,18 @@ export function TripMembers({ trip, onMembersChanged }: TripMembersProps) {
 
       {/* Error */}
       {error && (
-        <div className="alert alert-error" style={{ marginBottom: '1rem' }}>
-          ⚠️ {error}
+        <div className="alert alert-error" role="alert">
+          <Icon name="alert-circle" />
+          <span className="alert-body">{error}</span>
         </div>
       )}
 
       {/* Members List */}
       {members.length === 0 ? (
         <div className="empty-state">
-          <div className="empty-state-icon">👤</div>
+          <div className="empty-state-icon">
+            <Icon name="user" size={26} />
+          </div>
           <p>{t('noMembersYet')}</p>
         </div>
       ) : (
@@ -368,123 +333,106 @@ export function TripMembers({ trip, onMembersChanged }: TripMembersProps) {
                 <th>{t('email')}</th>
                 <th>{t('role')}</th>
                 <th>{t('settled')}</th>
-                {isOwner && <th></th>}
+                {isOwner && <th><span className="sr-only">{t('remove')}</span></th>}
               </tr>
             </thead>
             <tbody>
-              {members.map((member) => (
-                <tr key={member.userId}>
-                  <td>
-                    {editingUserId === member.userId ? (
-                      <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                        <input
-                          type="text"
-                          className="form-input"
-                          value={editDisplayName}
-                          onChange={(e) => setEditDisplayName(e.target.value)}
-                          disabled={updatingDisplayName}
-                          style={{ padding: '0.25rem 0.5rem', fontSize: '0.875rem' }}
-                          autoFocus
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') handleSaveDisplayName();
-                            if (e.key === 'Escape') handleCancelEdit();
-                          }}
-                        />
+              {members.map((member) => {
+                const isMe = member.email === userEmail;
+                return (
+                  <tr key={member.userId}>
+                    <td>
+                      {editingUserId === member.userId ? (
+                        <div className="inline-edit">
+                          <input
+                            type="text"
+                            className="form-input"
+                            value={editDisplayName}
+                            onChange={(e) => setEditDisplayName(e.target.value)}
+                            disabled={updatingDisplayName}
+                            aria-label={t('name')}
+                            autoFocus
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') handleSaveDisplayName();
+                              if (e.key === 'Escape') handleCancelEdit();
+                            }}
+                          />
+                          <button
+                            type="button"
+                            className="icon-btn"
+                            onClick={handleSaveDisplayName}
+                            disabled={updatingDisplayName || !editDisplayName.trim()}
+                            aria-label={t('save')}
+                          >
+                            {updatingDisplayName ? <Spinner /> : <Icon name="check" />}
+                          </button>
+                          <button
+                            type="button"
+                            className="icon-btn"
+                            onClick={handleCancelEdit}
+                            disabled={updatingDisplayName}
+                            aria-label={t('cancel')}
+                          >
+                            <Icon name="x" />
+                          </button>
+                        </div>
+                      ) : isMe ? (
                         <button
-                          onClick={handleSaveDisplayName}
-                          disabled={updatingDisplayName || !editDisplayName.trim()}
-                          style={{
-                            padding: '0.25rem 0.5rem',
-                            borderRadius: '4px',
-                            background: '#4f46e5',
-                            color: 'white',
-                            border: 'none',
-                            fontSize: '0.75rem',
-                            fontWeight: '600',
-                            cursor: updatingDisplayName ? 'not-allowed' : 'pointer',
-                          }}
+                          type="button"
+                          className="member-name-btn"
+                          onClick={() => handleStartEdit(member)}
+                          title={t('clickToEdit')}
                         >
-                          {updatingDisplayName ? '⏳' : '✓'}
+                          <strong>{member.displayName}</strong> {t('you')}
+                          <Icon name="pencil" size={14} />
                         </button>
-                        <button
-                          onClick={handleCancelEdit}
-                          disabled={updatingDisplayName}
-                          style={{
-                            padding: '0.25rem 0.5rem',
-                            borderRadius: '4px',
-                            background: 'var(--gray-200)',
-                            border: 'none',
-                            fontSize: '0.75rem',
-                            cursor: 'not-allowed',
-                          }}
-                        >
-                          ✕
-                        </button>
-                      </div>
-                    ) : (
-                      <span
-                        style={{ cursor: member.email === userEmail ? 'pointer' : 'default' }}
-                        onClick={() => member.email === userEmail && handleStartEdit(member)}
-                        title={member.email === userEmail ? t('clickToEdit') : undefined}
-                      >
+                      ) : (
                         <strong>{member.displayName}</strong>
-                        {member.email === userEmail && ' ' + t('you')}
-                        {member.email === userEmail && (
-                          <span style={{ marginLeft: '0.5rem', fontSize: '0.75rem', opacity: 0.6 }}>✏️</span>
-                        )}
-                      </span>
-                    )}
-                  </td>
-                  <td>{member.email}</td>
-                  <td>
-                    <span className={`badge ${member.role === 'owner' ? 'badge-success' : 'badge-neutral'}`}>
-                      {member.role === 'owner' ? t('owner') : t('memberRole')}
-                    </span>
-                  </td>
-                  <td>
-                    {member.isSettled ? (
-                      <span className="badge badge-success">✓ {t('settled')}</span>
-                    ) : (
-                      <span className="badge badge-neutral">{t('unsettled')}</span>
-                    )}
-                  </td>
-                  {isOwner && member.role !== 'owner' && (
-                    <td style={{ textAlign: 'right' }}>
-                      <button
-                        onClick={() => handleToggleSettled(member)}
-                        style={{
-                          background: 'none',
-                          border: 'none',
-                          cursor: 'pointer',
-                          fontSize: '0.75rem',
-                          color: '#4f46e5',
-                          padding: '0.25rem 0.5rem',
-                          marginRight: '0.25rem',
-                        }}
-                        title={member.isSettled ? t('markUnsettled') : t('markSettled')}
-                      >
-                        {member.isSettled ? t('markUnsettled') : t('markSettled')}
-                      </button>
-                      <button
-                        onClick={() => handleRemoveMember(member.userId, member.displayName)}
-                        style={{
-                          background: 'none',
-                          border: 'none',
-                          cursor: 'pointer',
-                          fontSize: '0.875rem',
-                          color: '#991b1b',
-                          padding: '0.25rem 0.5rem',
-                        }}
-                        title={t('remove')}
-                      >
-                        ✕
-                      </button>
+                      )}
                     </td>
-                  )}
-                  {isOwner && member.role === 'owner' && <td></td>}
-                  {!isOwner && <td></td>}
-                </tr>
-              ))}
+                    <td>{member.email}</td>
+                    <td>
+                      <span className={`badge ${member.role === 'owner' ? 'badge-success' : 'badge-neutral'}`}>
+                        {member.role === 'owner' ? t('owner') : t('memberRole')}
+                      </span>
+                    </td>
+                    <td>
+                      {member.isSettled ? (
+                        <span className="badge badge-success">
+                          <Icon name="check" size={12} />
+                          {t('settled')}
+                        </span>
+                      ) : (
+                        <span className="badge badge-neutral">{t('unsettled')}</span>
+                      )}
+                    </td>
+                    {isOwner && (
+                      <td>
+                        {member.role !== 'owner' && (
+                          <div className="row-actions">
+                            <button
+                              type="button"
+                              className="link-btn"
+                              onClick={() => handleToggleSettled(member)}
+                            >
+                              {member.isSettled ? t('markUnsettled') : t('markSettled')}
+                            </button>
+                            <button
+                              type="button"
+                              className="icon-btn icon-btn-danger"
+                              onClick={() => handleRemoveMember(member.userId, member.displayName)}
+                              title={t('remove')}
+                              aria-label={`${t('remove')}: ${member.displayName}`}
+                            >
+                              <Icon name="x" />
+                            </button>
+                          </div>
+                        )}
+                      </td>
+                    )}
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

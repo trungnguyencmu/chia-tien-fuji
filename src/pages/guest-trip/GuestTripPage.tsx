@@ -21,6 +21,9 @@ import { GuestExpenseList } from './guest-expense-list';
 import { GuestSettlement } from './guest-settlement';
 import { GuestMemberList } from './guest-member-list';
 import { GuestPhotos } from './guest-photos';
+import { Icon, type IconName } from '../../components/ui/Icon';
+import { PageLoader } from '../../components/ui/PageLoader';
+import { LanguageToggle } from '../../components/ui/LanguageToggle';
 import { useLanguage } from '../../i18n';
 
 type Tab = 'expenses' | 'settlement' | 'photos' | 'members';
@@ -113,116 +116,88 @@ export default function GuestTripPage() {
   };
 
   if (loading) {
-    return (
-      <div style={{ textAlign: 'center', padding: '3rem' }}>
-        <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>⏳</div>
-        <div style={{ color: 'white', fontSize: '1.25rem', fontWeight: '600' }}>
-          {t('loadingTrip')}
-        </div>
-      </div>
-    );
+    return <PageLoader label={t('loadingTrip')} />;
   }
 
   if (error) {
     return (
-      <div style={{ maxWidth: '600px', margin: '2rem auto', padding: '0 1rem' }}>
-        <div className="card">
-          <div className="alert alert-error">⚠️ {error}</div>
-          <button className="btn btn-primary" onClick={loadData} style={{ marginTop: '1rem' }}>
-            🔄 {t('retry')}
-          </button>
+      <div className="card">
+        <div className="alert alert-error" role="alert">
+          <Icon name="alert-circle" />
+          <span className="alert-body">{error}</span>
         </div>
+        <button type="button" className="btn btn-primary" onClick={loadData}>
+          <Icon name="refresh" />
+          {t('retry')}
+        </button>
       </div>
     );
   }
 
+  const tabs: { key: Tab; label: string; icon: IconName }[] = [
+    { key: 'expenses', label: t('expensesTab'), icon: 'receipt' },
+    { key: 'settlement', label: t('settlementTab'), icon: 'wallet' },
+    { key: 'photos', label: t('photosTab'), icon: 'image' },
+    { key: 'members', label: t('members'), icon: 'users' },
+  ];
+
   return (
-    <div style={{ maxWidth: '900px', margin: '0 auto', padding: '1rem' }}>
+    <main>
       {/* Header */}
-      <div
-        className="card"
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '1rem',
-        }}
-      >
+      <div className="page-header">
         <div>
-          <h1 style={{ fontSize: '1.5rem', fontWeight: '700', margin: 0 }}>
-            {trip?.tripName || t('loadingTrip')}
-          </h1>
-          <p style={{ margin: '0.25rem 0 0', color: '#6b7280', fontSize: '0.9rem' }}>
+          <h1 className="page-title">{trip?.tripName || t('loadingTrip')}</h1>
+          <p className="page-meta">
             {t('loggedInAs')} <strong>{displayName}</strong>
           </p>
         </div>
-        <button
-          onClick={handleLeave}
-          className="btn btn-secondary"
-          style={{ fontSize: '0.875rem' }}
-        >
-          🚪 {t('leave')}
-        </button>
+        <div className="page-actions">
+          <LanguageToggle />
+          <button type="button" onClick={handleLeave} className="btn btn-secondary btn-sm">
+            <Icon name="log-out" size={16} />
+            {t('leave')}
+          </button>
+        </div>
       </div>
 
       {/* Tab bar */}
-      <div
-        style={{
-          display: 'flex',
-          gap: '0.5rem',
-          marginBottom: '1.5rem',
-          background: 'rgba(255,255,255,0.15)',
-          borderRadius: '12px',
-          padding: '0.25rem',
-        }}
-      >
-        {([
-          { key: 'expenses', label: '💸 ' + t('expensesTab') },
-          { key: 'settlement', label: '💰 ' + t('settlementTab') },
-          { key: 'photos', label: '📸 ' + t('photosTab') },
-          { key: 'members', label: '👥 ' + t('members') },
-        ] as const).map(({ key, label }) => (
+      <div className="tabs" role="tablist">
+        {tabs.map(({ key, label, icon }) => (
           <button
             key={key}
+            type="button"
+            role="tab"
+            id={`guest-tab-${key}`}
+            aria-selected={activeTab === key}
+            aria-controls="guest-tabpanel"
+            className="tab"
             onClick={() => setActiveTab(key)}
-            style={{
-              flex: 1,
-              padding: '0.75rem 1rem',
-              border: 'none',
-              borderRadius: '10px',
-              fontWeight: '600',
-              fontSize: '0.9rem',
-              cursor: 'pointer',
-              transition: 'all 0.2s',
-              background: activeTab === key ? 'white' : 'transparent',
-              color: activeTab === key ? '#1f2937' : 'rgba(255,255,255,0.8)',
-              boxShadow: activeTab === key ? '0 2px 8px rgba(0,0,0,0.1)' : 'none',
-            }}
           >
+            <Icon name={icon} />
             {label}
           </button>
         ))}
       </div>
 
       {/* Tab content */}
-      {activeTab === 'expenses' && (
-        <>
-          <GuestExpenseForm members={members} onSubmit={handleAddExpense} />
-          <div style={{ marginTop: '1.5rem' }}>
+      <div id="guest-tabpanel" role="tabpanel" aria-labelledby={`guest-tab-${activeTab}`}>
+        {activeTab === 'expenses' && (
+          <>
+            <GuestExpenseForm members={members} onSubmit={handleAddExpense} />
             <GuestExpenseList expenses={expenses} />
-          </div>
-        </>
-      )}
+          </>
+        )}
 
-      {activeTab === 'settlement' && (
-        <GuestSettlement settlement={settlement} />
-      )}
+        {activeTab === 'settlement' && (
+          <GuestSettlement settlement={settlement} />
+        )}
 
-      {activeTab === 'photos' && tripId && (
-        <GuestPhotos tripId={tripId} images={images} onImagesChanged={handleReloadImages} />
-      )}
+        {activeTab === 'photos' && tripId && (
+          <GuestPhotos tripId={tripId} images={images} onImagesChanged={handleReloadImages} />
+        )}
 
-      {activeTab === 'members' && <GuestMemberList members={members} />}
-    </div>
+        {activeTab === 'members' && <GuestMemberList members={members} />}
+      </div>
+    </main>
   );
 }

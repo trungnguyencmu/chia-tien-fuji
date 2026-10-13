@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { motion, useInView } from 'framer-motion';
 import { useRef } from 'react';
 import { useLanguage } from '../../i18n';
+import { Icon } from '../../components/ui/Icon';
 
 export function CtaSection() {
   const { t } = useLanguage();
@@ -16,14 +17,13 @@ export function CtaSection() {
         animate={isInView ? { opacity: 1, scale: 1 } : {}}
         transition={{ duration: 0.6 }}
       >
-        <div className="cta-glow" />
         <h2 className="cta-title">{t('landingCtaTitle')}</h2>
         <p className="cta-subtitle">
           {t('landingCtaSubtitle')}
         </p>
-        <Link to="/register" className="btn btn-primary cta-btn">
+        <Link to="/register" className="btn btn-primary btn-lg cta-btn">
           {t('landingCtaBtn')}
-          <span className="hero-btn-arrow">→</span>
+          <Icon name="arrow-right" className="hero-btn-arrow" />
         </Link>
       </motion.div>
     </section>

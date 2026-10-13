@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/auth-context';
 import { useLanguage } from '../i18n';
+import { Icon } from '../components/ui/Icon';
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -35,15 +36,15 @@ export default function LoginPage() {
     <div className="auth-container">
       <div className="auth-card card">
         <div className="auth-header">
-          <div className="auth-icon">💰</div>
+          <div className="auth-icon"><Icon name="wallet" size={28} /></div>
           <h1 className="auth-title">{t('welcomeBack')}</h1>
           <p className="auth-subtitle">{t('signInToShareMoney')}</p>
         </div>
 
         {error && (
-          <div className="alert alert-error">
-            <span>⚠️</span>
-            {error}
+          <div className="alert alert-error" role="alert">
+            <Icon name="alert-circle" />
+            <span className="alert-body">{error}</span>
           </div>
         )}
 
@@ -83,9 +84,10 @@ export default function LoginPage() {
                 type="button"
                 className="password-toggle"
                 onClick={() => setShowPassword(!showPassword)}
-                tabIndex={-1}
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                aria-pressed={showPassword}
               >
-                {showPassword ? '🙈' : '👁️'}
+                <Icon name={showPassword ? 'eye-off' : 'eye'} size={20} />
               </button>
             </div>
           </div>
@@ -98,8 +100,8 @@ export default function LoginPage() {
             {loading ? t('signingIn') : t('signIn')}
           </button>
 
-          <div style={{ textAlign: 'right', marginTop: '0.5rem' }}>
-            <Link to="/forgot-password" className="auth-link" style={{ fontSize: '0.85rem' }}>
+          <div className="auth-aside">
+            <Link to="/forgot-password" className="auth-link">
               {t('forgotPassword')}?
             </Link>
           </div>

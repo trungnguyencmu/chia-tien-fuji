@@ -4,20 +4,28 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Simple expense splitter for trips with friends" />
-    <title>✈️ Share Money</title>
+    <title>Share Money</title>
 
     <!-- Preconnect to Google Apps Script API for faster loading -->
     <link rel="preconnect" href="https://script.google.com" />
     <link rel="dns-prefetch" href="https://script.google.com" />
 
-    <!-- Beautiful SVG Favicon -->
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23ff9ec1'/><text x='50' y='70' font-size='60' text-anchor='middle' fill='white'>✈️</text></svg>" />
+    <!-- Fonts: Calistoga (headings) + Inter (body), both with Vietnamese subsets -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Calistoga&family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- SVG favicon: wallet mark on the brand colour -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23047857'/><g transform='translate(20 20) scale(2.5)' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M21 12V7H5a2 2 0 0 1 0-4h14v4'/><path d='M3 5v14a2 2 0 0 0 2 2h16v-5'/><path d='M18 12a2 2 0 0 0 0 4h4v-4Z'/></g></svg>" />
 
     <!-- Theme color for mobile browsers -->
-    <meta name="theme-color" content="#ff9ec1" />
+    <meta name="theme-color" content="#047857" />
 
     <!-- Apple touch icon -->
-    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='40' fill='%23ff9ec1'/><text x='90' y='130' font-size='100' text-anchor='middle' fill='white'>✈️</text></svg>" />
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' fill='%23047857'/><g transform='translate(42 42) scale(4)' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M21 12V7H5a2 2 0 0 1 0-4h14v4'/><path d='M3 5v14a2 2 0 0 0 2 2h16v-5'/><path d='M18 12a2 2 0 0 0 0 4h4v-4Z'/></g></svg>" />
   </head>
   <body>
     <div id="root"></div>

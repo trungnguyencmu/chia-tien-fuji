@@ -2,16 +2,18 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '../../i18n';
+import { Icon } from '../../components/ui/Icon';
+import { LanguageToggle } from '../../components/ui/LanguageToggle';
 
 export function LandingNavbar() {
-  const { language, setLanguage, t } = useLanguage();
+  const { t } = useLanguage();
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <nav className="landing-nav">
+    <nav className="landing-nav" aria-label="Main">
       <div className="landing-nav-inner">
         <Link to="/" className="landing-logo">
-          <span className="landing-logo-icon">💸</span>
+          <span className="landing-logo-icon"><Icon name="wallet" size={20} /></span>
           <span className="landing-logo-text">Share Money</span>
         </Link>
 
@@ -22,26 +24,11 @@ export function LandingNavbar() {
         </div>
 
         <div className="landing-nav-actions">
-          <button
-            onClick={() => setLanguage(language === 'en' ? 'vi' : 'en')}
-            style={{
-              padding: '0.5rem 0.75rem',
-              borderRadius: '8px',
-              background: 'rgba(116, 185, 255, 0.2)',
-              border: '1px solid rgba(116, 185, 255, 0.3)',
-              cursor: 'pointer',
-              fontSize: '0.8rem',
-              fontWeight: 600,
-              color: 'var(--gray-700)',
-              marginRight: '0.5rem',
-            }}
-          >
-            {language === 'en' ? '🇺🇸 EN' : '🇻🇳 VI'}
-          </button>
+          <LanguageToggle />
           <Link to="/login" className="landing-nav-signin">
             {t('landingSignIn')}
           </Link>
-          <Link to="/register" className="btn btn-primary landing-nav-cta">
+          <Link to="/register" className="btn btn-primary btn-sm">
             {t('landingGetStarted')}
           </Link>
         </div>
@@ -51,6 +38,7 @@ export function LandingNavbar() {
           className="landing-menu-toggle"
           onClick={() => setMenuOpen(!menuOpen)}
           aria-label="Toggle menu"
+          aria-expanded={menuOpen}
         >
           <span className={`hamburger ${menuOpen ? 'open' : ''}`} />
         </button>
@@ -75,22 +63,7 @@ export function LandingNavbar() {
               {t('landingReviews')}
             </a>
             <div className="landing-mobile-actions">
-              <button
-                onClick={() => setLanguage(language === 'en' ? 'vi' : 'en')}
-                style={{
-                  padding: '0.5rem 0.75rem',
-                  borderRadius: '8px',
-                  background: 'rgba(116, 185, 255, 0.2)',
-                  border: '1px solid rgba(116, 185, 255, 0.3)',
-                  cursor: 'pointer',
-                  fontSize: '0.8rem',
-                  fontWeight: 600,
-                  color: 'var(--gray-700)',
-                  marginRight: '0.5rem',
-                }}
-              >
-                {language === 'en' ? '🇺🇸 EN' : '🇻🇳 VI'}
-              </button>
+              <LanguageToggle />
               <Link to="/login">{t('landingSignIn')}</Link>
               <Link to="/register" className="btn btn-primary">
                 {t('landingGetStarted')}

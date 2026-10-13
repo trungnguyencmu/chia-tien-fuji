@@ -1,0 +1,428 @@
+/* Expense form, expense timeline, settlement, scan-bill upload */
+
+/* ---------- Expense form ---------- */
+.expense-form-amount-wrapper {
+  text-align: center;
+  padding: 1.25rem 0.75rem;
+  background: var(--color-muted);
+  border: 1px solid transparent;
+  border-radius: var(--radius-lg);
+  margin-bottom: 1.5rem;
+  transition: border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+}
+
+/* The bare input has no outline of its own, so the wrapper shows focus */
+.expense-form-amount-wrapper:focus-within {
+  border-color: var(--color-ring);
+  box-shadow: 0 0 0 3px rgb(5 150 105 / 0.25);
+}
+
+.expense-form-amount-label,
+.expense-form-section-label {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-fg-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.expense-form-amount-label {
+  justify-content: center;
+  margin-bottom: 0.25rem;
+}
+
+.expense-form-section-label {
+  margin-bottom: 0.625rem;
+}
+
+.expense-form-amount-input {
+  width: 100%;
+  max-width: 340px;
+  border: none;
+  background: transparent;
+  font-size: clamp(2rem, 1.5rem + 3vw, 2.75rem);
+  font-weight: 700;
+  text-align: center;
+  color: var(--color-fg);
+  outline: none;
+  caret-color: var(--color-primary);
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.expense-form-amount-input::placeholder {
+  color: var(--color-fg-subtle);
+  font-size: 1.25rem;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+.expense-form-amount-currency {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-fg-muted);
+}
+
+.expense-form-description {
+  margin-top: 0.75rem;
+}
+
+/* Category chips — horizontally scrollable row */
+.category-scroll-container {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding: 3px;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+}
+
+.category-scroll-container::-webkit-scrollbar {
+  display: none;
+}
+
+.category-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.375rem;
+  flex-shrink: 0;
+  min-width: 76px;
+  padding: 0.625rem 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-fg-muted);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  scroll-snap-align: start;
+  transition: background-color var(--dur) var(--ease), border-color var(--dur) var(--ease),
+    color var(--dur) var(--ease);
+}
+
+.category-chip:hover {
+  background: var(--color-muted);
+  color: var(--color-fg);
+}
+
+.category-chip.selected {
+  background: var(--color-primary-soft);
+  border-color: var(--color-primary);
+  color: var(--color-primary-hover);
+  font-weight: 600;
+}
+
+/* Avatar picker */
+.avatar-picker {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.avatar-picker-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.375rem;
+  min-width: 76px;
+  padding: 0.625rem 0.5rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  background: transparent;
+  transition: background-color var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+
+.avatar-picker-item:hover:not(:disabled) {
+  background: var(--color-muted);
+}
+
+.avatar-picker-item.selected {
+  border-color: var(--color-primary);
+  background: var(--color-primary-soft);
+}
+
+.avatar-picker-name {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--color-fg);
+  max-width: 72px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.avatar-picker-item.selected .avatar-picker-name {
+  font-weight: 600;
+  color: var(--color-primary-hover);
+}
+
+/* Sticky submit */
+.expense-form-cta {
+  position: sticky;
+  bottom: 0;
+  padding: 0.75rem 0 0;
+  background: var(--color-surface);
+  z-index: var(--z-sticky);
+}
+
+/* ---------- Expense timeline ---------- */
+.timeline-group + .timeline-group {
+  margin-top: 1.25rem;
+}
+
+.timeline-date {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-fg-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.5rem;
+}
+
+.expense-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  margin-bottom: 0.5rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  transition: border-color var(--dur) var(--ease);
+}
+
+.expense-card:hover {
+  border-color: var(--color-border-strong);
+}
+
+.expense-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  background: var(--color-muted);
+  color: var(--color-fg-muted);
+  border-radius: var(--radius-md);
+}
+
+.expense-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.expense-title {
+  font-weight: 600;
+  color: var(--color-fg);
+  overflow-wrap: anywhere;
+}
+
+.expense-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  margin-top: 0.125rem;
+  font-size: 0.8125rem;
+  color: var(--color-fg-muted);
+}
+
+.expense-side {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex-shrink: 0;
+}
+
+.expense-amount {
+  font-weight: 700;
+  font-size: 1.0625rem;
+  color: var(--color-fg);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Settlement ---------- */
+.settlement-card,
+.transaction-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.5rem;
+  background: var(--color-warning-soft);
+  border: 1px solid var(--color-warning-border);
+  border-radius: var(--radius-md);
+}
+
+.transaction-list {
+  list-style: none;
+}
+
+.transaction-item .icon,
+.settlement-arrow {
+  display: flex;
+  color: var(--color-warning-text);
+}
+
+.settlement-names,
+.transaction-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.settlement-from {
+  font-weight: 600;
+  color: var(--color-fg);
+}
+
+.settlement-to {
+  font-size: 0.875rem;
+  color: var(--gray-700);
+}
+
+.settlement-amount {
+  font-weight: 700;
+  color: var(--color-warning-text);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.balance-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.balance-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 0.875rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.balance-row.is-settled {
+  background: var(--color-bg);
+}
+
+.balance-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.balance-name {
+  font-weight: 600;
+  font-size: 0.9375rem;
+}
+
+.balance-paid {
+  font-size: 0.75rem;
+  color: var(--color-fg-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.settled-message {
+  font-size: 1.0625rem;
+  font-weight: 600;
+  color: var(--color-primary-hover);
+}
+
+/* ---------- Scan bill ---------- */
+.upload-options {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.upload-option {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  min-height: 132px;
+  padding: 1.5rem 1rem;
+  background: var(--color-bg);
+  border: 1px dashed var(--color-input-border);
+  border-radius: var(--radius-md);
+  color: var(--color-fg);
+  font-weight: 600;
+  font-size: 0.9375rem;
+  text-align: center;
+  transition: background-color var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+
+.upload-option .icon {
+  color: var(--color-primary);
+}
+
+.upload-option:hover:not(:disabled) {
+  background: var(--color-primary-soft);
+  border-color: var(--color-primary);
+}
+
+.upload-option.is-static {
+  cursor: default;
+  color: var(--color-fg-muted);
+  font-weight: 500;
+}
+
+.upload-option img {
+  max-height: 200px;
+  border-radius: var(--radius-sm);
+}
+
+.upload-option-hint {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-fg-muted);
+}
+
+.receipt-thumb {
+  display: block;
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 1.5rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  object-fit: cover;
+}
+
+.amount-input-lg {
+  font-size: 1.25rem;
+  font-weight: 600;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.danger-form {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.danger-form .form-input {
+  flex: 1;
+  min-width: 0;
+}
+
+@media (max-width: 480px) {
+  .danger-form {
+    flex-direction: column;
+  }
+
+  .expense-card {
+    align-items: flex-start;
+  }
+
+  .expense-side {
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0;
+  }
+}

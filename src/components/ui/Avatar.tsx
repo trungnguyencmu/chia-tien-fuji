@@ -6,10 +6,11 @@ interface AvatarProps {
   className?: string;
 }
 
+// Every swatch keeps white initials at 4.5:1 or better
 const COLORS = [
-  '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4',
-  '#FFEAA7', '#DDA0DD', '#98D8C8', '#F7DC6F',
-  '#BB8FCE', '#85C1E9', '#F8B500', '#00CED1',
+  '#b91c1c', '#c2410c', '#a16207', '#4d7c0f',
+  '#047857', '#0f766e', '#0e7490', '#1d4ed8',
+  '#4338ca', '#7e22ce', '#a21caf', '#be185d',
 ];
 
 function getColor(name: string): string {
@@ -64,10 +65,7 @@ export function AvatarGroup({ names, max = 4, size = 'sm' }: AvatarGroupProps) {
         <Avatar key={i} name={name} size={size} />
       ))}
       {remaining > 0 && (
-        <div
-          className={`avatar avatar-${size}`}
-          style={{ background: 'var(--gray-300)', color: 'var(--gray-700)' }}
-        >
+        <div className={`avatar avatar-${size} avatar-neutral`}>
           +{remaining}
         </div>
       )}

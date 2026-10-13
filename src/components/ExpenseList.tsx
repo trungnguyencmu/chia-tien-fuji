@@ -2,7 +2,8 @@ import { useMemo, memo, useCallback, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Expense } from '../utils/calculation';
 import { Avatar } from './ui/Avatar';
-import { getEmojiForTitle } from './ui/CategoryTag';
+import { getIconForTitle } from './ui/CategoryTag';
+import { Icon, Spinner } from './ui/Icon';
 import { deleteExpense, deleteImage, fetchImages, TripMember } from '../api/api';
 import { useLanguage } from '../i18n';
 import { exportExpensesToExcel } from '../utils/export-excel';
@@ -120,7 +121,9 @@ export const ExpenseList = memo(function ExpenseList({ tripId, tripName, expense
     return (
       <div className="card">
         <div className="empty-state">
-          <div className="empty-state-icon">🧾</div>
+          <div className="empty-state-icon">
+            <Icon name="receipt" size={26} />
+          </div>
           <h3>{t('noExpensesYet')}</h3>
           <p>{t('addFirstExpense')}</p>
         </div>
@@ -131,24 +134,25 @@ export const ExpenseList = memo(function ExpenseList({ tripId, tripName, expense
   return (
     <div className="card">
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', gap: '0.75rem' }}>
-        <div style={{ minWidth: 0 }}>
-          <h2 style={{ fontSize: '1.5rem', fontWeight: 700, margin: 0 }}>
-            📋 {t('expenses')}
+      <div className="card-header">
+        <div className="card-header-text">
+          <h2 className="card-title">
+            <Icon name="list" size={22} />
+            {t('expenses')}
           </h2>
-          <p style={{ fontSize: '0.875rem', color: 'var(--gray-600)', margin: '0.25rem 0 0' }}>
-            {expenses.length} {expenses.length === 1 ? t('items').slice(0, -1) : t('items')} • {t('totalExpenses')} {totalAmount.toLocaleString()} {t('currency')}
+          <p className="card-subtitle tabular">
+            {expenses.length} {expenses.length === 1 ? t('items').slice(0, -1) : t('items')} · {t('totalExpenses')} {totalAmount.toLocaleString()} {t('currency')}
           </p>
         </div>
         <button
           type="button"
-          className="btn btn-secondary"
+          className="btn btn-secondary btn-sm"
           onClick={handleExport}
           disabled={expenses.length === 0}
           title={t('exportExcel')}
-          style={{ flexShrink: 0, fontSize: '0.875rem', padding: '0.5rem 0.75rem' }}
         >
-          📊 {t('exportExcel')}
+          <Icon name="download" size={16} />
+          {t('exportExcel')}
         </button>
       </div>
 
@@ -156,73 +160,54 @@ export const ExpenseList = memo(function ExpenseList({ tripId, tripName, expense
       {Array.from(grouped.entries()).map(([dateKey, dateExpenses]) => {
         const { label } = formatDate(dateKey);
         return (
-          <div key={dateKey}>
+          <div key={dateKey} className="timeline-group">
             <div className="timeline-date">{label}</div>
-            {dateExpenses.map((expense) => (
-              <div key={expense.id} className="expense-card">
-                <div className="expense-emoji">
-                  {getEmojiForTitle(expense.title)}
-                </div>
-                <div className="expense-details">
-                  <div className="expense-title">
-                    {expense.title}
-                    <span className="expense-split">
-                      • {members.length > 0 ? `${members.length} ${t('people')}` : 'everyone'}
-                    </span>
+            {dateExpenses.map((expense) => {
+              const payerName = expense.payerName
+                ?? memberNameById.get(expense.payerUserId)
+                ?? expense.payerUserId;
+              const isDeleting = deletingId === expense.id;
+              return (
+                <div key={expense.id} className="expense-card">
+                  <div className="expense-icon">
+                    <Icon name={getIconForTitle(expense.title)} size={22} />
                   </div>
-                  <div className="expense-meta">
-                    {(() => {
-                      const payerName = expense.payerName
-                        ?? memberNameById.get(expense.payerUserId)
-                        ?? expense.payerUserId;
-                      return (
-                        <>
-                          <Avatar name={payerName} size="sm" />
-                          <span>{payerName} {t('paid')}</span>
-                        </>
-                      );
-                    })()}
-                    {expense.billImageUrl && (
-                      <button
-                        onClick={() => setLightboxExpense(expense)}
-                        style={{
-                          background: 'rgba(79, 70, 229, 0.1)',
-                          border: '1px solid rgba(79, 70, 229, 0.3)',
-                          borderRadius: '6px',
-                          cursor: 'pointer',
-                          fontSize: '0.75rem',
-                          color: '#4f46e5',
-                          padding: '0.2rem 0.5rem',
-                          marginLeft: '0.5rem',
-                        }}
-                        title={t('viewReceipt')}
-                      >
-                        🧾 {t('receipt')}
-                      </button>
-                    )}
+                  <div className="expense-details">
+                    <div className="expense-title">{expense.title}</div>
+                    <div className="expense-meta">
+                      <Avatar name={payerName} size="sm" />
+                      <span>{payerName} {t('paid')}</span>
+                      <span aria-hidden="true">·</span>
+                      <span>{members.length > 0 ? `${members.length} ${t('people')}` : 'everyone'}</span>
+                      {expense.billImageUrl && (
+                        <button
+                          type="button"
+                          className="link-btn"
+                          onClick={() => setLightboxExpense(expense)}
+                          title={t('viewReceipt')}
+                        >
+                          <Icon name="receipt" size={14} />
+                          {t('receipt')}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                  <div className="expense-side">
+                    <div className="expense-amount">{expense.amount.toLocaleString()}</div>
+                    <button
+                      type="button"
+                      className="icon-btn icon-btn-danger"
+                      onClick={() => handleDelete(expense.id, expense.tripId, expense.title)}
+                      disabled={isDeleting}
+                      title={t('deleteExpense')}
+                      aria-label={`${t('deleteExpense')}: ${expense.title}`}
+                    >
+                      {isDeleting ? <Spinner /> : <Icon name="trash" />}
+                    </button>
                   </div>
                 </div>
-                <div style={{ textAlign: 'right' }}>
-                  <div className="expense-amount">{expense.amount.toLocaleString()}</div>
-                  <button
-                    onClick={() => handleDelete(expense.id, expense.tripId, expense.title)}
-                    disabled={deletingId === expense.id}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      cursor: deletingId === expense.id ? 'not-allowed' : 'pointer',
-                      fontSize: '0.75rem',
-                      color: 'var(--gray-500)',
-                      padding: '0.25rem',
-                      marginTop: '0.25rem',
-                    }}
-                    title={t('deleteExpense')}
-                  >
-                    {deletingId === expense.id ? '⏳' : '🗑️'}
-                  </button>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         );
       })}
@@ -232,30 +217,34 @@ export const ExpenseList = memo(function ExpenseList({ tripId, tripName, expense
         {lightboxExpense && (
           <motion.div
             className="photo-lightbox"
+            role="dialog"
+            aria-modal="true"
+            aria-label={t('viewReceipt')}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setLightboxExpense(null)}
           >
             <button
+              type="button"
               className="photo-lightbox-close"
               onClick={() => setLightboxExpense(null)}
+              aria-label={t('cancel')}
             >
-              ✕
+              <Icon name="x" size={22} />
             </button>
             <motion.img
               src={lightboxExpense.billImageUrl!}
-              alt="Receipt"
-              initial={{ scale: 0.9 }}
+              alt={`${t('receipt')}: ${lightboxExpense.title}`}
+              initial={{ scale: 0.96 }}
               animate={{ scale: 1 }}
-              exit={{ scale: 0.9 }}
+              exit={{ scale: 0.96 }}
               onClick={(e) => e.stopPropagation()}
-              style={{ maxWidth: '90vw', maxHeight: '80vh', objectFit: 'contain' }}
             />
             <div className="photo-lightbox-actions">
               <button
-                className="btn btn-danger"
-                style={{ fontSize: '0.85rem', padding: '0.5rem 1rem' }}
+                type="button"
+                className="btn btn-danger btn-sm"
                 onClick={async (e) => {
                   e.stopPropagation();
                   if (!window.confirm(t('deleteReceiptConfirm'))) return;
@@ -277,7 +266,8 @@ export const ExpenseList = memo(function ExpenseList({ tripId, tripName, expense
                 }}
                 disabled={deletingBill}
               >
-                {deletingBill ? '⏳' : '🗑️'} {t('deleteReceipt')}
+                {deletingBill ? <Spinner size={16} /> : <Icon name="trash" size={16} />}
+                {t('deleteReceipt')}
               </button>
             </div>
           </motion.div>
